@@ -1,6 +1,6 @@
 {
   "name": "BackHub",
-  "version": "1.5.2-BETA",
+  "version": "1.5.30-BETA",
   "description": "L'outil de gestion complet pour RevolutionDayZ",
   "main": "app/main.js",
   "repository": {

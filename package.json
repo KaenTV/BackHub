@@ -82,7 +82,8 @@
       "provider": "github",
       "owner": "KaenTV",
       "repo": "BackHub",
-      "releaseType": "release"
+      "releaseType": "release",
+      "channel": "latest"
     },
     "compression": "maximum",
     "asar": true

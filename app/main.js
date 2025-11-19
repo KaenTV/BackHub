@@ -17,14 +17,13 @@ autoUpdater.autoInstallOnAppQuit = true
 
 autoUpdater.allowPrerelease = true
 
+// Configuration explicite pour repository public GitHub
+// Force l'utilisation de /latest/download/latest.yml
 autoUpdater.setFeedURL({
   provider: 'github',
   owner: 'KaenTV',
-  repo: 'BackHub',
-  private: false
+  repo: 'BackHub'
 })
-
-autoUpdater.channel = 'latest'
 
 autoUpdater.on('checking-for-update', () => {
   console.log('Vérification des mises à jour...')

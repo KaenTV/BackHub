@@ -95,7 +95,7 @@ class DragDropManager {
       e.stopPropagation()
       dropZone.classList.remove('drag-over')
 
-      // File drop désactivé (système de backup retiré)
+
     })
   }
 }

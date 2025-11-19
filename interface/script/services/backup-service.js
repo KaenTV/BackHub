@@ -6,7 +6,7 @@ import { notificationService } from './notification-service.js'
 class BackupService {
   constructor() {
     this.backupInterval = null
-    this.backupIntervalMs = 5 * 60 * 1000 
+    this.backupIntervalMs = 5 * 60 * 1000
     this.maxBackups = 10
     this.backupPrefix = 'backhub_backup_'
     this.init()
@@ -17,7 +17,7 @@ class BackupService {
     this.startAutoBackup()
 
     window.addEventListener('beforeunload', () => {
-      this.createBackup().catch(() => {}) // Ignore errors on unload
+      this.createBackup().catch(() => {})
     })
   }
 

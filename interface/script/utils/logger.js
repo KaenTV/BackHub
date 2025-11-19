@@ -24,8 +24,8 @@ class Logger {
       this.logs.shift()
     }
 
-    // Ne pas afficher de notification automatiquement pour éviter les doublons
-    // Les notifications doivent être gérées explicitement par le code appelant
+
+
     if (showNotification && window.app && window.app.showNotification) {
       window.app.showNotification(message, 'error')
     }

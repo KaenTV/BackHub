@@ -47,14 +47,14 @@ class InteractiveGuide {
   async start() {
     if (!(await this.shouldShow())) return
 
-    // Attendre que le DOM soit complètement chargé
+
     if (document.readyState === 'loading') {
       await new Promise(resolve => {
         document.addEventListener('DOMContentLoaded', resolve)
       })
     }
 
-    // Attendre un peu plus pour que les vues soient initialisées
+
     await new Promise(resolve => setTimeout(resolve, 500))
 
     this.currentStep = 0
@@ -84,8 +84,8 @@ class InteractiveGuide {
 
     const tooltip = document.createElement('div')
     tooltip.className = `guide-tooltip guide-tooltip-${stepData.position}`
-    
-    // Utiliser des event listeners au lieu de onclick pour éviter les problèmes de contexte
+
+
     const closeBtn = document.createElement('button')
     closeBtn.className = 'guide-close'
     closeBtn.textContent = '×'
@@ -131,14 +131,14 @@ class InteractiveGuide {
     overlay.appendChild(tooltip)
     document.body.appendChild(overlay)
 
-    // Attendre que le DOM soit mis à jour avant de positionner
+
     requestAnimationFrame(() => {
       if (stepData.target) {
         const target = document.querySelector(stepData.target)
         if (target) {
-          // Faire défiler vers l'élément si nécessaire
+
           target.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          
+
           setTimeout(() => {
             const rect = target.getBoundingClientRect()
             highlight.style.top = `${rect.top}px`
@@ -149,7 +149,7 @@ class InteractiveGuide {
             this.positionTooltip(tooltip, rect, stepData.position)
           }, 300)
         } else {
-          // Si l'élément n'existe pas, centrer le tooltip
+
           tooltip.style.top = '50%'
           tooltip.style.left = '50%'
           tooltip.style.transform = 'translate(-50%, -50%)'
@@ -175,7 +175,7 @@ class InteractiveGuide {
         top = rect.top - tooltipRect.height - padding
         left = rect.left + (rect.width / 2)
         transform = 'translateX(-50%)'
-        // Ajuster si en dehors de la vue
+
         if (top < 0) {
           top = rect.bottom + padding
           position = 'bottom'
@@ -185,7 +185,7 @@ class InteractiveGuide {
         top = rect.bottom + padding
         left = rect.left + (rect.width / 2)
         transform = 'translateX(-50%)'
-        // Ajuster si en dehors de la vue
+
         if (top + tooltipRect.height > viewportHeight) {
           top = rect.top - tooltipRect.height - padding
           position = 'top'
@@ -195,7 +195,7 @@ class InteractiveGuide {
         top = rect.top + (rect.height / 2)
         left = rect.left - tooltipRect.width - padding
         transform = 'translateY(-50%)'
-        // Ajuster si en dehors de la vue
+
         if (left < 0) {
           left = rect.right + padding
           position = 'right'
@@ -205,7 +205,7 @@ class InteractiveGuide {
         top = rect.top + (rect.height / 2)
         left = rect.right + padding
         transform = 'translateY(-50%)'
-        // Ajuster si en dehors de la vue
+
         if (left + tooltipRect.width > viewportWidth) {
           left = rect.left - tooltipRect.width - padding
           position = 'left'
@@ -217,7 +217,7 @@ class InteractiveGuide {
         transform = 'translate(-50%, -50%)'
     }
 
-    // S'assurer que le tooltip reste dans la vue
+
     top = Math.max(padding, Math.min(top, viewportHeight - tooltipRect.height - padding))
     left = Math.max(padding, Math.min(left, viewportWidth - tooltipRect.width - padding))
 

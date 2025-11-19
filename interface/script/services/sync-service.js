@@ -6,7 +6,7 @@ import { notificationService } from './notification-service.js'
 class SyncService {
   constructor() {
     this.syncInterval = null
-    this.syncIntervalMs = 2 * 1000 
+    this.syncIntervalMs = 2 * 1000
     this.lastSync = {}
     this.isSyncing = false
     this.syncEnabled = true

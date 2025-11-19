@@ -44,7 +44,7 @@ class LazyLoadService {
   }
 
   async preloadCategories(categoryKeys, loadFunction) {
-    const promises = categoryKeys.map(key => 
+    const promises = categoryKeys.map(key =>
       this.loadCategory(key, () => loadFunction(key))
     )
     await Promise.all(promises)

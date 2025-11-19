@@ -22,14 +22,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   dbQuery: (sql, params) => ipcRenderer.invoke('db-query', sql, params),
   dbExec: (sql, params) => ipcRenderer.invoke('db-exec', sql, params),
   fetchHtml: (url) => ipcRenderer.invoke('fetch-html', url),
-  
-  // APIs de mise à jour
+
+
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   downloadUpdate: () => ipcRenderer.invoke('download-update'),
   installUpdate: () => ipcRenderer.invoke('install-update'),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
-  
-  // Écouter les événements de mise à jour
+
+
   onUpdateStatus: (callback) => {
     ipcRenderer.on('update-status', (event, data) => callback(data))
   },
@@ -42,7 +42,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onUpdateDownloaded: (callback) => {
     ipcRenderer.on('update-downloaded', (event, data) => callback(data))
   },
-  
+
   removeAllListeners: (channel) => {
     ipcRenderer.removeAllListeners(channel)
   }

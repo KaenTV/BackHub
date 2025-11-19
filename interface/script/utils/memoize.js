@@ -47,7 +47,7 @@ export const memoCache = new MemoCache()
 
 export function memoize(fn, keyGenerator = null) {
   return function(...args) {
-    const key = keyGenerator 
+    const key = keyGenerator
       ? keyGenerator(...args)
       : JSON.stringify(args)
 

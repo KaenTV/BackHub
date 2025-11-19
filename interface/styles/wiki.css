@@ -1,4 +1,4 @@
-/* ===== WIKI/DOCUMENTATION STYLES ===== */
+
 
 .wiki-layout {
   display: flex;
@@ -8,7 +8,7 @@
   min-height: 0;
 }
 
-/* Sidebar Navigation */
+
 .wiki-sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -86,7 +86,7 @@
   flex: 1;
 }
 
-/* Main Content */
+
 .wiki-content {
   flex: 1;
   min-width: 0;
@@ -121,7 +121,7 @@
   font-weight: 500;
 }
 
-/* Wiki Sections */
+
 .wiki-sections {
   display: flex;
   flex-direction: column;
@@ -167,7 +167,7 @@
   line-height: 1.6;
 }
 
-/* Wiki Article */
+
 .wiki-article {
   background: linear-gradient(135deg, rgba(37, 37, 38, 0.8) 0%, rgba(26, 26, 27, 0.9) 100%);
   border: 1px solid rgba(249, 115, 22, 0.15);
@@ -197,7 +197,7 @@
   margin: 0 0 16px 0;
 }
 
-/* Lists */
+
 .wiki-list {
   list-style: none;
   padding: 0;
@@ -246,7 +246,7 @@
   text-align: right;
 }
 
-/* FAQ Items */
+
 .wiki-faq-item {
   margin-bottom: 24px;
   padding: 20px;
@@ -278,7 +278,7 @@
   margin: 0;
 }
 
-/* Alerts */
+
 .wiki-alert {
   padding: 20px 24px;
   border-radius: 12px;
@@ -316,7 +316,7 @@
   line-height: 1.6;
 }
 
-/* Formula */
+
 .wiki-formula {
   padding: 20px 24px;
   background: rgba(249, 115, 22, 0.1);
@@ -329,7 +329,7 @@
   color: #fb923c;
 }
 
-/* Info Grid */
+
 .wiki-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -361,7 +361,7 @@
   font-weight: 600;
 }
 
-/* Contact Grid */
+
 .wiki-contact-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -403,7 +403,7 @@
   margin: 0;
 }
 
-/* Responsive */
+
 @media (max-width: 1024px) {
   .wiki-layout {
     flex-direction: column;

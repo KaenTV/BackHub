@@ -20,7 +20,7 @@ class BackHubApp {
   constructor() {
     this.currentUser = null
     this.viewSwitchInProgress = false
-    this.selectedItems = new Map() 
+    this.selectedItems = new Map()
     this.history = []
     this.users = []
     this.priceOverrides = {}
@@ -48,7 +48,7 @@ class BackHubApp {
 
       this.initServices()
       this.init()
-    
+
     this.initAsync().catch(err => {
       logger.error('Init async failed', err)
     })
@@ -64,25 +64,25 @@ class BackHubApp {
           return
         }
       } catch (error) {
-        // Ne logger que si ce n'est pas une erreur d'auto-login silencieuse
+
         if (!error.isAutoLogin) {
           logger.error('Auto-login failed', error)
         }
-        // Nettoyer complètement le localStorage en cas d'erreur
+
         localStorage.removeItem('authToken')
         localStorage.removeItem('savedCredentials')
         localStorage.removeItem('savedSession')
-        // Continuer normalement si la reconnexion automatique échoue (ne pas afficher d'erreur)
+
       }
     }
-    
+
     const savedSession = localStorage.getItem('savedSession')
     if (savedSession && this.useApi) {
       try {
         const sessionData = JSON.parse(savedSession)
         const sessionAge = Date.now() - sessionData.timestamp
         const maxAge = 30 * 24 * 60 * 60 * 1000
-        
+
         if (sessionAge < maxAge) {
           const usernameInput = document.getElementById('login-username')
           if (usernameInput) {
@@ -96,8 +96,8 @@ class BackHubApp {
         localStorage.removeItem('savedSession')
       }
     }
-    
-    // Charger depuis localStorage en fallback
+
+
     if (!this.useApi) {
     this.history = await this.loadHistory()
     this.users = await this.loadUsers()
@@ -109,7 +109,7 @@ class BackHubApp {
     syncService.start()
     dragDropManager.init()
     this.initKeyboardShortcuts()
-    
+
     requestAnimationFrame(() => {
       tooltipManager.initTooltips()
     })
@@ -161,11 +161,11 @@ class BackHubApp {
         return false
       }
     }, true)
-    
+
     window.addEventListener('beforeunload', () => {
       this.stopVoteCooldownCheck()
     })
-    
+
     window.addEventListener('focus', () => {
       const voteView = document.getElementById('vote-view')
       if (voteView && !voteView.classList.contains('hidden')) {
@@ -177,7 +177,7 @@ class BackHubApp {
         })
       }
     })
-    
+
     this.initAuth()
     this.initSidebar()
     this.initCalculator()
@@ -185,7 +185,7 @@ class BackHubApp {
     this.initClan()
     this.initSettings()
 
-    // Vérifier et démarrer la mise à jour du cooldown au démarrage
+
     this.startCooldownCheck()
 
     const savedUser = localStorage.getItem('currentUser')
@@ -195,23 +195,23 @@ class BackHubApp {
         this.login(user)
       }
     }
-    
+
     this.startGlobalVoteStatsUpdate()
   }
-  
+
 
   startGlobalVoteStatsUpdate() {
     if (this.voteStatsInterval) {
       clearInterval(this.voteStatsInterval)
       this.voteStatsInterval = null
     }
-    
-      // Charger immédiatement les stats
+
+
     this.loadVoteStats().catch(err => {
       logger.error('Erreur lors du chargement initial des stats de vote', err)
     })
-    
-    // Mettre à jour les stats toutes les 5 secondes (continue même hors page vote)
+
+
     this.voteStatsInterval = setInterval(() => {
       this.loadVoteStats().catch(err => {
         logger.error('Erreur lors de la mise à jour des stats de vote', err)
@@ -220,7 +220,7 @@ class BackHubApp {
   }
 
   initAuth() {
-    // Formulaire de connexion
+
     const loginForm = document.getElementById('login-form')
     if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
@@ -229,7 +229,7 @@ class BackHubApp {
     })
     }
 
-    // Formulaire d'inscription
+
     const registerForm = document.getElementById('register-form')
     if (registerForm) {
       registerForm.addEventListener('submit', (e) => {
@@ -238,16 +238,16 @@ class BackHubApp {
       })
     }
 
-    // Gestion des onglets
+
     const loginTab = document.getElementById('tab-login')
     const registerTab = document.getElementById('tab-register')
-    
+
     if (loginTab) {
       loginTab.addEventListener('click', () => {
         this.switchAuthTab('login')
       })
     }
-    
+
     if (registerTab) {
       registerTab.addEventListener('click', () => {
         this.switchAuthTab('register')
@@ -261,17 +261,17 @@ class BackHubApp {
       })
     }
 
-    // Initialiser la modal des conditions d'utilisation
+
     this.initTermsModal()
 
     if (this.users.length === 0 && !this.useApi) {
       this.createDefaultAdmin()
     }
-    
-    // Écouter les messages pour ouvrir la section feedback
+
+
     if (window.electronAPI && window.electronAPI.onOpenFeedbackSection) {
       window.electronAPI.onOpenFeedbackSection(() => {
-        // Ouvrir la vue admin et activer l'onglet feedbacks
+
         this.switchView('admin')
         setTimeout(() => {
           const feedbacksTab = document.querySelector('.admin-nav-tab[data-tab="feedbacks"]')
@@ -283,9 +283,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Initialiser la modal des conditions d'utilisation
-   */
+
   initTermsModal() {
     const termsModal = document.getElementById('terms-modal')
     const termsModalOverlay = document.getElementById('terms-modal-overlay')
@@ -295,18 +293,18 @@ class BackHubApp {
     const termsLink = document.querySelector('.link-terms')
     const termsDate = document.getElementById('terms-date')
 
-    // Afficher la date actuelle
+
     if (termsDate) {
       const now = new Date()
-      const dateStr = now.toLocaleDateString('fr-FR', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      const dateStr = now.toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       })
       termsDate.textContent = dateStr
     }
 
-    // Ouvrir la modal
+
     const openTermsModal = (e) => {
       if (e) e.preventDefault()
       if (termsModal) {
@@ -315,7 +313,7 @@ class BackHubApp {
       }
     }
 
-    // Fermer la modal
+
     const closeTermsModal = () => {
       if (termsModal) {
         termsModal.classList.remove('show')
@@ -323,7 +321,7 @@ class BackHubApp {
       }
     }
 
-    // Event listeners
+
     if (termsLink) {
       termsLink.addEventListener('click', openTermsModal)
     }
@@ -338,7 +336,7 @@ class BackHubApp {
 
     if (termsAcceptBtn) {
       termsAcceptBtn.addEventListener('click', () => {
-          // Cocher la case d'acceptation des conditions
+
         const termsCheckbox = document.getElementById('register-terms')
         if (termsCheckbox) {
           termsCheckbox.checked = true
@@ -349,7 +347,7 @@ class BackHubApp {
 
     if (termsDeclineBtn) {
       termsDeclineBtn.addEventListener('click', () => {
-        // Décocher la case d'acceptation des conditions
+
         const termsCheckbox = document.getElementById('register-terms')
         if (termsCheckbox) {
           termsCheckbox.checked = false
@@ -358,7 +356,7 @@ class BackHubApp {
       })
     }
 
-    // Fermer avec la touche Escape
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && termsModal && termsModal.classList.contains('show')) {
         closeTermsModal()
@@ -366,22 +364,20 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Basculer entre les onglets connexion/inscription
-   */
+
   switchAuthTab(tab) {
     const loginTab = document.getElementById('tab-login')
     const registerTab = document.getElementById('tab-register')
     const loginForm = document.getElementById('auth-login')
     const registerForm = document.getElementById('auth-register')
-    
+
     if (tab === 'login') {
       loginTab?.classList.add('active')
       registerTab?.classList.remove('active')
       loginForm?.classList.add('active')
       registerForm?.classList.remove('active')
-      
-      // Focus sur le premier champ
+
+
       const usernameInput = document.getElementById('login-username')
       if (usernameInput) {
         setTimeout(() => usernameInput.focus(), 100)
@@ -391,15 +387,15 @@ class BackHubApp {
       loginTab?.classList.remove('active')
       registerForm?.classList.add('active')
       loginForm?.classList.remove('active')
-      
-      // Focus sur le premier champ
+
+
       const usernameInput = document.getElementById('register-username')
       if (usernameInput) {
         setTimeout(() => usernameInput.focus(), 100)
       }
     }
-    
-    // Réinitialiser les messages d'erreur
+
+
     const errorMessages = document.querySelectorAll('.error-message, .success-message')
     errorMessages.forEach(msg => {
       msg.classList.remove('show')
@@ -407,9 +403,7 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Gérer l'inscription
-   */
+
   async handleRegister() {
     const username = document.getElementById('register-username').value.trim()
     const password = document.getElementById('register-password').value
@@ -418,8 +412,8 @@ class BackHubApp {
     const errorDiv = document.getElementById('register-error')
     const successDiv = document.getElementById('register-success')
     const registerBtn = document.querySelector('#register-form button[type="submit"]')
-    
-    // Réinitialiser les messages
+
+
     if (errorDiv) {
       errorDiv.classList.remove('show')
       errorDiv.textContent = ''
@@ -428,8 +422,8 @@ class BackHubApp {
       successDiv.classList.remove('show')
       successDiv.textContent = ''
     }
-    
-    // Validation
+
+
     if (username.length < 3 || username.length > 20) {
       if (errorDiv) {
         errorDiv.textContent = 'Le nom d\'utilisateur doit contenir entre 3 et 20 caractères'
@@ -437,7 +431,7 @@ class BackHubApp {
       }
       return
     }
-    
+
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
       if (errorDiv) {
         errorDiv.textContent = 'Le nom d\'utilisateur ne peut contenir que des lettres, chiffres et underscores'
@@ -445,7 +439,7 @@ class BackHubApp {
       }
       return
     }
-    
+
     if (password.length < 6) {
       if (errorDiv) {
         errorDiv.textContent = 'Le mot de passe doit contenir au moins 6 caractères'
@@ -453,7 +447,7 @@ class BackHubApp {
       }
       return
     }
-    
+
     if (password !== passwordConfirm) {
       if (errorDiv) {
         errorDiv.textContent = 'Les mots de passe ne correspondent pas'
@@ -461,7 +455,7 @@ class BackHubApp {
       }
       return
     }
-    
+
     if (!termsAccepted) {
       if (errorDiv) {
         errorDiv.textContent = 'Vous devez accepter les conditions d\'utilisation'
@@ -469,8 +463,8 @@ class BackHubApp {
       }
       return
     }
-    
-    // Désactiver le bouton pendant l'inscription
+
+
     if (registerBtn) {
       registerBtn.disabled = true
       const originalText = registerBtn.querySelector('span').textContent
@@ -479,18 +473,18 @@ class BackHubApp {
 
     try {
       if (this.useApi) {
-        // Utiliser l'API
+
         const user = await apiService.register(username, password, 'user')
-        
+
         if (successDiv) {
           successDiv.textContent = 'Compte créé avec succès ! Redirection...'
           successDiv.classList.add('show')
         }
-        
-        // Attendre un peu puis basculer vers la connexion
+
+
         setTimeout(() => {
           this.switchAuthTab('login')
-          // Pré-remplir le nom d'utilisateur
+
           const loginUsername = document.getElementById('login-username')
           if (loginUsername) {
             loginUsername.value = username
@@ -498,7 +492,7 @@ class BackHubApp {
           notificationService.success('Compte créé ! Vous pouvez maintenant vous connecter.')
         }, 1500)
       } else {
-        // Mode local (fallback)
+
         const existingUser = this.users.find(u => u.username === username)
         if (existingUser) {
           if (errorDiv) {
@@ -507,7 +501,7 @@ class BackHubApp {
           }
           return
         }
-        
+
         const newUser = {
           id: Date.now().toString(),
           username: username,
@@ -515,15 +509,15 @@ class BackHubApp {
           role: 'user',
           createdAt: new Date().toISOString()
         }
-        
+
         this.users.push(newUser)
         await this.saveUsers()
-        
+
         if (successDiv) {
           successDiv.textContent = 'Compte créé avec succès ! Redirection...'
           successDiv.classList.add('show')
         }
-        
+
         setTimeout(() => {
           this.switchAuthTab('login')
           const loginUsername = document.getElementById('login-username')
@@ -550,7 +544,7 @@ class BackHubApp {
     const defaultAdmin = {
       id: '1',
       username: 'admin',
-      password: 'admin', 
+      password: 'admin',
       role: 'admin',
       createdAt: new Date().toISOString()
     }
@@ -564,8 +558,8 @@ class BackHubApp {
     const rememberMe = document.getElementById('login-remember').checked
     const errorDiv = document.getElementById('login-error')
     const loginBtn = document.querySelector('#login-form button[type="submit"]')
-    
-    // Désactiver le bouton pendant la connexion
+
+
     if (loginBtn) {
       loginBtn.disabled = true
       const btnSpan = loginBtn.querySelector('span')
@@ -578,20 +572,20 @@ class BackHubApp {
 
     try {
       if (this.useApi) {
-        // Utiliser l'API
+
         const user = await apiService.login(username, password, rememberMe)
         apiService.setCurrentUser(user)
         if (errorDiv) {
           errorDiv.textContent = ''
           errorDiv.classList.remove('show')
         }
-        
-        // Charger les données de l'utilisateur depuis l'API
+
+
         await this.loadUserDataFromApi(user.id)
-        
+
         this.login(user, rememberMe)
       } else {
-        // Mode local (fallback)
+
         const user = this.users.find(u => u.username === username && u.password === password)
     if (user) {
           if (errorDiv) {
@@ -625,16 +619,14 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Charger les données de l'utilisateur depuis l'API
-   */
+
   async loadUserDataFromApi(userId) {
     try {
-      // Les prix d'achat sont déjà chargés dans login() depuis localStorage
-      // On ne les recharge pas ici pour éviter d'écraser les modifications en cours
-      // this.priceOverrides est déjà initialisé avec les données de l'utilisateur
-      
-      // Charger l'historique depuis l'API (base de données)
+
+
+
+
+
       let transactions = []
       try {
         transactions = await apiService.getUserHistory(userId, 1000)
@@ -643,34 +635,34 @@ class BackHubApp {
           transactions = []
         }
       } catch (historyError) {
-        // Logger sans notification
+
         logger.warn('Failed to load user history from API', historyError, {}, false)
-        // Si l'API est activée, ne pas charger depuis localStorage
-        // Les données doivent être uniquement en base de données
+
+
         if (this.useApi) {
           this.history = []
           return
         }
-        // Essayer de charger depuis localStorage en fallback seulement si l'API n'est pas activée
+
         try {
           this.history = await this.loadHistory()
           logger.info('Loaded history from localStorage fallback', { count: this.history.length })
           return
         } catch (fallbackError) {
-          // Logger sans notification - erreur silencieuse
+
           logger.error('Failed to load history from localStorage fallback', fallbackError, {}, false)
           this.history = []
           return
         }
       }
-      
-      // Normaliser le format des transactions retournées par l'API
+
+
       this.history = transactions.map(t => ({
         id: t.id || t.transaction_id || Date.now().toString(),
         date: t.date || t.created_at || new Date().toISOString(),
         user: t.user || t.username || this.currentUser?.username || 'Utilisateur',
         seller: t.seller || '',
-        items: Array.isArray(t.items) ? t.items : 
+        items: Array.isArray(t.items) ? t.items :
                (typeof t.items === 'string' ? (() => {
                  try {
                    return JSON.parse(t.items)
@@ -681,40 +673,40 @@ class BackHubApp {
                })() : []),
         totalBuy: t.total_buy || t.totalBuy || 0,
         totalSell: t.total_sell || t.totalSell || 0,
-        margin: t.margin !== undefined ? t.margin : 
+        margin: t.margin !== undefined ? t.margin :
                 ((t.total_sell || t.totalSell || 0) - (t.total_buy || t.totalBuy || 0))
       }))
-      
-      // Ne PAS sauvegarder en localStorage si l'API est activée
-      // Les données doivent être uniquement en base de données
+
+
+
       if (!this.useApi) {
         await this.saveHistory()
       }
-      
-      // Rafraîchir le cache
+
+
       this.refreshItemsCache()
-      
-      logger.info('User data loaded from API', { 
-        userId, 
+
+      logger.info('User data loaded from API', {
+        userId,
         transactionsCount: this.history.length,
         transactions: this.history.map(t => ({ id: t.id, date: t.date, user: t.user }))
       })
     } catch (error) {
-      // Logger sans notification
+
       logger.error('Failed to load user data from API', error, {}, false)
-      // Si l'API est activée, ne pas charger depuis localStorage
-      // Les données doivent être uniquement en base de données
+
+
       if (this.useApi) {
         this.history = []
         this.priceOverrides = this.priceOverrides || {}
         return
       }
-      // Essayer de charger depuis localStorage en fallback seulement si l'API n'est pas activée
+
       try {
         this.history = await this.loadHistory()
         logger.info('Loaded history from localStorage fallback after error', { count: this.history.length })
       } catch (fallbackError) {
-        // Logger sans notification - erreur silencieuse
+
         logger.error('Failed to load history from localStorage fallback', fallbackError, {}, false)
         this.history = []
       }
@@ -726,11 +718,11 @@ class BackHubApp {
     this.currentUser = user
     localStorage.setItem('currentUser', user.username)
     apiService.setCurrentUser(user)
-    
-    // Le token est déjà sauvegardé dans apiService.login() si rememberMe est true
-    // On sauvegarde aussi les informations de session pour compatibilité
+
+
+
     if (rememberMe && this.useApi) {
-      // Sauvegarder les informations de session
+
       const sessionData = {
         userId: user.id,
         username: user.username,
@@ -739,82 +731,82 @@ class BackHubApp {
       }
       localStorage.setItem('savedSession', JSON.stringify(sessionData))
     } else {
-      // Supprimer la session sauvegardée si elle existe
+
       localStorage.removeItem('savedSession')
     }
-    
-    // Charger les données depuis l'API si activé
+
+
     if (this.useApi && user.id) {
-      // Charger d'abord les prix d'achat personnalisés (localStorage)
+
       const loadedOverrides = await this.loadPriceOverrides()
       this.priceOverrides = loadedOverrides || {}
-      
-      // Invalider le cache pour forcer le rechargement avec les nouveaux prix
+
+
       this.refreshItemsCache()
-      
-      // Si on a chargé des prix, s'assurer qu'ils sont sauvegardés avec la bonne clé
+
+
       if (Object.keys(this.priceOverrides).length > 0) {
         await this.savePriceOverrides()
       }
-      
-      // Ensuite charger l'historique depuis l'API (base de données)
+
+
       await this.loadUserDataFromApi(user.id)
-      
-      // Charger aussi les données du clan
+
+
       await this.loadClanData()
     } else {
-      // Mode hors ligne - charger les prix d'achat depuis localStorage
+
       this.priceOverrides = await this.loadPriceOverrides() || {}
-      // Invalider le cache pour forcer le rechargement avec les nouveaux prix
+
       this.refreshItemsCache()
     }
-    
+
     this.showApp()
-    
-    // Mettre à jour le nom d'utilisateur dans toutes les vues
+
+
     const currentUserEl = document.getElementById('current-user')
     if (currentUserEl) {
       currentUserEl.textContent = user.username
     }
-    
-    // Afficher le modal de bienvenue pour les nouveaux utilisateurs
-    // Utiliser un petit délai pour s'assurer que l'UI est prête
+
+
+
     setTimeout(() => {
       this.showWelcomeModal()
     }, 500)
-    
+
     const dashboardUser = document.getElementById('current-user-dashboard')
     if (dashboardUser) {
       dashboardUser.textContent = user.username
     }
-    
+
     const clanCurrentUserEl = document.getElementById('clan-current-user')
     if (clanCurrentUserEl) {
       clanCurrentUserEl.textContent = user.username
     }
 
-    // Afficher le menu admin pour les admins et développeurs
+
     if (user.role === 'admin' || user.role === 'developpeur') {
       document.getElementById('admin-nav').style.display = 'block'
     } else {
       document.getElementById('admin-nav').style.display = 'none'
     }
-    
-    // Mettre à jour la visibilité des onglets admin
-    // Utiliser requestAnimationFrame pour s'assurer que le DOM est prêt
+
+
+
     requestAnimationFrame(() => {
       setTimeout(() => {
         this.updateAdminTabsVisibility()
       }, 100)
     })
-    
-    // Rafraîchir les vues actives pour afficher les prix personnalisés
+
+
     setTimeout(() => {
       const currentView = document.querySelector('.view:not(.hidden)')
       if (currentView) {
         const viewId = currentView.id
         if (viewId === 'drugs-view' || viewId === 'weapons-view') {
-          // Re-rendre la vue actuelle pour afficher les prix personnalisés
+
           if (viewId === 'drugs-view') {
             this.renderDrugsModern()
             this.renderDrugCalculator()
@@ -825,9 +817,9 @@ class BackHubApp {
         }
       }
     }, 100)
-    
-    // Démarrer la vérification des nouveaux feedbacks pour les développeurs
-    // Attendre un peu pour s'assurer que le token est bien disponible
+
+
+
     if (user.role === 'developpeur') {
       setTimeout(() => {
         this.startFeedbackCheck()
@@ -836,21 +828,21 @@ class BackHubApp {
   }
 
   logout() {
-    // Arrêter la vérification des feedbacks
+
     this.stopFeedbackCheck()
-    
-    // Sauvegarder les prix d'achat avant de déconnecter
+
+
     if (this.currentUser && this.currentUser.id) {
       this.savePriceOverrides().catch(err => {
         logger.error('Failed to save price overrides on logout', err)
       })
     }
-    
+
     this.currentUser = null
     localStorage.removeItem('currentUser')
-    localStorage.removeItem('savedSession') // Supprimer la session sauvegardée
+    localStorage.removeItem('savedSession')
     apiService.logout()
-    this.selectedItems.clear() 
+    this.selectedItems.clear()
     this.priceOverrides = {}
     this.history = []
     this.showLogin()
@@ -859,8 +851,8 @@ class BackHubApp {
   showLogin() {
     document.getElementById('login-view').classList.remove('hidden')
     document.getElementById('app-view').classList.add('hidden')
-    
-    // Réinitialiser complètement les formulaires de connexion et d'inscription
+
+
     const loginForm = document.getElementById('login-form')
     const registerForm = document.getElementById('register-form')
     const loginUsername = document.getElementById('login-username')
@@ -868,8 +860,8 @@ class BackHubApp {
     const registerUsername = document.getElementById('register-username')
     const registerPassword = document.getElementById('register-password')
     const registerPasswordConfirm = document.getElementById('register-password-confirm')
-    
-    // Réinitialiser le formulaire de connexion
+
+
     if (loginForm) {
       loginForm.reset()
     }
@@ -885,8 +877,8 @@ class BackHubApp {
       loginPassword.readOnly = false
       loginPassword.required = true
     }
-    
-    // Réinitialiser le formulaire d'inscription
+
+
     if (registerForm) {
       registerForm.reset()
     }
@@ -914,34 +906,34 @@ class BackHubApp {
     document.getElementById('login-view').classList.add('hidden')
     document.getElementById('app-view').classList.remove('hidden')
 
-    // Vérifier si une vue est déjà active ou visible
+
     setTimeout(() => {
-      // Si un changement de vue est en cours, ne pas interférer
+
       if (this.viewSwitchInProgress) {
         return
       }
-      
-      // Vérifier si un élément de navigation est déjà actif
+
+
       const activeNav = document.querySelector('.nav-item.active')
       if (activeNav && activeNav.dataset.view) {
         const viewName = activeNav.dataset.view
-        // Si une vue autre que dashboard est active, ne pas la changer
+
         if (viewName !== 'dashboard') {
-          // S'assurer que la vue est bien affichée
+
           this.switchView(viewName)
           return
         }
       }
-      
-      // Vérifier si une vue autre que dashboard est déjà visible
-      // En vérifiant les styles inline qui peuvent être appliqués par switchView
+
+
+
       const allViews = document.querySelectorAll('.view')
       let hasNonDashboardView = false
       allViews.forEach(view => {
         if (view.id && view.id !== 'dashboard-view') {
           const style = window.getComputedStyle(view)
-          const isVisible = style.display !== 'none' && 
-                           style.visibility !== 'hidden' && 
+          const isVisible = style.display !== 'none' &&
+                           style.visibility !== 'hidden' &&
                            !view.classList.contains('hidden') &&
                            style.opacity !== '0'
           if (isVisible) {
@@ -949,13 +941,13 @@ class BackHubApp {
           }
         }
       })
-      
-      // Si une autre vue est visible, ne pas forcer dashboard
+
+
       if (hasNonDashboardView) {
         return
       }
-      
-      // Sinon, afficher dashboard par défaut
+
+
       this.switchView('dashboard')
     }, 100)
   }
@@ -1007,15 +999,15 @@ class BackHubApp {
       }
     })
 
-    // Gérer le clic sur le bouton Paramètres
+
     const settingsBtn = document.getElementById('settings-btn')
     if (settingsBtn) {
       settingsBtn.addEventListener('click', (e) => {
         e.preventDefault()
         e.stopPropagation()
         this.switchView('settings')
-        
-        // Mettre à jour l'état actif
+
+
         document.querySelectorAll('.nav-item').forEach(nav => {
           if (nav.id !== 'logout-btn') {
             nav.classList.remove('active')
@@ -1084,9 +1076,7 @@ class BackHubApp {
     localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'))
   }
 
-  /**
-   * Nettoyer les intervalles de vote quand on quitte la page vote
-   */
+
   stopVoteCooldownCheck() {
     if (this.voteCooldownInterval) {
       clearInterval(this.voteCooldownInterval)
@@ -1110,15 +1100,15 @@ class BackHubApp {
 
   async switchView(viewName) {
     if (this.viewSwitchInProgress) return
-    
-    // Nettoyer tous les intervalles et timers actifs avant de changer de vue
+
+
     const currentView = document.querySelector('.view:not(.hidden)')
     if (currentView) {
-      // Nettoyer les intervalles de vote si on quitte la page vote
+
       if (currentView.id === 'vote-view') {
         this.stopVoteCooldownCheck()
       }
-      // Nettoyer les intervalles de cooldown de clan si on quitte la page clan
+
       if (currentView.id === 'clan-view') {
         if (this.cooldownInterval) {
           clearTimeout(this.cooldownInterval)
@@ -1132,20 +1122,20 @@ class BackHubApp {
     }
     this.viewSwitchInProgress = true
 
-    // Mettre à jour l'état actif dans la sidebar (batch DOM updates)
+
     const navItems = document.querySelectorAll('.nav-item')
     const targetNav = Array.from(navItems).find(nav => nav.dataset.view === viewName && nav.id !== 'logout-btn')
-    
+
     navItems.forEach(nav => {
       if (nav.id !== 'logout-btn') {
         nav.classList.toggle('active', nav === targetNav)
       }
     })
 
-    // Cacher toutes les vues sauf la cible (batch DOM updates)
+
     const views = document.querySelectorAll('.view')
     const targetViewId = `${viewName}-view`
-    
+
     views.forEach(view => {
       if (view.id !== targetViewId) {
         view.classList.add('hidden')
@@ -1210,7 +1200,7 @@ class BackHubApp {
         }
     }
 
-    // Charger les données et rendre la vue de manière optimisée
+
       if (viewName === 'calculator') {
       requestAnimationFrame(() => {
         if (this.currentCalcType === 'drogue') {
@@ -1221,7 +1211,7 @@ class BackHubApp {
         this.updateTotals()
       })
       } else if (viewName === 'history') {
-      // Ne pas recharger si on vient de sauvegarder (déjà fait dans saveToHistory)
+
       if (!this._justSavedTransaction && this.useApi && this.currentUser?.id) {
         const loadPromise = this.loadUserDataFromApi(this.currentUser.id)
         await loadPromise
@@ -1230,7 +1220,7 @@ class BackHubApp {
         this.renderHistory()
       })
     } else if (viewName === 'dashboard') {
-      const loadPromise = this.useApi && this.currentUser?.id 
+      const loadPromise = this.useApi && this.currentUser?.id
         ? this.loadUserDataFromApi(this.currentUser.id)
         : Promise.resolve()
 
@@ -1239,7 +1229,7 @@ class BackHubApp {
         this.renderDashboard()
         })
       } else if (viewName === 'admin') {
-      // Recharger les données depuis l'API pour s'assurer que tout est à jour
+
       if (this.useApi && this.currentUser && this.currentUser.id) {
         await this.loadUserDataFromApi(this.currentUser.id)
       }
@@ -1255,23 +1245,23 @@ class BackHubApp {
     } else if (viewName === 'settings') {
       this.renderSettings()
     } else if (viewName === 'vote') {
-      // Utiliser requestAnimationFrame pour s'assurer que le DOM est prêt
+
       requestAnimationFrame(() => {
         this.initVotePage()
-        // Mettre à jour l'affichage avec les stats actuelles (qui sont déjà à jour globalement)
+
         this.updateVotePageDisplay()
       })
     }
-    
-    // Mettre à jour la visibilité des onglets admin si on est sur la vue admin
+
+
     if (viewName === 'admin') {
-      // Utiliser un petit délai pour s'assurer que le DOM est prêt
+
       setTimeout(() => {
         this.updateAdminTabsVisibility()
       }, 50)
     }
-    
-    // Réinitialiser le flag après un court délai
+
+
     setTimeout(() => {
       this.viewSwitchInProgress = false
     }, 200)
@@ -1395,22 +1385,22 @@ class BackHubApp {
     }
   }
 
-  // ===== NOUVELLE FONCTIONNALITÉ ARMES MODERNE =====
+
   initWeaponsModern() {
-    // Initialiser la recherche
+
     const searchInput = document.getElementById('armes-search')
     const searchClear = document.getElementById('armes-search-clear')
-    
+
     if (searchInput) {
       let debounceTimer
       searchInput.addEventListener('input', (e) => {
         const value = e.target.value.trim()
-        
-        // Afficher/masquer le bouton clear
+
+
         if (searchClear) {
           searchClear.style.display = value ? 'flex' : 'none'
         }
-        
+
         clearTimeout(debounceTimer)
         debounceTimer = setTimeout(() => {
           this.searchQuery = value.toLowerCase()
@@ -1418,7 +1408,7 @@ class BackHubApp {
         }, 200)
       })
 
-      // Bouton clear
+
       if (searchClear) {
         searchClear.addEventListener('click', () => {
           searchInput.value = ''
@@ -1430,32 +1420,32 @@ class BackHubApp {
       }
     }
 
-    // Initialiser les onglets de catégories
+
     const tabs = document.querySelectorAll('.weapon-tab')
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const category = tab.dataset.category
-        
-        // Mettre à jour l'état actif
+
+
         tabs.forEach(t => t.classList.remove('active'))
         tab.classList.add('active')
-        
-        // Stocker la catégorie active
+
+
         this.activeWeaponCategory = category === 'all' ? null : category
-        
-        // Re-rendre
+
+
         this.renderWeaponsModern()
       })
     })
 
-    // Initialiser la catégorie active
+
     this.activeWeaponCategory = null
   }
 
   renderWeaponsModern() {
     const grid = document.getElementById('weapons-grid')
     const emptyState = document.getElementById('weapons-empty-state')
-    
+
     if (!grid) return
 
     const categories = {
@@ -1467,22 +1457,22 @@ class BackHubApp {
       vanillaSkin: { name: 'Vanilla Skin', icon: '🎨' }
     }
 
-    // Collecter tous les items
+
     let allWeapons = []
     const query = this.searchQuery || ''
     const activeCategory = this.activeWeaponCategory
 
     Object.keys(categories).forEach(categoryKey => {
       if (activeCategory && activeCategory !== categoryKey) return
-      
+
       const items = this.getItemsData()[categoryKey] || []
       items.forEach(item => {
-        // Nettoyer le nom
+
         let cleanName = item.name
         const pricePatternStartEnd = /^\d{1,3}(?:\s?\d{3})*\s*€\s*(.+?)\s+\d{1,3}(?:\s?\d{3})*\s*€\s*$/i
         const pricePatternEnd = /^(.+?)\s+\d{1,3}(?:\s?\d{3})*\s*€\s*$/i
         const pricePatternStart = /^\d{1,3}(?:\s?\d{3})*\s*€\s*(.+?)$/i
-        
+
         let match = cleanName.match(pricePatternStartEnd)
         if (match && match[1]) {
           cleanName = match[1].trim()
@@ -1499,7 +1489,7 @@ class BackHubApp {
         }
         cleanName = cleanName.replace(/\s+/g, ' ').trim()
 
-        // Filtrer par recherche
+
         if (query && !cleanName.toLowerCase().includes(query)) {
           return
         }
@@ -1520,20 +1510,20 @@ class BackHubApp {
       })
     })
 
-    // Mettre à jour les compteurs d'onglets
+
     Object.keys(categories).forEach(categoryKey => {
       const count = (this.getItemsData()[categoryKey] || []).length
       const countEl = document.getElementById(`tab-count-${categoryKey}`)
       if (countEl) countEl.textContent = count
     })
-    
+
     const totalCount = Object.keys(categories).reduce((sum, key) => {
       return sum + (this.getItemsData()[key] || []).length
     }, 0)
     const totalCountEl = document.getElementById('tab-count-all')
     if (totalCountEl) totalCountEl.textContent = totalCount
 
-    // Afficher/masquer l'état vide
+
     if (allWeapons.length === 0) {
       grid.style.display = 'none'
       if (emptyState) emptyState.style.display = 'flex'
@@ -1544,7 +1534,7 @@ class BackHubApp {
     grid.style.display = 'grid'
     if (emptyState) emptyState.style.display = 'none'
 
-    // Générer les cartes
+
     grid.innerHTML = ''
     const fragment = document.createDocumentFragment()
 
@@ -1555,7 +1545,7 @@ class BackHubApp {
 
     grid.appendChild(fragment)
 
-    // Animer les cartes
+
     requestAnimationFrame(() => {
       const cards = grid.querySelectorAll('.weapon-card')
       cards.forEach((card, index) => {
@@ -1564,7 +1554,7 @@ class BackHubApp {
       })
     })
 
-    // Mettre à jour les stats
+
     this.updateWeaponsStats(allWeapons, categories)
   }
 
@@ -1576,8 +1566,8 @@ class BackHubApp {
     const isAdmin = this.currentUser && this.currentUser.role === 'admin'
     const profitClass = weapon.profit >= 0 ? 'profit-positive' : 'profit-negative'
     const profitBadgeClass = weapon.profit >= 0 ? '' : 'negative'
-    
-    // Créer l'ID unique pour l'item
+
+
     const itemId = `${weapon.category}::${weapon.originalName}`
     const isSelected = this.selectedItems.has(itemId)
     const quantity = this.selectedItems.get(itemId) || 1
@@ -1620,14 +1610,14 @@ class BackHubApp {
       </div>
     `
 
-    // Ajouter les event listeners
+
     const checkbox = card.querySelector('.weapon-card-checkbox')
     if (checkbox) {
       checkbox.addEventListener('change', (e) => {
         const itemId = e.target.dataset.itemId
         if (e.target.checked) {
           this.selectedItems.set(itemId, 1)
-          // Ajouter le champ quantité
+
           const quantityContainer = document.createElement('div')
           quantityContainer.className = 'weapon-card-quantity'
           quantityContainer.innerHTML = `
@@ -1636,8 +1626,8 @@ class BackHubApp {
           `
           const stats = card.querySelector('.weapon-card-stats')
           stats.after(quantityContainer)
-          
-          // Ajouter l'event listener pour la quantité
+
+
           const quantityInput = quantityContainer.querySelector('.weapon-quantity-input')
           quantityInput.addEventListener('input', () => {
             const qty = Math.max(1, parseInt(quantityInput.value) || 1)
@@ -1652,7 +1642,7 @@ class BackHubApp {
           })
         } else {
           this.selectedItems.delete(itemId)
-          // Retirer le champ quantité
+
           const quantityContainer = card.querySelector('.weapon-card-quantity')
           if (quantityContainer) {
             quantityContainer.remove()
@@ -1662,7 +1652,7 @@ class BackHubApp {
       })
     }
 
-    // Event listener pour la quantité si elle existe déjà
+
     const quantityInput = card.querySelector('.weapon-quantity-input')
     if (quantityInput) {
       quantityInput.addEventListener('input', () => {
@@ -1680,7 +1670,7 @@ class BackHubApp {
       })
     }
 
-    // Ajouter les event listeners pour l'édition des prix (tous les utilisateurs peuvent modifier leurs prix d'achat)
+
     const editBtn = card.querySelector('.edit-price-btn-modern')
     if (editBtn) {
       editBtn.addEventListener('click', (e) => {
@@ -1702,17 +1692,17 @@ class BackHubApp {
     const buyPriceKey = `${itemId}::buyPrice`
     const currentPrice = (this.priceOverrides[buyPriceKey] ?? currentItem.buyPrice) || 0
 
-    // Utiliser un modal personnalisé au lieu de prompt()
+
     const price = await this.openEditPriceModal(weapon.name, currentPrice)
     if (price === null) return
 
-    // Si le prix est 0 ou égal au prix par défaut, supprimer l'override
+
     if (price === 0 || price === currentItem.buyPrice) {
       delete this.priceOverrides[buyPriceKey]
     } else {
       this.priceOverrides[buyPriceKey] = price
     }
-    
+
     this._priceOverridesChanged = true
     await this.savePriceOverrides()
     this.renderWeaponsModern()
@@ -1720,13 +1710,13 @@ class BackHubApp {
   }
 
   updateWeaponsStats(weapons, categories) {
-    // Total count
+
     const totalCountEl = document.getElementById('weapons-total-count')
     if (totalCountEl) {
       totalCountEl.textContent = weapons.length
     }
 
-    // Prix moyen
+
     if (weapons.length > 0) {
       const totalSellPrice = weapons.reduce((sum, w) => sum + (w.sellPrice || 0), 0)
       const avgPrice = Math.round(totalSellPrice / weapons.length)
@@ -1735,7 +1725,7 @@ class BackHubApp {
         avgPriceEl.textContent = this.formatPrice(avgPrice)
       }
 
-      // Bénéfice moyen
+
       const totalProfit = weapons.reduce((sum, w) => sum + (w.profit || 0), 0)
       const avgProfit = Math.round(totalProfit / weapons.length)
       const avgProfitEl = document.getElementById('weapons-avg-profit')
@@ -1753,7 +1743,7 @@ class BackHubApp {
       }
     }
 
-    // Résumé total
+
     const totalBuy = weapons.reduce((sum, w) => sum + (w.buyPrice || 0), 0)
     const totalSell = weapons.reduce((sum, w) => sum + (w.sellPrice || 0), 0)
     const totalProfit = totalSell - totalBuy
@@ -1771,7 +1761,7 @@ class BackHubApp {
     }
   }
 
-  // Recherche pour les drogues
+
   initDrugSearch() {
     const drugSearch = document.getElementById('drug-search')
     if (drugSearch) {
@@ -1791,22 +1781,22 @@ class BackHubApp {
     }
   }
 
-  // ===== NOUVELLE FONCTIONNALITÉ DROGUES MODERNE =====
+
   initDrugsModern() {
-    // Initialiser la recherche
+
     const searchInput = document.getElementById('drug-search')
     const searchClear = document.getElementById('drug-search-clear')
-    
+
     if (searchInput) {
       let debounceTimer
       searchInput.addEventListener('input', (e) => {
         const value = e.target.value.trim()
-        
-        // Afficher/masquer le bouton clear
+
+
         if (searchClear) {
           searchClear.style.display = value ? 'flex' : 'none'
         }
-        
+
         clearTimeout(debounceTimer)
         debounceTimer = setTimeout(() => {
           this.drugSearchQuery = value.toLowerCase()
@@ -1814,7 +1804,7 @@ class BackHubApp {
         }, 200)
       })
 
-      // Bouton clear
+
       if (searchClear) {
         searchClear.addEventListener('click', () => {
           searchInput.value = ''
@@ -1826,32 +1816,32 @@ class BackHubApp {
       }
     }
 
-    // Initialiser les onglets de catégories
+
     const tabs = document.querySelectorAll('.drug-tab')
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const category = tab.dataset.category
-        
-        // Mettre à jour l'état actif
+
+
         tabs.forEach(t => t.classList.remove('active'))
         tab.classList.add('active')
-        
-        // Stocker la catégorie active
+
+
         this.activeDrugCategory = category === 'all' ? null : category
-        
-        // Re-rendre
+
+
         this.renderDrugsModern()
       })
     })
 
-    // Initialiser la catégorie active
+
     this.activeDrugCategory = null
   }
 
   renderDrugsModern() {
     const grid = document.getElementById('drugs-grid')
     const emptyState = document.getElementById('drugs-empty-state')
-    
+
     if (!grid) return
 
     const categories = {
@@ -1862,17 +1852,17 @@ class BackHubApp {
       drugPochon: { name: 'Pochon', icon: '🔴' }
     }
 
-    // Collecter tous les items
+
     let allDrugs = []
     const query = this.drugSearchQuery || ''
     const activeCategory = this.activeDrugCategory
 
     Object.keys(categories).forEach(categoryKey => {
       if (activeCategory && activeCategory !== categoryKey) return
-      
+
       const items = this.getItemsData()[categoryKey] || []
       items.forEach(item => {
-        // Filtrer par recherche
+
         if (query && !item.name.toLowerCase().includes(query)) {
           return
         }
@@ -1893,20 +1883,20 @@ class BackHubApp {
       })
     })
 
-    // Mettre à jour les compteurs d'onglets
+
     Object.keys(categories).forEach(categoryKey => {
       const count = (this.getItemsData()[categoryKey] || []).length
       const countEl = document.getElementById(`tab-count-${categoryKey}`)
       if (countEl) countEl.textContent = count
     })
-    
+
     const totalCount = Object.keys(categories).reduce((sum, key) => {
       return sum + (this.getItemsData()[key] || []).length
     }, 0)
     const totalCountEl = document.getElementById('tab-count-all-drugs')
     if (totalCountEl) totalCountEl.textContent = totalCount
 
-    // Afficher/masquer l'état vide
+
     if (allDrugs.length === 0) {
       grid.style.display = 'none'
       if (emptyState) emptyState.style.display = 'flex'
@@ -1917,7 +1907,7 @@ class BackHubApp {
     grid.style.display = 'grid'
     if (emptyState) emptyState.style.display = 'none'
 
-    // Générer les cartes
+
     grid.innerHTML = ''
     const fragment = document.createDocumentFragment()
 
@@ -1928,7 +1918,7 @@ class BackHubApp {
 
     grid.appendChild(fragment)
 
-    // Animer les cartes
+
     requestAnimationFrame(() => {
       const cards = grid.querySelectorAll('.drug-card')
       cards.forEach((card, index) => {
@@ -1937,7 +1927,7 @@ class BackHubApp {
       })
     })
 
-    // Mettre à jour les stats
+
     this.updateDrugsStats(allDrugs, categories)
   }
 
@@ -1948,13 +1938,13 @@ class BackHubApp {
 
     const profitClass = drug.profit >= 0 ? 'profit-positive' : 'profit-negative'
     const profitBadgeClass = drug.profit >= 0 ? '' : 'negative'
-    
-    // Créer l'ID unique pour l'item
+
+
     const itemId = `${drug.category}::${drug.originalName}`
     const isSelected = this.selectedItems.has(itemId)
     const quantity = this.selectedItems.get(itemId) || 1
-    
-    // Récupérer le prix personnalisé s'il existe
+
+
     const buyPriceKey = `${itemId}::buyPrice`
     const customBuyPrice = this.priceOverrides[buyPriceKey] ?? drug.buyPrice
     const actualProfit = drug.sellPrice - customBuyPrice
@@ -1997,14 +1987,14 @@ class BackHubApp {
       </div>
     `
 
-    // Ajouter les event listeners
+
     const checkbox = card.querySelector('.drug-card-checkbox')
     if (checkbox) {
       checkbox.addEventListener('change', (e) => {
         const itemId = e.target.dataset.itemId
         if (e.target.checked) {
           this.selectedItems.set(itemId, 1)
-          // Ajouter le champ quantité
+
           const quantityContainer = document.createElement('div')
           quantityContainer.className = 'drug-card-quantity'
           quantityContainer.innerHTML = `
@@ -2013,8 +2003,8 @@ class BackHubApp {
           `
           const stats = card.querySelector('.drug-card-stats')
           stats.after(quantityContainer)
-          
-          // Ajouter l'event listener pour la quantité
+
+
           const quantityInput = quantityContainer.querySelector('.drug-quantity-input')
           quantityInput.addEventListener('input', () => {
             const qty = Math.max(1, parseInt(quantityInput.value) || 1)
@@ -2029,7 +2019,7 @@ class BackHubApp {
           })
         } else {
           this.selectedItems.delete(itemId)
-          // Retirer le champ quantité
+
           const quantityContainer = card.querySelector('.drug-card-quantity')
           if (quantityContainer) {
             quantityContainer.remove()
@@ -2039,7 +2029,7 @@ class BackHubApp {
       })
     }
 
-    // Event listener pour la quantité si elle existe déjà
+
     const quantityInput = card.querySelector('.drug-quantity-input')
     if (quantityInput) {
       quantityInput.addEventListener('input', () => {
@@ -2057,7 +2047,7 @@ class BackHubApp {
       })
     }
 
-    // Event listener pour modifier le prix
+
     const editBtn = card.querySelector('.edit-price-btn-drug')
     if (editBtn) {
       editBtn.addEventListener('click', (e) => {
@@ -2079,7 +2069,7 @@ class BackHubApp {
     const buyPriceKey = `${itemId}::buyPrice`
     const currentPrice = (this.priceOverrides[buyPriceKey] ?? currentItem.buyPrice) || 0
 
-    // Utiliser un modal personnalisé au lieu de prompt()
+
     const price = await this.openEditPriceModal(drug.name, currentPrice)
     if (price === null) return
 
@@ -2088,7 +2078,7 @@ class BackHubApp {
     } else {
       this.priceOverrides[buyPriceKey] = price
     }
-    
+
     this._priceOverridesChanged = true
     await this.savePriceOverrides()
     this.renderDrugsModern()
@@ -2096,13 +2086,13 @@ class BackHubApp {
   }
 
   updateDrugsStats(drugs, categories) {
-    // Total count
+
     const totalCountEl = document.getElementById('drugs-total-count')
     if (totalCountEl) {
       totalCountEl.textContent = drugs.length
     }
 
-    // Prix moyen
+
     if (drugs.length > 0) {
       const totalSellPrice = drugs.reduce((sum, d) => sum + (d.sellPrice || 0), 0)
       const avgPrice = Math.round(totalSellPrice / drugs.length)
@@ -2111,7 +2101,7 @@ class BackHubApp {
         avgPriceEl.textContent = this.formatPrice(avgPrice)
       }
 
-      // Bénéfice moyen
+
       const totalProfit = drugs.reduce((sum, d) => {
         const itemId = `${d.category}::${d.originalName}`
         const buyPriceKey = `${itemId}::buyPrice`
@@ -2160,7 +2150,7 @@ class BackHubApp {
       { key: 'drugPochon', tbody: 'drug-pochon-tbody', name: 'Pochon' }
     ]
 
-    // Utiliser requestAnimationFrame pour un rendu non-bloquant
+
     requestAnimationFrame(() => {
     drugCategories.forEach(cat => {
       this.renderDrugCategory(cat.key, cat.tbody, cat.name)
@@ -2175,11 +2165,11 @@ class BackHubApp {
 
     if (!tbody) return
 
-    // Filtrer les items selon la recherche (optimisé avec cache)
+
     const searchQuery = (this.drugSearchQuery || '').toLowerCase()
-    const filteredItems = searchQuery 
+    const filteredItems = searchQuery
       ? items.filter(item => {
-          // Cache de recherche pour éviter les toLowerCase répétés
+
           if (!item._searchCache) {
             item._searchCache = item.name.toLowerCase()
           }
@@ -2187,7 +2177,7 @@ class BackHubApp {
         })
       : items
 
-    // Utiliser DocumentFragment pour une insertion DOM plus rapide
+
     const fragment = document.createDocumentFragment()
     const rows = filteredItems.map(item => {
       const itemId = `${categoryKey}::${item.name}`
@@ -2206,8 +2196,8 @@ class BackHubApp {
         <tr>
           <td><strong>${this.escapeHtml(item.name)}</strong></td>
           <td class="text-right">
-            <input type="number" 
-                   class="${priceInputClass}" 
+            <input type="number"
+                   class="${priceInputClass}"
                    data-item-id="${itemId}"
                    data-category="${categoryKey}"
                    data-default-price="${item.buyPrice}"
@@ -2218,8 +2208,8 @@ class BackHubApp {
                    title="${isCustomPrice ? 'Prix personnalisé (double-clic pour réinitialiser)' : 'Entrez le prix d&apos;achat'}">
           </td>
           <td class="text-right">
-            <input type="number" 
-                   class="drug-quantity-input" 
+            <input type="number"
+                   class="drug-quantity-input"
                    data-item-id="${itemId}"
                    data-category="${categoryKey}"
                    value="${quantity}"
@@ -2235,8 +2225,8 @@ class BackHubApp {
         </tr>
       `
     })
-    
-    // Créer les éléments DOM une seule fois
+
+
     const tempDiv = document.createElement('div')
     tempDiv.innerHTML = rows.join('')
     while (tempDiv.firstChild) {
@@ -2250,7 +2240,7 @@ class BackHubApp {
         const itemId = input.dataset.itemId
         const qty = Math.max(0, parseInt(input.value) || 0)
         this.selectedItems.set(itemId, qty)
-        // Utiliser requestAnimationFrame pour les mises à jour non-bloquantes
+
         requestAnimationFrame(() => {
           this.updateDrugCategory(categoryKey, tbodyId)
         this.updateDrugSummary()
@@ -2259,52 +2249,52 @@ class BackHubApp {
       })
     })
 
-    // Debounce pour la sauvegarde des prix
+
     let savePriceDebounce = null
-    
+
     tbody.querySelectorAll('.drug-buy-price-input').forEach(input => {
       const defaultPrice = parseFloat(input.dataset.defaultPrice) || 0
-      
-      // Mettre à jour le style initial
+
+
       const updateInputStyle = () => {
         const currentValue = parseFloat(input.value) || 0
         const isCustom = currentValue !== defaultPrice && currentValue > 0
         input.classList.toggle('custom-price', isCustom)
       }
-      
+
       updateInputStyle()
-      
+
       input.addEventListener('input', () => {
         const itemId = input.dataset.itemId
         const buyPrice = Math.max(0, parseFloat(input.value) || 0)
         const buyPriceKey = `${itemId}::buyPrice`
-        
-        // Si le prix est égal au prix par défaut, supprimer l'override
+
+
         if (buyPrice === defaultPrice || buyPrice === 0) {
           delete this.priceOverrides[buyPriceKey]
         } else {
           this.priceOverrides[buyPriceKey] = buyPrice
         }
-        
-        // Marquer que les overrides ont changé pour invalider le cache
+
+
         this._priceOverridesChanged = true
-        
-        // Debounce la sauvegarde pour éviter trop d'appels
+
+
         clearTimeout(savePriceDebounce)
         savePriceDebounce = setTimeout(() => {
           this.savePriceOverrides()
         }, 500)
-        
+
         updateInputStyle()
-        // Utiliser requestAnimationFrame pour les mises à jour non-bloquantes
+
         requestAnimationFrame(() => {
           this.updateDrugCategory(categoryKey, tbodyId)
           this.updateDrugSummary()
           this.updateTotals()
         })
       })
-      
-      // Permettre la réinitialisation avec un double-clic
+
+
       input.addEventListener('dblclick', () => {
         input.value = defaultPrice
         const itemId = input.dataset.itemId
@@ -2313,7 +2303,7 @@ class BackHubApp {
         this._priceOverridesChanged = true
         this.savePriceOverrides()
         updateInputStyle()
-        // Utiliser requestAnimationFrame pour les mises à jour non-bloquantes
+
         requestAnimationFrame(() => {
           this.updateDrugCategory(categoryKey, tbodyId)
           this.updateDrugSummary()
@@ -2331,9 +2321,9 @@ class BackHubApp {
     if (!tbody) return
 
     const searchQuery = (this.drugSearchQuery || '').toLowerCase()
-    const filteredItems = searchQuery 
+    const filteredItems = searchQuery
       ? items.filter(item => {
-          // Cache de recherche pour éviter les toLowerCase répétés
+
           if (!item._searchCache) {
             item._searchCache = item.name.toLowerCase()
           }
@@ -2391,7 +2381,7 @@ class BackHubApp {
     const summaryTbody = document.getElementById('drug-summary-tbody')
 
     if (summaryTbody) {
-      // Utiliser DocumentFragment pour une insertion DOM plus rapide
+
       const fragment = document.createDocumentFragment()
       const rows = categories.map(cat => {
         const items = this.getItemsData()[cat.key] || []
@@ -2426,8 +2416,8 @@ class BackHubApp {
           </tr>
         `
       })
-      
-      // Créer les éléments DOM une seule fois
+
+
       const tempDiv = document.createElement('div')
       tempDiv.innerHTML = rows.join('')
       while (tempDiv.firstChild) {
@@ -2472,7 +2462,7 @@ class BackHubApp {
     const query = this.searchQuery.toLowerCase()
     const items = query
       ? allItems.filter(it => {
-          // Cache de recherche pour éviter les toLowerCase répétés
+
           if (!it._searchCache) {
             it._searchCache = it.name.toLowerCase()
           }
@@ -2488,45 +2478,45 @@ class BackHubApp {
     const isAdmin = this.currentUser && this.currentUser.role === 'admin'
     const isArmeCategory = categoryKey === 'sniper' || categoryKey === 'weaponSkins' || categoryKey === 'rifle' || categoryKey === 'armement' || categoryKey === 'accessoire' || categoryKey === 'vanillaSkin'
 
-    // Utiliser DocumentFragment pour une insertion DOM plus rapide
+
     const fragment = document.createDocumentFragment()
     const rows = items.map((item) => {
       const realIndex = allItems.findIndex(it => it.name === item.name)
 
-      // Nettoyer le nom s'il contient des prix (formats: "18000 € Nom 90000 €", "Nom 68000 €", "18000 € Nom")
+
       let cleanName = item.name
-      // Pattern pour détecter les prix au début et à la fin du nom (ex: "18000 € Nom 90000 €")
-      // Supporte les formats avec ou sans espaces : "18000 €", "18 000 €", "18000€"
+
+
       const pricePatternStartEnd = /^\d{1,3}(?:\s?\d{3})*\s*€\s*(.+?)\s+\d{1,3}(?:\s?\d{3})*\s*€\s*$/i
-      // Pattern pour détecter un prix à la fin seulement (ex: "Nom 68000 €" ou "AR 50A1 68000 €")
+
       const pricePatternEnd = /^(.+?)\s+\d{1,3}(?:\s?\d{3})*\s*€\s*$/i
-      // Pattern pour détecter un prix au début seulement (ex: "18000 € Nom")
+
       const pricePatternStart = /^\d{1,3}(?:\s?\d{3})*\s*€\s*(.+?)$/i
-      
-      // Essayer d'abord le pattern avec prix au début et à la fin
+
+
       let match = cleanName.match(pricePatternStartEnd)
       if (match && match[1]) {
         cleanName = match[1].trim()
       } else {
-        // Essayer le pattern avec prix à la fin
+
         match = cleanName.match(pricePatternEnd)
         if (match && match[1]) {
           cleanName = match[1].trim()
         } else {
-          // Essayer le pattern avec prix au début
+
           match = cleanName.match(pricePatternStart)
           if (match && match[1]) {
             cleanName = match[1].trim()
           }
         }
       }
-      
-      // Nettoyage final : supprimer les espaces multiples et les prix restants
+
+
       cleanName = cleanName.replace(/\s+/g, ' ').trim()
 
       if (isArmeCategory) {
-        // Format pour les armes : Nom | Prix de Revente | Prix d'Achat | Bénéfice
-        // S'assurer que les prix sont bien numériques
+
+
         const sellPrice = typeof item.sellPrice === 'number' ? item.sellPrice : (parseFloat(item.sellPrice) || 0)
         const buyPrice = typeof item.buyPrice === 'number' ? item.buyPrice : (parseFloat(item.buyPrice) || 0)
         const calculatedMargin = sellPrice - buyPrice
@@ -2550,12 +2540,12 @@ class BackHubApp {
           </tr>
         `
       } else {
-        // Format pour les autres catégories (si nécessaire)
+
         const sellPrice = typeof item.sellPrice === 'number' ? item.sellPrice : (parseFloat(item.sellPrice) || 0)
         const buyPrice = typeof item.buyPrice === 'number' ? item.buyPrice : (parseFloat(item.buyPrice) || 0)
         const calculatedMargin = sellPrice - buyPrice
         const marginClass = calculatedMargin >= 0 ? 'text-success' : 'text-danger'
-        
+
         return `
           <tr>
             <td><strong>${this.escapeHtml(cleanName)}</strong></td>
@@ -2575,8 +2565,8 @@ class BackHubApp {
       `
       }
     })
-    
-    // Créer les éléments DOM une seule fois
+
+
     const tempDiv = document.createElement('div')
     tempDiv.innerHTML = rows.join('')
     while (tempDiv.firstChild) {
@@ -2586,7 +2576,7 @@ class BackHubApp {
     tbody.appendChild(fragment)
 
     if (isArmeCategory) {
-      // Ajouter les event listeners pour l'édition des prix (admins)
+
       tbody.querySelectorAll('.edit-price-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation()
@@ -2662,11 +2652,11 @@ class BackHubApp {
     })
     }
 
-    // Permettre à tous les utilisateurs de modifier leurs prix
+
     if (this.currentUser) {
       tbody.querySelectorAll('.edit-price-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          e.stopPropagation() 
+          e.stopPropagation()
           const category = btn.dataset.category
           const realIndex = parseInt(btn.dataset.realIndex)
           const itemName = btn.dataset.itemName
@@ -2737,8 +2727,8 @@ class BackHubApp {
 
     const cells = row.querySelectorAll('td')
     if (cells.length >= 7) {
-      cells[3].textContent = this.formatPrice(buyTotalPrice) 
-      cells[5].textContent = item.sellPrice > 0 ? this.formatPrice(sellTotalPrice) : '-' 
+      cells[3].textContent = this.formatPrice(buyTotalPrice)
+      cells[5].textContent = item.sellPrice > 0 ? this.formatPrice(sellTotalPrice) : '-'
       const marginCell = cells[6]
       marginCell.textContent = item.sellPrice > 0 ? ((margin >= 0 ? '+' : '') + this.formatPrice(margin)) : '-'
       marginCell.className = `text-right ${marginClass}`
@@ -2759,9 +2749,9 @@ class BackHubApp {
     const items = []
     const itemsData = this.getItemsData()
 
-    // Optimiser avec Map pour les recherches rapides
+
     const categoryCache = new Map()
-    
+
     this.selectedItems.forEach((quantity, itemId) => {
       let category, itemName
       if (itemId.includes('::')) {
@@ -2773,26 +2763,26 @@ class BackHubApp {
         category = parts[0]
         itemName = parts.slice(1).join('-')
       }
-      
+
       const qty = Math.max(0, quantity || 0)
-      if (qty === 0) return // Skip les items avec quantité 0
-      
-      // Utiliser le cache pour éviter les recherches répétées
+      if (qty === 0) return
+
+
       let categoryMap = categoryCache.get(category)
       if (!categoryMap) {
         const categoryData = itemsData[category]
         if (!categoryData) return
-        
-        // Créer une Map pour recherche O(1) au lieu de O(n)
+
+
         categoryMap = new Map(categoryData.map(it => [it.name, it]))
         categoryCache.set(category, categoryMap)
       }
-      
+
       const item = categoryMap.get(itemName)
         if (item) {
         const buyPriceKey = `${itemId}::buyPrice`
         const customBuyPrice = this.priceOverrides[buyPriceKey] ?? item.buyPrice
-        
+
           items.push({
           buyPrice: parseFloat(customBuyPrice) || 0,
             sellPrice: parseFloat(item.sellPrice) || 0,
@@ -2929,13 +2919,13 @@ class BackHubApp {
         }
       })
 
-      // Demander le nom du vendeur
+
       const sellerName = await this.openSellerNameModal()
       if (sellerName === null) {
-        // L'utilisateur a annulé, on arrête la sauvegarde
+
         return
       }
-      // Si sellerName est '', l'utilisateur a cliqué sur "Passer", on continue avec une chaîne vide
+
 
       const historyEntry = {
         id: Date.now().toString(),
@@ -2948,64 +2938,64 @@ class BackHubApp {
         margin: totalSell - totalBuy
       }
 
-      // Sauvegarder via l'API si activé
+
       let savedToApi = false
       if (this.useApi && this.currentUser && this.currentUser.id) {
         try {
           const result = await apiService.saveTransaction(this.currentUser.id, historyEntry)
-          
-          // Vérifier que la réponse est valide
+
+
           if (!result) {
             throw new Error('Réponse vide du serveur')
           }
-          
+
           if (!result.success) {
             throw new Error(result.error || 'Erreur lors de la sauvegarde')
           }
-          
-          // Ne pas ajouter à l'historique local immédiatement
-          // On va recharger depuis l'API pour avoir les données complètes et à jour
+
+
+
           savedToApi = true
-          
-          logger.info('Transaction saved to API successfully', { 
+
+          logger.info('Transaction saved to API successfully', {
             transactionId: result.transaction_id || result.transaction?.id,
             hasTransaction: !!result.transaction
           })
-          
-          // Ne PAS sauvegarder en localStorage si l'API fonctionne
-          // Les données doivent être uniquement en base de données
-          // L'historique sera rechargé depuis l'API après la sauvegarde
+
+
+
+
         } catch (error) {
-          // En cas d'erreur API, NE PAS sauvegarder du tout
+
           logger.error('Failed to save transaction to API', error)
-          
-          // Ne pas ajouter à l'historique local si l'API échoue
-          // L'utilisateur doit corriger le problème avant de pouvoir sauvegarder
+
+
+
           const errorMessage = error.message || error.data?.error || 'Erreur serveur'
           const errorDetails = error.data?.details || ''
-          
-          // Afficher une erreur claire avec les détails
+
+
           if (errorDetails) {
             notificationService.error(`Erreur lors de la sauvegarde en base de données: ${errorDetails}`)
           } else {
             notificationService.error(`Erreur lors de la sauvegarde en base de données: ${errorMessage}`)
           }
-          
-          // Ne pas continuer - la transaction n'est pas sauvegardée
-          // Ne pas vider les items sélectionnés pour que l'utilisateur puisse réessayer
-          return // Arrêter l'exécution ici
+
+
+
+          return
         }
       } else {
-        // Mode local uniquement (si l'API n'est pas activée)
+
       this.history.push(historyEntry)
       await this.saveHistory()
       }
-      
-      // Vider les items sélectionnés seulement si la sauvegarde a réussi
+
+
       this.selectedItems.clear()
       this.updateCalculator()
 
-      // Créer une copie de l'historique actuel pour undo/redo
+
       const currentHistory = [...this.history]
 
       undoRedoService.addAction({
@@ -3014,13 +3004,13 @@ class BackHubApp {
         undo: async () => {
           this.history = previousHistory
           this.selectedItems = previousSelectedItems
-          
-          // Si sauvegardé via API, on ne peut pas vraiment annuler côté serveur
-          // On met juste à jour localement
+
+
+
           if (savedToApi) {
             logger.warn('Cannot undo API transaction on server, only local undo')
           }
-          
+
           await this.saveHistory()
           this.updateCalculator()
           notificationService.info('Transaction annulée')
@@ -3028,41 +3018,41 @@ class BackHubApp {
         redo: async () => {
           this.history = currentHistory
           this.selectedItems.clear()
-          
-          // Si sauvegardé via API, on ne peut pas vraiment refaire côté serveur
-          // On met juste à jour localement
+
+
+
           if (savedToApi) {
             logger.warn('Cannot redo API transaction on server, only local redo')
           }
-          
+
           await this.saveHistory()
           this.updateCalculator()
           notificationService.info('Transaction rétablie')
         }
       })
 
-      // Afficher le message de succès seulement si la sauvegarde a réussi
+
       if (savedToApi) {
         notificationService.success('Transaction sauvegardée avec succès dans la base de données')
       } else if (!this.useApi) {
         notificationService.success('Transaction sauvegardée localement')
       }
-      
-      // Mettre à jour la navigation active avant de basculer
+
+
       document.querySelectorAll('.nav-item').forEach(nav => {
         if (nav.id !== 'logout-btn') nav.classList.remove('active')
       })
       const historyNav = document.querySelector('.nav-item[data-view="history"]')
       if (historyNav) historyNav.classList.add('active')
-      
-      // Recharger l'historique depuis l'API AVANT de basculer vers la vue
-      // pour s'assurer qu'on a les dernières données
+
+
+
       if (savedToApi && this.useApi && this.currentUser && this.currentUser.id) {
         try {
-          // Recharger l'historique complet depuis l'API pour s'assurer qu'on a les dernières données
+
           logger.info('Reloading history from API after save...')
           await this.loadUserDataFromApi(this.currentUser.id)
-          logger.info('History reloaded from API', { 
+          logger.info('History reloaded from API', {
             count: this.history.length,
             transactions: this.history.map(t => ({ id: t.id, date: t.date }))
           })
@@ -3070,23 +3060,23 @@ class BackHubApp {
           logger.error('Failed to reload history from API after save', reloadError)
         }
       }
-      
-      // Marquer qu'on vient de sauvegarder pour éviter le double rechargement dans switchView
+
+
       this._justSavedTransaction = true
-      
-      // Basculer vers la vue historique
+
+
       await this.switchView('history')
-      
-      // Réinitialiser le flag
+
+
       this._justSavedTransaction = false
-      
-      // Attendre un peu pour que le DOM soit prêt, puis forcer le rendu
+
+
       await new Promise(resolve => setTimeout(resolve, 300))
-      
-      // Forcer le rendu de l'historique après le rechargement
+
+
       this.renderHistory()
-      
-      // Double vérification : si l'historique est toujours vide, recharger une fois de plus
+
+
       if (this.history.length === 0 && savedToApi && this.useApi && this.currentUser && this.currentUser.id) {
         logger.warn('History is empty after reload, trying again...')
         setTimeout(async () => {
@@ -3099,11 +3089,11 @@ class BackHubApp {
           }
         }, 500)
       }
-      
-      // Mettre à jour le dashboard si on y est (en arrière-plan)
+
+
       const dashboardView = document.getElementById('dashboard-view')
       if (dashboardView && !dashboardView.classList.contains('hidden')) {
-        // Ne pas attendre pour ne pas bloquer l'affichage de l'historique
+
         this.renderDashboard().catch(err => {
           logger.warn('Failed to update dashboard after save', err)
         })
@@ -3122,7 +3112,7 @@ class BackHubApp {
       return
     }
 
-    // Optimiser l'affichage avec requestAnimationFrame
+
     requestAnimationFrame(() => {
     historyView.classList.remove('hidden')
     historyView.removeAttribute('hidden')
@@ -3166,13 +3156,13 @@ class BackHubApp {
         return
       }
 
-      // Optimiser le tri avec cache de dates
+
       const sortedHistory = filteredHistory.map(entry => ({
         ...entry,
         _sortDate: new Date(entry.date).getTime()
       })).sort((a, b) => b._sortDate - a._sortDate)
 
-      // Utiliser DocumentFragment pour une insertion DOM plus rapide
+
       const fragment = document.createDocumentFragment()
       const rows = sortedHistory.map(entry => {
         const date = new Date(entry.date)
@@ -3289,8 +3279,8 @@ class BackHubApp {
           </div>
         `
       })
-      
-      // Créer les éléments DOM une seule fois avec DocumentFragment
+
+
       const tempDiv = document.createElement('div')
       tempDiv.innerHTML = rows.join('')
       while (tempDiv.firstChild) {
@@ -3299,7 +3289,7 @@ class BackHubApp {
       container.innerHTML = ''
       container.appendChild(fragment)
 
-      // Animer les cartes
+
       requestAnimationFrame(() => {
         const cards = container.querySelectorAll('.transaction-card')
         cards.forEach((card, index) => {
@@ -3331,8 +3321,8 @@ class BackHubApp {
 
     let filtered = this.history.filter(entry => {
       if (!entry) return false
-      
-      // Si pas d'utilisateur dans l'entrée, on l'accepte si on a un utilisateur actuel
+
+
       if (!entry.user) {
         return this.currentUser !== null
       }
@@ -3341,7 +3331,7 @@ class BackHubApp {
         return true
       }
 
-      // Comparer avec le username de l'utilisateur actuel
+
       const entryUser = entry.user || ''
       const currentUsername = this.currentUser ? this.currentUser.username : ''
       return entryUser === currentUsername
@@ -3401,7 +3391,7 @@ class BackHubApp {
 
     let userHistory = this.history
     if (this.currentUser && this.currentUser.role !== 'admin') {
-      userHistory = this.history.filter(entry => 
+      userHistory = this.history.filter(entry =>
         entry && entry.user === this.currentUser.username
       )
     }
@@ -3456,7 +3446,7 @@ class BackHubApp {
         userFilter.style.display = 'block'
         const users = [...new Set(this.history.map(entry => entry.user).filter(Boolean))]
         const currentValue = userFilter.value
-        userFilter.innerHTML = '<option value="">Tous les utilisateurs</option>' + 
+        userFilter.innerHTML = '<option value="">Tous les utilisateurs</option>' +
           users.map(user => `<option value="${this.escapeHtml(user)}">${this.escapeHtml(user)}</option>`).join('')
         if (currentValue) userFilter.value = currentValue
       } else {
@@ -3512,18 +3502,18 @@ class BackHubApp {
 
         if (confirm(`Êtes-vous sûr de vouloir effacer vos ${userTransactions.length} transaction${userTransactions.length > 1 ? 's' : ''} ?`)) {
           try {
-            // Supprimer via l'API si activée
+
             if (this.useApi && this.currentUser && this.currentUser.id) {
               if (this.currentUser && this.currentUser.role === 'admin') {
                 if (confirm('En tant qu\'admin, cela effacera toutes les transactions. Continuer ?')) {
-                  // Supprimer toutes les transactions via l'API
+
                   try {
                     const result = await apiService.deleteAllTransactions()
                     if (!result.success) {
                       notificationService.error(result.error || 'Erreur lors de la suppression de l\'historique')
                       return
                     }
-                    // Ne pas modifier l'historique local ici - il sera rechargé depuis l'API
+
                   } catch (apiError) {
                     logger.error('Failed to delete all transactions from API', apiError)
                     const errorMessage = apiError.message || apiError.data?.error || 'Erreur serveur'
@@ -3536,14 +3526,14 @@ class BackHubApp {
                     return
                   }
                 } else {
-                  // Supprimer uniquement les transactions de l'utilisateur via l'API
+
                   try {
                     const result = await apiService.deleteUserTransactions(this.currentUser.id)
                     if (!result.success) {
                       notificationService.error(result.error || 'Erreur lors de la suppression de l\'historique')
                       return
                     }
-                    // Ne pas modifier l'historique local ici - il sera rechargé depuis l'API
+
                   } catch (apiError) {
                     logger.error('Failed to delete user transactions from API', apiError)
                     const errorMessage = apiError.message || apiError.data?.error || 'Erreur serveur'
@@ -3557,14 +3547,14 @@ class BackHubApp {
                   }
                 }
               } else {
-                // Supprimer uniquement les transactions de l'utilisateur via l'API
+
                 try {
                   const result = await apiService.deleteUserTransactions(this.currentUser.id)
                   if (!result.success) {
                     notificationService.error(result.error || 'Erreur lors de la suppression de l\'historique')
                     return
                   }
-                  // Ne pas modifier l'historique local ici - il sera rechargé depuis l'API
+
                 } catch (apiError) {
                   logger.error('Failed to delete user transactions from API', apiError)
                   const errorMessage = apiError.message || apiError.data?.error || 'Erreur serveur'
@@ -3578,22 +3568,22 @@ class BackHubApp {
                 }
               }
 
-              // Recharger l'historique depuis l'API pour s'assurer que tout est à jour
+
               await this.loadUserDataFromApi(this.currentUser.id)
-              
-              // Forcer le rechargement de l'affichage après la suppression
+
+
               this.renderHistory()
-              
-              // Actualiser les statistiques si on est sur le dashboard
+
+
               const dashboardView = document.getElementById('dashboard-view')
               if (dashboardView && !dashboardView.classList.contains('hidden')) {
                 await this.renderDashboard()
               }
-              
-              // Afficher le message de succès après le rechargement
+
+
               notificationService.success('Historique supprimé avec succès de la base de données')
             } else {
-              // Mode hors ligne - suppression locale uniquement
+
           if (this.currentUser && this.currentUser.role === 'admin') {
             if (confirm('En tant qu\'admin, cela effacera toutes les transactions. Continuer ?')) {
               this.history = []
@@ -3603,19 +3593,19 @@ class BackHubApp {
           } else {
             this.history = this.history.filter(entry => entry.user !== currentUsername)
           }
-              
-              // Sauvegarder en localStorage seulement si l'API n'est pas activée
+
+
               await this.saveHistory()
-              
-              // Recharger l'affichage
+
+
           this.renderHistory()
-              
-              // Actualiser les statistiques si on est sur le dashboard
+
+
               const dashboardView = document.getElementById('dashboard-view')
               if (dashboardView && !dashboardView.classList.contains('hidden')) {
                 await this.renderDashboard()
               }
-              
+
               notificationService.success('Historique supprimé avec succès')
             }
           } catch (error) {
@@ -3630,17 +3620,17 @@ class BackHubApp {
   initHistorySearchClear() {
     const searchInput = document.getElementById('history-search')
     const clearBtn = document.getElementById('history-search-clear')
-    
+
     if (!searchInput || !clearBtn) return
 
-    // Vérifier l'état initial
+
     if (searchInput.value.trim()) {
       clearBtn.style.display = 'flex'
     } else {
       clearBtn.style.display = 'none'
     }
 
-    // Event listener pour le bouton clear
+
     if (!clearBtn.dataset.listenerAttached) {
       clearBtn.dataset.listenerAttached = 'true'
       clearBtn.addEventListener('click', () => {
@@ -3655,11 +3645,11 @@ class BackHubApp {
   initDeleteButtons() {
     const deleteButtons = document.querySelectorAll('.transaction-delete-btn')
     deleteButtons.forEach(btn => {
-      // Retirer les anciens listeners pour éviter les doublons
+
       const newBtn = btn.cloneNode(true)
       btn.parentNode.replaceChild(newBtn, btn)
-      
-      // Ajouter le listener sur le nouveau bouton
+
+
       const transactionId = newBtn.getAttribute('data-transaction-id')
       if (transactionId) {
         newBtn.addEventListener('click', async (e) => {
@@ -3677,12 +3667,12 @@ class BackHubApp {
       return
     }
 
-    // Chercher la transaction dans l'historique
-    const transaction = this.history.find(entry => 
-      String(entry.id) === String(transactionId) || 
+
+    const transaction = this.history.find(entry =>
+      String(entry.id) === String(transactionId) ||
       String(entry.transaction_id) === String(transactionId)
     )
-    
+
     if (!transaction) {
       notificationService.warning('Transaction introuvable')
       return
@@ -3699,7 +3689,7 @@ class BackHubApp {
     const userName = isAdmin ? transaction.user : 'votre'
     if (confirm(`Êtes-vous sûr de vouloir supprimer ${isAdmin ? `la transaction de ${transaction.user}` : 'cette transaction'} ?`)) {
       try {
-        // Supprimer via l'API si activée
+
         if (this.useApi && this.currentUser && this.currentUser.id) {
           try {
             const result = await apiService.deleteTransaction(transactionId)
@@ -3709,45 +3699,45 @@ class BackHubApp {
               return
             }
           } catch (apiError) {
-            // Logger sans notification automatique
+
             logger.error('Failed to delete transaction from API', apiError, { transactionId }, false)
-            // Extraire le message d'erreur de la réponse API si disponible
+
             const errorMessage = apiError.data?.error || apiError.data?.message || apiError.message || 'Erreur lors de la suppression de la transaction sur le serveur'
             notificationService.error(errorMessage)
             return
           }
         }
 
-        // Supprimer de l'historique local
-        this.history = this.history.filter(entry => 
-          String(entry.id) !== String(transactionId) && 
+
+        this.history = this.history.filter(entry =>
+          String(entry.id) !== String(transactionId) &&
           String(entry.transaction_id) !== String(transactionId) &&
           String(entry.id) !== String(transaction.id)
         )
 
-        // Sauvegarder l'historique local (backup)
+
         await this.saveHistory()
 
-        // Recharger l'historique depuis l'API pour s'assurer que tout est à jour
+
         if (this.useApi && this.currentUser && this.currentUser.id) {
           await this.loadUserDataFromApi(this.currentUser.id)
         }
 
-        // Recharger l'affichage
+
       this.renderHistory()
 
-        // Actualiser les statistiques si on est sur le dashboard
+
         const dashboardView = document.getElementById('dashboard-view')
         if (dashboardView && !dashboardView.classList.contains('hidden')) {
           await this.renderDashboard()
         }
-        
-        // Si on est dans la vue clan, mettre à jour l'historique du clan aussi
+
+
         const clanView = document.getElementById('clan-view')
         if (clanView && !clanView.classList.contains('hidden')) {
           await this.renderClanHistory()
         }
-        
+
         notificationService.success('Transaction supprimée définitivement')
       } catch (error) {
         logger.error('Failed to delete transaction', error)
@@ -3761,29 +3751,29 @@ class BackHubApp {
     const sections = document.querySelectorAll('.support-section-modern')
 
     navTabs.forEach(tab => {
-      // Supprimer les anciens listeners pour éviter les doublons
+
       const newTab = tab.cloneNode(true)
       tab.parentNode.replaceChild(newTab, tab)
     })
 
-    // Réattacher les listeners
+
     const newNavTabs = document.querySelectorAll('.support-nav-tab')
     newNavTabs.forEach(tab => {
       tab.addEventListener('click', (e) => {
         e.preventDefault()
         const targetSection = tab.dataset.section
 
-        // Mettre à jour les onglets actifs
+
         newNavTabs.forEach(nav => nav.classList.remove('active'))
         tab.classList.add('active')
 
-        // Mettre à jour les sections actives
+
         sections.forEach(section => {
           section.classList.remove('active')
           if (section.id === targetSection) {
             section.classList.add('active')
 
-            // Animation de scroll fluide
+
             requestAnimationFrame(() => {
               section.scrollIntoView({ behavior: 'smooth', block: 'start' })
             })
@@ -3794,7 +3784,7 @@ class BackHubApp {
   }
 
   initClan() {
-    // Event listeners pour créer/rejoindre un clan
+
     const createClanBtn = document.getElementById('create-clan-btn')
     const joinClanBtn = document.getElementById('join-clan-btn')
     const createClanModal = document.getElementById('create-clan-modal')
@@ -3808,37 +3798,37 @@ class BackHubApp {
     const copyInvitationKeyBtn = document.getElementById('copy-invitation-key-btn')
     const leaveClanBtn = document.getElementById('leave-clan-btn')
 
-    // Quitter le clan
+
     if (leaveClanBtn) {
       leaveClanBtn.addEventListener('click', async () => {
         await this.handleLeaveClan()
       })
     }
 
-    // Créer un clan
+
     if (createClanBtn) {
       createClanBtn.addEventListener('click', () => {
-        // Vérifier le cooldown
+
         const remainingSeconds = this.getClanDeleteCooldownRemaining()
         if (remainingSeconds > 0) {
           notificationService.warning(`Vous devez attendre ${remainingSeconds} seconde${remainingSeconds > 1 ? 's' : ''} avant de créer un nouveau clan.`)
           return
         }
-        
+
         if (createClanModal) {
-          // S'assurer qu'aucun autre modal n'est ouvert
+
           const transferModal = document.getElementById('transfer-ownership-modal')
           if (transferModal) {
             transferModal.style.display = 'none'
             transferModal.remove()
           }
-          
-          // Réinitialiser le formulaire AVANT d'ouvrir le modal
+
+
           if (createClanForm) {
             createClanForm.reset()
           }
-          
-          // Réinitialiser le champ immédiatement
+
+
           const clanNameInput = document.getElementById('clan-name')
           if (clanNameInput) {
             clanNameInput.removeAttribute('disabled')
@@ -3851,11 +3841,11 @@ class BackHubApp {
             clanNameInput.style.cursor = 'text'
             clanNameInput.style.zIndex = '1001'
           }
-          
-          // Ouvrir le modal
+
+
           createClanModal.style.display = 'flex'
-          
-          // Focus immédiat avec requestAnimationFrame pour meilleure réactivité
+
+
           requestAnimationFrame(() => {
             if (clanNameInput) {
               clanNameInput.focus()
@@ -3864,8 +3854,8 @@ class BackHubApp {
           })
         }
       })
-      
-      // Vérifier l'état du bouton au chargement
+
+
       this.updateCreateClanButton()
     }
 
@@ -3905,7 +3895,7 @@ class BackHubApp {
       createClanForm.addEventListener('submit', async (e) => {
         e.preventDefault()
         const clanName = document.getElementById('clan-name').value.trim()
-        
+
         if (!clanName) {
           notificationService.warning('Veuillez entrer un nom de clan')
           return
@@ -3921,7 +3911,7 @@ class BackHubApp {
               if (createClanModal) createClanModal.style.display = 'none'
               if (createClanForm) {
                 createClanForm.reset()
-                // S'assurer que le champ est réinitialisé
+
                 const clanNameInput = document.getElementById('clan-name')
                 if (clanNameInput) {
                   clanNameInput.value = ''
@@ -3941,7 +3931,7 @@ class BackHubApp {
       })
     }
 
-    // Rejoindre un clan
+
     if (joinClanBtn) {
       joinClanBtn.addEventListener('click', () => {
         if (joinClanModal) joinClanModal.style.display = 'flex'
@@ -3966,7 +3956,7 @@ class BackHubApp {
       joinClanForm.addEventListener('submit', async (e) => {
         e.preventDefault()
         const invitationKey = document.getElementById('invitation-key').value.trim()
-        
+
         if (!invitationKey) {
           notificationService.warning('Veuillez entrer une clé d\'invitation')
           return
@@ -3993,7 +3983,7 @@ class BackHubApp {
       })
     }
 
-    // Copier la clé d'invitation
+
     if (copyInvitationKeyBtn) {
       copyInvitationKeyBtn.addEventListener('click', () => {
         const keyDisplay = document.getElementById('clan-invitation-key-display')
@@ -4007,7 +3997,7 @@ class BackHubApp {
       })
     }
 
-    // Event listeners pour ajouter un membre
+
     const addMemberBtn = document.getElementById('add-member-btn')
     const clanMemberModal = document.getElementById('clan-member-modal')
     const clanMemberModalClose = document.getElementById('clan-member-modal-close')
@@ -4037,10 +4027,10 @@ class BackHubApp {
       })
     }
 
-    // Note: L'ajout de membre via username n'est plus utilisé, on utilise les clés d'invitation
-    // Mais on garde le modal pour compatibilité
 
-    // Filtres
+
+
+
     const memberFilter = document.getElementById('clan-member-filter')
     const dateFilter = document.getElementById('clan-date-filter')
 
@@ -4057,15 +4047,13 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Charger les données du clan depuis l'API
-   */
+
   async loadClanData() {
     if (!this.useApi || !this.currentUser || !this.currentUser.id) {
       return
     }
 
-    // Vérifier que le token est disponible
+
     if (!apiService.authToken) {
       const savedToken = apiService.getSavedToken()
       if (savedToken) {
@@ -4077,11 +4065,11 @@ class BackHubApp {
     }
 
     try {
-      // Charger le clan de l'utilisateur
+
       this.currentClan = await apiService.getMyClan()
-      
+
       if (this.currentClan) {
-        // Charger les membres du clan
+
         this.clanMembers = await apiService.getClanMembers(this.currentClan.id)
       } else {
         this.clanMembers = []
@@ -4142,10 +4130,10 @@ class BackHubApp {
     const roleSelect = document.getElementById('user-role')
     const developpeurOption = roleSelect?.querySelector('option[value="developpeur"]')
 
-    // Réinitialiser complètement le formulaire d'abord
+
     form.reset()
-    
-    // S'assurer que tous les champs sont activés et accessibles
+
+
     if (usernameInput) {
       usernameInput.disabled = false
       usernameInput.readOnly = false
@@ -4161,7 +4149,7 @@ class BackHubApp {
       roleSelect.title = ''
     }
 
-    // Masquer l'option "Développeur" si l'utilisateur actuel n'est pas développeur
+
     if (developpeurOption) {
       if (this.currentUser?.role === 'developpeur') {
         developpeurOption.style.display = 'block'
@@ -4193,8 +4181,8 @@ class BackHubApp {
         roleSelect.disabled = false
       }
       form.dataset.userId = user.id
-      
-      // Si l'utilisateur à modifier est développeur et que l'utilisateur actuel n'est pas développeur, empêcher la modification
+
+
       if (user.role === 'developpeur' && this.currentUser?.role !== 'developpeur') {
         if (roleSelect) {
           roleSelect.disabled = true
@@ -4206,9 +4194,9 @@ class BackHubApp {
           roleSelect.title = ''
         }
       }
-      
-      // Les développeurs peuvent modifier n'importe quel compte, y compris les admins
-      // Donc si l'utilisateur actuel est développeur, tout est autorisé
+
+
+
     } else {
       title.textContent = 'Créer un compte'
       if (usernameInput) {
@@ -4244,12 +4232,12 @@ class BackHubApp {
     const usernameInput = document.getElementById('user-username')
     const passwordInput = document.getElementById('user-password')
     const roleSelect = document.getElementById('user-role')
-    
+
     modal.classList.remove('active')
     form.reset()
     delete form.dataset.userId
-    
-    // S'assurer que tous les champs sont réinitialisés et activés
+
+
     if (usernameInput) {
       usernameInput.value = ''
       usernameInput.disabled = false
@@ -4277,7 +4265,7 @@ class BackHubApp {
     const userId = form.dataset.userId
     const submitBtn = form.querySelector('button[type="submit"]')
 
-    // Validation
+
     if (!username) {
       notificationService.error('Le nom d\'utilisateur est requis')
       return
@@ -4293,17 +4281,17 @@ class BackHubApp {
       return
     }
 
-    // Vérifier les permissions pour les développeurs
-    // Les développeurs peuvent tout faire (créer/modifier n'importe quel compte)
-    // Les admins ne peuvent pas créer/modifier des développeurs
+
+
+
     if (this.currentUser?.role !== 'developpeur') {
-      // Si l'utilisateur actuel n'est pas développeur, vérifier les restrictions
+
       if (role === 'developpeur') {
         notificationService.error('Accès refusé - Seuls les développeurs peuvent créer ou modifier des utilisateurs développeurs')
         return
       }
-      
-      // Vérifier aussi lors de la modification d'un utilisateur existant
+
+
     if (userId) {
         const existingUser = await this.getUserById(userId)
         if (existingUser && existingUser.role === 'developpeur') {
@@ -4313,7 +4301,7 @@ class BackHubApp {
       }
     }
 
-    // Désactiver le bouton pendant la sauvegarde
+
     if (submitBtn) {
       submitBtn.disabled = true
       submitBtn.textContent = 'Enregistrement...'
@@ -4321,27 +4309,27 @@ class BackHubApp {
 
     try {
       if (this.useApi && (this.currentUser?.role === 'admin' || this.currentUser?.role === 'developpeur') && this.currentUser.id) {
-        // Utiliser l'API
+
     if (userId) {
-          // Mettre à jour un utilisateur existant
+
           await apiService.updateUser(
             this.currentUser.id,
             userId,
             username,
             role,
-            password || null // Ne mettre à jour le mot de passe que s'il est fourni
+            password || null
           )
           notificationService.success('Utilisateur mis à jour avec succès')
         } else {
-          // Créer un nouvel utilisateur
+
           const newUser = await apiService.register(username, password, role)
           notificationService.success('Utilisateur créé avec succès')
         }
-        
-        // Recharger la liste des utilisateurs depuis l'API
+
+
         await this.renderUsers()
       } else {
-        // Mode local (fallback)
+
         if (userId) {
       const user = this.users.find(u => u.id === userId)
       if (user) {
@@ -4383,59 +4371,57 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Obtenir un utilisateur par son ID
-   */
+
   async getUserById(userId) {
     if (!userId) return null
-    
-    // Si on utilise l'API, chercher dans la liste des utilisateurs chargés
+
+
     if (this.useApi && this.users && Array.isArray(this.users)) {
       return this.users.find(u => u.id === userId.toString() || u.id === userId) || null
     }
-    
-    // Mode local
+
+
     if (this.users && Array.isArray(this.users)) {
       return this.users.find(u => u.id === userId.toString() || u.id === userId) || null
     }
-    
+
     return null
   }
 
   async deleteUser(id) {
     if (!id) return
-    
-    // Récupérer l'utilisateur à supprimer
+
+
     const userToDelete = await this.getUserById(id)
     if (!userToDelete) {
       notificationService.error('Utilisateur introuvable')
       return
     }
-    
-    // Vérifier les permissions : les admins ne peuvent pas supprimer des développeurs
+
+
     if (this.currentUser?.role === 'admin' && userToDelete.role === 'developpeur') {
       notificationService.error('Accès refusé - Les administrateurs ne peuvent pas supprimer des comptes développeurs')
       return
     }
-    
-    // Les développeurs peuvent supprimer n'importe quel compte
-    // Les admins peuvent supprimer les autres comptes (sauf développeurs)
+
+
+
     if (!confirm(`Êtes-vous sûr de vouloir supprimer le compte "${userToDelete.username}" ?`)) {
       return
     }
-    
+
     try {
       if (this.useApi && (this.currentUser?.role === 'admin' || this.currentUser?.role === 'developpeur') && this.currentUser.id) {
-        // Utiliser l'API pour supprimer
+
         await apiService.deleteUser(id)
         notificationService.success('Utilisateur supprimé avec succès')
       } else {
-        // Mode local
+
       this.users = this.users.filter(u => u.id !== id)
         await this.saveUsers()
         notificationService.success('Utilisateur supprimé avec succès')
       }
-      
+
       await this.renderUsers()
     } catch (error) {
       logger.error('Delete user error', error)
@@ -4449,21 +4435,21 @@ class BackHubApp {
       console.warn('users-tbody not found')
       return
     }
-    
-    // Initialiser this.users si vide
+
+
     if (!this.users) {
       this.users = []
     }
-    
-    // Charger les utilisateurs depuis l'API si activé (admin ou développeur)
+
+
     const canLoadUsers = this.useApi && (this.currentUser?.role === 'admin' || this.currentUser?.role === 'developpeur') && this.currentUser.id
-    
+
     if (canLoadUsers) {
       try {
         const usersFromApi = await apiService.getAllUsers()
-        
+
         if (usersFromApi && Array.isArray(usersFromApi)) {
-          // Convertir le format pour compatibilité
+
           this.users = usersFromApi.map(u => ({
             id: u.id ? u.id.toString() : String(Date.now() + Math.random()),
             username: u.username || 'Inconnu',
@@ -4481,7 +4467,7 @@ class BackHubApp {
       }
     } else {
       if (!this.useApi) {
-        // Mode local - charger depuis localStorage si disponible
+
         try {
           const savedUsers = localStorage.getItem('backhub-users')
           if (savedUsers) {
@@ -4493,13 +4479,13 @@ class BackHubApp {
         }
       }
     }
-    
-    // Afficher un message si aucun utilisateur
+
+
     if (!this.users || this.users.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: rgba(255, 255, 255, 0.6);">Aucun utilisateur trouvé</td></tr>'
       return
     }
-    
+
     const userStats = {}
     this.history.forEach(t => {
       if (!userStats[t.user]) {
@@ -4508,11 +4494,11 @@ class BackHubApp {
       userStats[t.user].transactions++
       userStats[t.user].volume += t.totalSell || 0
     })
-    
+
     tbody.innerHTML = this.users.map(user => {
       const date = new Date(user.createdAt)
       const stats = userStats[user.username] || { transactions: 0, volume: 0 }
-      
+
       return `
         <tr>
           <td><strong>${this.escapeHtml(user.username)}</strong></td>
@@ -4550,52 +4536,52 @@ class BackHubApp {
   }
 
   async renderDashboard() {
-    // Recharger les données depuis l'API pour s'assurer que tout est à jour
+
     if (this.useApi && this.currentUser && this.currentUser.id) {
       await this.loadUserDataFromApi(this.currentUser.id)
     }
-    
-    // Afficher la date actuelle
+
+
     const dateElement = document.getElementById('dashboard-current-date')
     if (dateElement) {
       const now = new Date()
-      const dateStr = now.toLocaleDateString('fr-FR', { 
-        weekday: 'long', 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
+      const dateStr = now.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
       })
       dateElement.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1)
     }
 
-    // Calculer les statistiques principales
+
     const totalProfit = this.history.reduce((sum, t) => sum + (t.margin || 0), 0)
     const totalTransactions = this.history.length
     const avgMargin = totalTransactions > 0 ? totalProfit / totalTransactions : 0
     const totalBuy = this.history.reduce((sum, t) => sum + (t.totalBuy || 0), 0)
     const totalSell = this.history.reduce((sum, t) => sum + (t.totalSell || 0), 0)
-    
-    // Calculer le pourcentage de marge moyen
+
+
     const avgMarginPercent = totalBuy > 0 ? ((totalProfit / totalBuy) * 100) : 0
-    
-    // Calculer le nombre total d'items
+
+
     const totalItems = this.history.reduce((sum, t) => {
       return sum + (t.items ? t.items.reduce((itemSum, item) => itemSum + (item.quantity || 0), 0) : 0)
     }, 0)
-    
-    // Trouver la meilleure transaction
-    const bestTransaction = this.history.length > 0 
+
+
+    const bestTransaction = this.history.length > 0
       ? this.history.reduce((best, t) => (t.margin || 0) > (best.margin || 0) ? t : best, this.history[0])
       : null
     const bestMargin = bestTransaction ? (bestTransaction.margin || 0) : 0
 
-    // Mettre à jour les statistiques principales
+
     document.getElementById('dashboard-total-profit').textContent = formatPrice(totalProfit)
     document.getElementById('dashboard-total-transactions').textContent = totalTransactions.toString()
     document.getElementById('dashboard-avg-margin').textContent = formatPrice(avgMargin)
     document.getElementById('dashboard-total-buy').textContent = formatPrice(totalBuy)
-    
-    // Mettre à jour les statistiques avancées
+
+
     const totalSellEl = document.getElementById('dashboard-total-sell')
     if (totalSellEl) totalSellEl.textContent = formatPrice(totalSell)
     const totalSellAdvancedEl = document.getElementById('dashboard-total-sell-advanced')
@@ -4604,11 +4590,11 @@ class BackHubApp {
     document.getElementById('dashboard-best-margin').textContent = formatPrice(bestMargin)
     document.getElementById('dashboard-total-items').textContent = totalItems.toString()
 
-    // Afficher les transactions récentes (5 dernières)
+
     const recentContainer = document.getElementById('dashboard-recent-transactions')
     if (recentContainer) {
       const recentTransactions = this.history.slice(-5).reverse()
-      
+
       if (recentTransactions.length === 0) {
         recentContainer.innerHTML = `
           <div class="empty-state-modern">
@@ -4620,13 +4606,13 @@ class BackHubApp {
       } else {
         recentContainer.innerHTML = recentTransactions.map((transaction, index) => {
           const date = new Date(transaction.date)
-          const dateStr = date.toLocaleDateString('fr-FR', { 
-            day: '2-digit', 
+          const dateStr = date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
             month: '2-digit',
             hour: '2-digit',
             minute: '2-digit'
           })
-          const itemsText = transaction.items 
+          const itemsText = transaction.items
             ? transaction.items.map(i => `${i.name}${i.quantity > 1 ? ` (x${i.quantity})` : ''}`).join(', ')
             : 'N/A'
           return `
@@ -4644,13 +4630,13 @@ class BackHubApp {
       }
     }
 
-    // Afficher les meilleures transactions (top 5)
+
     const topContainer = document.getElementById('dashboard-top-transactions')
     if (topContainer) {
       const topTransactions = [...this.history]
         .sort((a, b) => (b.margin || 0) - (a.margin || 0))
         .slice(0, 5)
-      
+
       if (topTransactions.length === 0) {
         topContainer.innerHTML = `
           <div class="empty-state-modern">
@@ -4662,13 +4648,13 @@ class BackHubApp {
       } else {
         topContainer.innerHTML = topTransactions.map((transaction, index) => {
           const date = new Date(transaction.date)
-          const dateStr = date.toLocaleDateString('fr-FR', { 
-            day: '2-digit', 
+          const dateStr = date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
             month: '2-digit',
             hour: '2-digit',
             minute: '2-digit'
           })
-          const itemsText = transaction.items 
+          const itemsText = transaction.items
             ? transaction.items.map(i => `${i.name}${i.quantity > 1 ? ` (x${i.quantity})` : ''}`).join(', ')
             : 'N/A'
           const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : ''
@@ -4688,26 +4674,26 @@ class BackHubApp {
       }
     }
 
-    // Gérer les clics sur les boutons d'action rapide
+
     document.querySelectorAll('.quick-action-btn').forEach(btn => {
       if (!btn.dataset.listenerAttached) {
         btn.dataset.listenerAttached = 'true'
-        
+
         btn.addEventListener('click', (e) => {
           const view = btn.dataset.view
           const calcType = btn.dataset.calcType
-          
+
           if (view) {
             this.switchView(view)
-            
-            // Mettre à jour la navigation active
+
+
             document.querySelectorAll('.nav-item').forEach(nav => {
               if (nav.id !== 'logout-btn' && nav.id !== 'settings-btn') {
                 nav.classList.remove('active')
               }
             })
-            
-            // Activer le bon élément de navigation
+
+
             if (view === 'calculator' && calcType) {
               const navItem = document.querySelector(`.nav-item[data-view="calculator"][data-calc-type="${calcType}"]`)
               if (navItem) navItem.classList.add('active')
@@ -4715,8 +4701,8 @@ class BackHubApp {
               const navItem = document.querySelector(`.nav-item[data-view="${view}"]`)
               if (navItem) navItem.classList.add('active')
             }
-            
-            // Si c'est le calculateur, changer le type
+
+
             if (view === 'calculator' && calcType) {
               this.currentCalcType = calcType
               this.switchCalculatorType(calcType)
@@ -4726,7 +4712,7 @@ class BackHubApp {
       }
     })
 
-    // Gérer le bouton "Tout voir" dans les transactions récentes
+
     const seeAllBtn = document.querySelector('.modern-card-action[data-view="history"]')
     if (seeAllBtn && !seeAllBtn.dataset.listenerAttached) {
       seeAllBtn.dataset.listenerAttached = 'true'
@@ -4744,32 +4730,32 @@ class BackHubApp {
   }
 
   async renderAdminDashboard() {
-    // Recharger les données depuis l'API pour s'assurer que tout est à jour
+
     if (this.useApi && this.currentUser && this.currentUser.id) {
       await this.loadUserDataFromApi(this.currentUser.id)
     }
-    
-    // Afficher/masquer l'onglet feedbacks selon le rôle
+
+
     this.updateAdminTabsVisibility()
-    
+
     this.initAdminTabs()
     await this.calculateStats()
     await this.renderUsers()
     this.renderCharts()
     await this.renderPriceAnalysis()
-    
-    // Initialiser les feedbacks si l'onglet est actif
+
+
     const feedbacksTab = document.querySelector('.admin-tab[data-tab="feedbacks"]')
     if (feedbacksTab && feedbacksTab.classList.contains('active')) {
       this.initAdminFeedbacks()
       await this.loadAdminFeedbacks()
     }
-    
+
     const refreshBtn = document.getElementById('refresh-stats-btn')
     if (refreshBtn && !refreshBtn.dataset.listenerAttached) {
       refreshBtn.dataset.listenerAttached = 'true'
       refreshBtn.addEventListener('click', async () => {
-        // Recharger les données depuis l'API avant de recalculer
+
         if (this.useApi && this.currentUser && this.currentUser.id) {
           await this.loadUserDataFromApi(this.currentUser.id)
         }
@@ -4781,19 +4767,17 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Mettre à jour la visibilité des onglets admin selon le rôle
-   */
+
   updateAdminTabsVisibility() {
     if (!this.currentUser) {
       return
     }
-    
+
     const feedbacksTab = document.querySelector('.admin-nav-tab[data-tab="feedbacks"]')
     if (!feedbacksTab) {
       return
     }
-    
+
     if (this.currentUser.role === 'developpeur') {
       feedbacksTab.style.display = 'flex'
       feedbacksTab.style.visibility = 'visible'
@@ -4807,16 +4791,16 @@ class BackHubApp {
   initAdminTabs() {
     const tabs = document.querySelectorAll('.admin-nav-tab')
     const contents = document.querySelectorAll('.admin-tab-content')
-    
+
     tabs.forEach(tab => {
       if (!tab.dataset.listenerAttached) {
         tab.dataset.listenerAttached = 'true'
         tab.addEventListener('click', () => {
           const targetTab = tab.dataset.tab
-          
+
           tabs.forEach(t => t.classList.remove('active'))
           contents.forEach(c => c.classList.remove('active'))
-          
+
           tab.classList.add('active')
           const targetContent = document.getElementById(`admin-${targetTab}`)
           if (targetContent) {
@@ -4835,9 +4819,7 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Initialiser les filtres et boutons pour les feedbacks admin
-   */
+
   initAdminFeedbacks() {
     const statusFilter = document.getElementById('feedback-filter-status')
     const typeFilter = document.getElementById('feedback-filter-type')
@@ -4865,14 +4847,12 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Charger les feedbacks pour l'admin
-   */
+
   async loadAdminFeedbacks() {
     const feedbacksList = document.getElementById('admin-feedbacks-list')
     if (!feedbacksList) return
 
-    // Vérifier que l'utilisateur est développeur
+
     if (!this.currentUser || this.currentUser.role !== 'developpeur') {
       feedbacksList.innerHTML = '<div class="error-message">Accès refusé - Développeur seulement</div>'
       return
@@ -4902,9 +4882,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Rendre la liste des feedbacks pour l'admin
-   */
+
   renderAdminFeedbacks(feedbacks) {
     const feedbacksList = document.getElementById('admin-feedbacks-list')
     if (!feedbacksList) return
@@ -5026,7 +5004,7 @@ class BackHubApp {
       `
     }).join('')
 
-    // Attacher les listeners pour les changements de statut
+
     feedbacksList.querySelectorAll('.admin-feedback-status-select').forEach(select => {
       select.addEventListener('change', async (e) => {
         const feedbackId = parseInt(e.target.dataset.feedbackId)
@@ -5039,15 +5017,15 @@ class BackHubApp {
       })
     })
 
-    // Attacher les listeners pour les boutons de réponse
+
     feedbacksList.querySelectorAll('.admin-feedback-response-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const feedbackId = parseInt(btn.dataset.feedbackId)
         const title = btn.dataset.feedbackTitle
         const currentResponse = btn.dataset.feedbackResponse
         const feedbackCard = btn.closest('.admin-feedback-card-modern')
-        
-        // Extraire les données du feedback depuis la carte
+
+
         let feedbackData = null
         if (feedbackCard) {
           const typeBadge = feedbackCard.querySelector('.admin-feedback-type-badge')
@@ -5057,7 +5035,7 @@ class BackHubApp {
           const usernameEl = feedbackCard.querySelectorAll('.admin-feedback-meta-value')[0]
           const dateEl = feedbackCard.querySelectorAll('.admin-feedback-meta-value')[1]
           const descEl = feedbackCard.querySelector('.admin-feedback-description-modern')
-          
+
           feedbackData = {
             type: type,
             username: usernameEl?.textContent || 'Inconnu',
@@ -5065,12 +5043,12 @@ class BackHubApp {
             description: descEl?.textContent || ''
           }
         }
-        
+
         this.openFeedbackResponseModal(feedbackId, title, currentResponse, feedbackData)
       })
     })
 
-    // Attacher les listeners pour les boutons de suppression
+
     feedbacksList.querySelectorAll('.admin-feedback-delete-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const feedbackId = parseInt(btn.dataset.feedbackId)
@@ -5082,16 +5060,14 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Supprimer un feedback (développeur seulement)
-   */
+
   async deleteFeedback(feedbackId) {
     if (!this.useApi || !this.currentUser) {
       notificationService.error('Impossible de supprimer le feedback en mode hors ligne')
       return
     }
 
-    // Vérifier que l'utilisateur est développeur
+
     if (this.currentUser.role !== 'developpeur') {
       notificationService.error('Accès refusé - Développeur seulement')
       return
@@ -5111,9 +5087,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Mettre à jour le statut d'un feedback
-   */
+
   async updateFeedbackStatus(feedbackId, status) {
     if (!this.useApi || !this.currentUser) {
       notificationService.error('Impossible de mettre à jour le statut en mode hors ligne')
@@ -5134,11 +5108,9 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Ouvrir le modal pour répondre à un feedback
-   */
+
   openFeedbackResponseModal(feedbackId, title, currentResponse = '', feedbackData = null) {
-    // Récupérer les données du feedback depuis la liste si disponibles
+
     if (!feedbackData) {
       const feedbackCard = document.querySelector(`[data-feedback-id="${feedbackId}"]`)
       if (feedbackCard) {
@@ -5146,7 +5118,7 @@ class BackHubApp {
         const usernameEl = feedbackCard.querySelector('.admin-feedback-meta-value')
         const dateEl = feedbackCard.querySelectorAll('.admin-feedback-meta-value')[1]
         const descEl = feedbackCard.querySelector('.admin-feedback-description-modern')
-        
+
         feedbackData = {
           type: feedbackCard.querySelector('.admin-feedback-type-badge')?.classList.contains('admin-feedback-type-bug') ? 'bug' :
                  feedbackCard.querySelector('.admin-feedback-type-badge')?.classList.contains('admin-feedback-type-suggestion') ? 'suggestion' :
@@ -5166,7 +5138,7 @@ class BackHubApp {
     }
     const config = typeConfig[feedbackData?.type || 'other'] || typeConfig.other
 
-    // Créer un modal professionnel et moderne
+
     const modal = document.createElement('div')
     modal.className = 'feedback-response-modal-overlay'
     modal.id = 'feedback-response-modal'
@@ -5250,10 +5222,10 @@ class BackHubApp {
               <span class="feedback-response-form-label">Votre réponse</span>
             </div>
             <div class="feedback-response-form-field">
-              <textarea 
-                id="feedback-response-text" 
-                class="feedback-response-textarea" 
-                rows="10" 
+              <textarea
+                id="feedback-response-text"
+                class="feedback-response-textarea"
+                rows="10"
                 placeholder="Rédigez votre réponse ici... Assurez-vous d'être clair, professionnel et de répondre à toutes les questions soulevées.">${this.escapeHtml(currentResponse)}</textarea>
               <div class="feedback-response-field-footer">
                 <div class="feedback-response-field-hint">
@@ -5285,14 +5257,14 @@ class BackHubApp {
       </div>
     `
 
-    // Fermer le modal
+
     const closeBtn = modal.querySelector('#feedback-response-modal-close')
     const cancelBtn = modal.querySelector('#cancel-feedback-response-btn')
     const saveBtn = modal.querySelector('#save-feedback-response-btn')
     const textarea = modal.querySelector('#feedback-response-text')
     const charCount = modal.querySelector('#feedback-response-char-count')
 
-    // Mettre à jour le compteur de caractères
+
     const updateCharCount = () => {
       if (charCount && textarea) {
         const count = textarea.value.length
@@ -5300,7 +5272,7 @@ class BackHubApp {
       }
     }
 
-    // Initialiser le compteur
+
     if (textarea && charCount) {
       updateCharCount()
       textarea.addEventListener('input', updateCharCount)
@@ -5328,27 +5300,25 @@ class BackHubApp {
       })
     }
 
-    // Sauvegarder la réponse
+
     saveBtn?.addEventListener('click', async () => {
       const responseText = document.getElementById('feedback-response-text')?.value.trim() || ''
       await this.saveFeedbackResponse(feedbackId, responseText)
       closeModal()
     })
 
-    // Focus sur le textarea
+
     if (textarea) {
       setTimeout(() => {
         textarea.focus()
       }, 100)
     }
 
-    // Empêcher le scroll du body
+
     document.body.style.overflow = 'hidden'
   }
 
-  /**
-   * Sauvegarder la réponse à un feedback
-   */
+
   async saveFeedbackResponse(feedbackId, response) {
     if (!this.useApi || !this.currentUser) {
       notificationService.error('Impossible d\'enregistrer la réponse en mode hors ligne')
@@ -5356,7 +5326,7 @@ class BackHubApp {
     }
 
     try {
-      // Mettre à jour le statut en "resolved" si ce n'est pas déjà le cas
+
       const result = await apiService.updateFeedbackStatus(feedbackId, 'resolved', response)
       if (result && result.success) {
         notificationService.success('Réponse enregistrée avec succès')
@@ -5372,14 +5342,14 @@ class BackHubApp {
 
   calculateStats() {
     const stats = this.getMarketStats()
-    
+
     const totalEl = document.getElementById('stat-total-transactions')
     const usersEl = document.getElementById('stat-active-users')
     const buyEl = document.getElementById('stat-total-buy')
     const sellEl = document.getElementById('stat-total-sell')
     const marginEl = document.getElementById('stat-total-margin')
     const avgEl = document.getElementById('stat-avg-margin')
-    
+
     if (totalEl) totalEl.textContent = stats.totalTransactions
     if (usersEl) usersEl.textContent = stats.activeUsers
     if (buyEl) buyEl.textContent = this.formatPrice(stats.totalBuy)
@@ -5395,7 +5365,7 @@ class BackHubApp {
     const totalSell = this.history.reduce((sum, t) => sum + (t.totalSell || 0), 0)
     const totalMargin = totalSell - totalBuy
     const avgMargin = totalTransactions > 0 ? totalMargin / totalTransactions : 0
-    
+
     return {
       totalTransactions,
       activeUsers,
@@ -5411,7 +5381,7 @@ class BackHubApp {
       setTimeout(() => this.renderCharts(), 100)
       return
     }
-    
+
     this.renderTransactionsTimeline()
     this.renderUsersDistribution()
     this.renderVolumeTimeline()
@@ -5427,7 +5397,7 @@ class BackHubApp {
   renderTransactionsTimeline() {
     const ctx = document.getElementById('chart-transactions-timeline')
     if (!ctx) return
-    
+
     const last7Days = this.getLast7Days()
     const data = last7Days.map(date => {
       return this.history.filter(t => {
@@ -5435,11 +5405,11 @@ class BackHubApp {
         return tDate === date.toDateString()
       }).length
     })
-    
+
     if (this.chartTransactionsTimeline) {
       this.chartTransactionsTimeline.destroy()
     }
-    
+
     this.chartTransactionsTimeline = new Chart(ctx, {
       type: 'line',
       data: {
@@ -5487,7 +5457,7 @@ class BackHubApp {
   renderUsersDistribution() {
     const ctx = document.getElementById('chart-users-distribution')
     if (!ctx) return
-    
+
     const userStats = {}
     this.history.forEach(t => {
       if (!userStats[t.user]) {
@@ -5495,14 +5465,14 @@ class BackHubApp {
       }
       userStats[t.user]++
     })
-    
+
     const labels = Object.keys(userStats)
     const data = Object.values(userStats)
-    
+
     if (this.chartUsersDistribution) {
       this.chartUsersDistribution.destroy()
     }
-    
+
     this.chartUsersDistribution = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -5539,7 +5509,7 @@ class BackHubApp {
   renderVolumeTimeline() {
     const ctx = document.getElementById('chart-volume-timeline')
     if (!ctx) return
-    
+
     const last7Days = this.getLast7Days()
     const buyData = last7Days.map(date => {
       return this.history.filter(t => {
@@ -5547,18 +5517,18 @@ class BackHubApp {
         return tDate === date.toDateString()
       }).reduce((sum, t) => sum + (t.totalBuy || 0), 0)
     })
-    
+
     const sellData = last7Days.map(date => {
       return this.history.filter(t => {
         const tDate = new Date(t.date).toDateString()
         return tDate === date.toDateString()
       }).reduce((sum, t) => sum + (t.totalSell || 0), 0)
     })
-    
+
     if (this.chartVolumeTimeline) {
       this.chartVolumeTimeline.destroy()
     }
-    
+
     this.chartVolumeTimeline = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -5616,7 +5586,7 @@ class BackHubApp {
   renderTopItems() {
     const ctx = document.getElementById('chart-top-items')
     if (!ctx) return
-    
+
     const itemStats = {}
     this.history.forEach(t => {
       if (t.items && Array.isArray(t.items)) {
@@ -5630,18 +5600,18 @@ class BackHubApp {
         })
       }
     })
-    
+
     const sorted = Object.entries(itemStats)
       .sort((a, b) => b[1].quantity - a[1].quantity)
       .slice(0, 10)
-    
+
     const labels = sorted.map(([name]) => name)
     const data = sorted.map(([, stats]) => stats.quantity)
-    
+
     if (this.chartTopItems) {
       this.chartTopItems.destroy()
     }
-    
+
     this.chartTopItems = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -5689,7 +5659,7 @@ class BackHubApp {
   renderMarginDistribution() {
     const ctx = document.getElementById('chart-margin-distribution')
     if (!ctx) return
-    
+
     const margins = this.history.map(t => t.margin || 0)
     const ranges = [
       { label: '< 0 €', min: -Infinity, max: 0 },
@@ -5698,16 +5668,16 @@ class BackHubApp {
       { label: '5000-10000 €', min: 5000, max: 10000 },
       { label: '> 10000 €', min: 10000, max: Infinity }
     ]
-    
+
     const data = ranges.map(range => {
       return margins.filter(m => m >= range.min && m < range.max).length
     })
     const labels = ranges.map(r => r.label)
-    
+
     if (this.chartMarginDistribution) {
       this.chartMarginDistribution.destroy()
     }
-    
+
     this.chartMarginDistribution = new Chart(ctx, {
       type: 'pie',
       data: {
@@ -5741,7 +5711,7 @@ class BackHubApp {
   renderCategoryDistribution() {
     const ctx = document.getElementById('chart-category-distribution')
     if (!ctx) return
-    
+
     const categoryStats = {}
     this.history.forEach(t => {
       if (t.items && Array.isArray(t.items)) {
@@ -5754,14 +5724,14 @@ class BackHubApp {
         })
       }
     })
-    
+
     const labels = Object.keys(categoryStats)
     const data = Object.values(categoryStats)
-    
+
     if (this.chartCategoryDistribution) {
       this.chartCategoryDistribution.destroy()
     }
-    
+
     this.chartCategoryDistribution = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -5798,18 +5768,18 @@ class BackHubApp {
   renderPriceBalance() {
     const ctx = document.getElementById('chart-price-balance')
     if (!ctx) return
-    
+
     const itemStats = this.getItemPriceStats()
     const top20 = itemStats.slice(0, 20)
-    
+
     const labels = top20.map(item => item.name)
     const buyPrices = top20.map(item => item.buyPrice)
     const sellPrices = top20.map(item => item.sellPrice)
-    
+
     if (this.chartPriceBalance) {
       this.chartPriceBalance.destroy()
     }
-    
+
     this.chartPriceBalance = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -5868,19 +5838,19 @@ class BackHubApp {
   renderMarginRatio() {
     const ctx = document.getElementById('chart-margin-ratio')
     if (!ctx) return
-    
+
     const itemStats = this.getItemPriceStats()
     const top15 = itemStats.slice(0, 15)
-    
+
     const labels = top15.map(item => item.name)
     const ratios = top15.map(item => {
       return item.buyPrice > 0 ? ((item.sellPrice - item.buyPrice) / item.buyPrice * 100) : 0
     })
-    
+
     if (this.chartMarginRatio) {
       this.chartMarginRatio.destroy()
     }
-    
+
     this.chartMarginRatio = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -5930,7 +5900,7 @@ class BackHubApp {
   renderUserActivity() {
     const ctx = document.getElementById('chart-user-activity')
     if (!ctx) return
-    
+
     const userStats = {}
     this.history.forEach(t => {
       if (!userStats[t.user]) {
@@ -5938,15 +5908,15 @@ class BackHubApp {
       }
       userStats[t.user]++
     })
-    
+
     const sorted = Object.entries(userStats).sort((a, b) => b[1] - a[1])
     const labels = sorted.map(([user]) => user)
     const data = sorted.map(([, count]) => count)
-    
+
     if (this.chartUserActivity) {
       this.chartUserActivity.destroy()
     }
-    
+
     this.chartUserActivity = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -5993,7 +5963,7 @@ class BackHubApp {
   renderUserPerformance() {
     const ctx = document.getElementById('chart-user-performance')
     if (!ctx) return
-    
+
     const userStats = {}
     this.history.forEach(t => {
       if (!userStats[t.user]) {
@@ -6002,18 +5972,18 @@ class BackHubApp {
       userStats[t.user].margin += t.margin || 0
       userStats[t.user].transactions++
     })
-    
+
     const sorted = Object.entries(userStats)
       .sort((a, b) => b[1].margin - a[1].margin)
       .slice(0, 10)
-    
+
     const labels = sorted.map(([user]) => user)
     const margins = sorted.map(([, stats]) => stats.margin)
-    
+
     if (this.chartUserPerformance) {
       this.chartUserPerformance.destroy()
     }
-    
+
     this.chartUserPerformance = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -6063,7 +6033,7 @@ class BackHubApp {
   getItemPriceStats() {
     const itemMap = {}
     const itemsData = this.getItemsData()
-    
+
     Object.keys(itemsData).forEach(category => {
       itemsData[category].forEach(item => {
         const key = item.name
@@ -6079,7 +6049,7 @@ class BackHubApp {
         }
       })
     })
-    
+
     this.history.forEach(t => {
       if (t.items && Array.isArray(t.items)) {
         t.items.forEach(item => {
@@ -6091,7 +6061,7 @@ class BackHubApp {
         })
       }
     })
-    
+
     return Object.values(itemMap)
       .filter(item => item.quantity > 0)
       .sort((a, b) => b.volume - a.volume)
@@ -6102,11 +6072,11 @@ class BackHubApp {
     const header = document.getElementById('price-analysis-header')
     const modeIndicator = document.getElementById('price-stats-mode')
     if (!tbody) return
-    
-    // Si admin et API activée, afficher les statistiques globales
+
+
     if (this.currentUser?.role === 'admin' && this.useApi && this.currentUser.id) {
       try {
-        // Modifier l'en-tête du tableau
+
         if (header) {
           header.innerHTML = `
             <th>Item</th>
@@ -6119,9 +6089,9 @@ class BackHubApp {
         if (modeIndicator) {
           modeIndicator.textContent = '(Vue globale - Tous les utilisateurs)'
         }
-        
+
         const stats = await apiService.getGlobalPriceStats(this.currentUser.id)
-        
+
         if (stats && stats.length > 0) {
           tbody.innerHTML = stats.map(stat => {
             return `
@@ -6156,8 +6126,8 @@ class BackHubApp {
         tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erreur lors du chargement des statistiques</td></tr>'
       }
     } else {
-      // Mode normal : statistiques basées sur l'historique local
-      // Restaurer l'en-tête original
+
+
       if (header) {
         header.innerHTML = `
           <th>Item</th>
@@ -6173,13 +6143,13 @@ class BackHubApp {
       if (modeIndicator) {
         modeIndicator.textContent = ''
       }
-    
+
     const itemStats = this.getItemPriceStats()
-    
+
     tbody.innerHTML = itemStats.map(item => {
       const margin = item.sellPrice - item.buyPrice
       const marginPercent = item.buyPrice > 0 ? ((margin / item.buyPrice) * 100).toFixed(2) : 0
-      
+
       return `
         <tr>
           <td><strong>${this.escapeHtml(item.name)}</strong></td>
@@ -6209,17 +6179,17 @@ class BackHubApp {
 
   async saveHistory() {
     try {
-      // Si l'API est activée, ne PAS sauvegarder en localStorage
-      // Les données doivent être uniquement en base de données
+
+
       if (this.useApi) {
-        // Ne rien sauvegarder localement si l'API est activée
+
         return
       }
-      
-      // Sauvegarder en localStorage seulement si l'API n'est pas activée
+
+
       localStorage.setItem('backhub-history', JSON.stringify(this.history))
 
-      // Si l'API n'est pas activée, sauvegarder aussi dans SQLite si disponible
+
       if (!this.useApi && window.electronAPI && window.electronAPI.dbExec) {
         for (const entry of this.history) {
           try {
@@ -6242,7 +6212,7 @@ class BackHubApp {
       }
     } catch (error) {
       logger.error('Failed to save history', error)
-      // Tentative de fallback
+
       try {
       localStorage.setItem('backhub-history', JSON.stringify(this.history))
       } catch (e) {
@@ -6253,30 +6223,30 @@ class BackHubApp {
 
   async loadHistory() {
     try {
-      // Si l'API est activée et qu'on a un utilisateur, charger depuis l'API
+
       if (this.useApi && this.currentUser && this.currentUser.id) {
         try {
           const transactions = await apiService.getUserHistory(this.currentUser.id, 1000)
-          // Normaliser le format des transactions retournées par l'API
+
           return transactions.map(t => ({
             id: t.id || t.transaction_id || Date.now().toString(),
             date: t.date || t.created_at || new Date().toISOString(),
             user: t.user || t.username || this.currentUser.username,
-            items: Array.isArray(t.items) ? t.items : 
+            items: Array.isArray(t.items) ? t.items :
                    (typeof t.items === 'string' ? JSON.parse(t.items) : []),
             totalBuy: t.total_buy || t.totalBuy || 0,
             totalSell: t.total_sell || t.totalSell || 0,
-            margin: t.margin !== undefined ? t.margin : 
+            margin: t.margin !== undefined ? t.margin :
                     ((t.total_sell || t.totalSell || 0) - (t.total_buy || t.totalBuy || 0))
           }))
         } catch (apiError) {
-          // Logger sans notification - on va utiliser le fallback
+
           logger.error('Failed to load history from API', apiError, {}, false)
-          // Fallback sur localStorage
+
         }
       }
 
-      // Fallback sur SQLite si disponible
+
       if (window.electronAPI && window.electronAPI.dbQuery) {
         try {
           const results = await window.electronAPI.dbQuery('SELECT * FROM history ORDER BY date DESC')
@@ -6296,11 +6266,11 @@ class BackHubApp {
         }
       }
 
-      // Fallback sur localStorage
+
       const data = localStorage.getItem('backhub-history')
       if (data) {
         const parsed = JSON.parse(data)
-        // S'assurer que toutes les transactions ont le bon format
+
         return Array.isArray(parsed) ? parsed.map(t => ({
           id: t.id || Date.now().toString(),
           date: t.date || new Date().toISOString(),
@@ -6345,33 +6315,33 @@ class BackHubApp {
   }
 
   getItemsData() {
-    // Utiliser le cache si disponible et si les overrides n'ont pas changé
+
     if (this.itemsCache && !this._priceOverridesChanged) {
       return this.itemsCache
     }
 
-    // Créer une copie shallow pour éviter le deep clone coûteux
+
     const base = {}
     const overrides = this.priceOverrides || {}
 
     Object.keys(ITEMS_DATA || {}).forEach(category => {
       base[category] = ITEMS_DATA[category].map(item => {
-        // Utiliser la même clé que lors de la sauvegarde
+
         const itemId = `${category}::${item.name}`
         const buyPriceKey = `${itemId}::buyPrice`
         const key = this.itemKey(category, item.name)
-        
-        // Chercher le prix personnalisé dans l'ordre : buyPriceKey (clé principale), key (ancienne clé), puis prix par défaut
+
+
         const customPrice = overrides[buyPriceKey] ?? overrides[key] ?? item.buyPrice
-        
-        // Retourner un nouvel objet seulement si nécessaire
+
+
         if (customPrice !== item.buyPrice) {
           return { ...item, buyPrice: customPrice }
         }
         return item
       })
     })
-    
+
     this.itemsCache = base
     this._priceOverridesChanged = false
     return this.itemsCache
@@ -6388,15 +6358,15 @@ class BackHubApp {
 
   async loadPriceOverrides() {
     try {
-      // Déterminer la clé de stockage
+
       let storageKey
       let tempKey = null
-      
+
       if (this.currentUser && this.currentUser.id) {
-        // Utiliser l'ID de l'utilisateur pour créer une clé unique
+
         storageKey = `backhub-price-overrides-${this.currentUser.id}`
       } else {
-        // Si aucun utilisateur n'est connecté, essayer de charger depuis la session sauvegardée
+
         const savedSession = localStorage.getItem('savedSession')
         if (savedSession) {
           try {
@@ -6407,18 +6377,18 @@ class BackHubApp {
               storageKey = `backhub-price-overrides-temp-${sessionData.username}`
             }
           } catch (e) {
-            // Ignorer l'erreur
+
           }
         }
-        
-        // Toujours vérifier la clé temporaire aussi
+
+
         tempKey = 'backhub-price-overrides-temp'
       }
-      
-      // Les prix d'achat sont stockés uniquement en localStorage (pas en BDD)
-      // Car ils sont uniques à chaque joueur
-      
-      // Essayer d'abord avec la clé principale
+
+
+
+
+
       if (storageKey) {
         try {
           const data = await storageService.load(storageKey, null)
@@ -6429,8 +6399,8 @@ class BackHubApp {
         } catch (storageError) {
           logger.warn('Failed to load from storageService, trying localStorage', storageError)
         }
-        
-        // Fallback vers localStorage
+
+
         const localData = localStorage.getItem(storageKey)
         if (localData) {
           try {
@@ -6444,8 +6414,8 @@ class BackHubApp {
           }
         }
       }
-      
-      // Si on n'a rien trouvé et qu'il y a une clé temporaire, essayer celle-ci
+
+
       if (tempKey && storageKey !== tempKey) {
         const tempData = localStorage.getItem(tempKey)
         if (tempData) {
@@ -6453,7 +6423,7 @@ class BackHubApp {
             const parsed = JSON.parse(tempData)
             if (parsed && Object.keys(parsed).length > 0) {
               logger.info('Loaded price overrides from temp storage', { tempKey, count: Object.keys(parsed).length })
-              // Migrer vers la clé principale si un utilisateur est connecté
+
               if (this.currentUser && this.currentUser.id) {
                 const mainKey = `backhub-price-overrides-${this.currentUser.id}`
                 localStorage.setItem(mainKey, tempData)
@@ -6467,7 +6437,7 @@ class BackHubApp {
           }
         }
       }
-      
+
       return {}
     } catch (error) {
       logger.error('Failed to load price overrides', error)
@@ -6477,14 +6447,14 @@ class BackHubApp {
 
   async savePriceOverrides() {
     try {
-      // Déterminer la clé de stockage
+
       let storageKey
       if (this.currentUser && this.currentUser.id) {
-        // Utiliser l'ID de l'utilisateur pour créer une clé unique
+
         storageKey = `backhub-price-overrides-${this.currentUser.id}`
       } else {
-        // Si aucun utilisateur n'est connecté, utiliser une clé temporaire
-        // qui sera migrée lors de la connexion
+
+
         const savedSession = localStorage.getItem('savedSession')
         if (savedSession) {
           try {
@@ -6492,23 +6462,23 @@ class BackHubApp {
             if (sessionData.userId) {
               storageKey = `backhub-price-overrides-${sessionData.userId}`
             } else {
-              // Fallback : utiliser le nom d'utilisateur si disponible
+
               storageKey = `backhub-price-overrides-temp-${sessionData.username || 'guest'}`
             }
           } catch (e) {
-            // Si on ne peut pas parser la session, utiliser une clé temporaire
+
             storageKey = 'backhub-price-overrides-temp'
           }
         } else {
-          // Dernier recours : clé temporaire
+
           storageKey = 'backhub-price-overrides-temp'
         }
       }
-      
-      // Sauvegarder dans localStorage
+
+
       localStorage.setItem(storageKey, JSON.stringify(this.priceOverrides))
-      
-      // Sauvegarder aussi via storageService si disponible (pour compatibilité)
+
+
       if (storageService) {
         try {
           await storageService.save(storageKey, this.priceOverrides)
@@ -6516,14 +6486,14 @@ class BackHubApp {
           logger.warn('Failed to save via storageService, using localStorage only', storageError)
         }
       }
-      
+
       const userId = this.currentUser?.id || 'temp'
       logger.info('Saved price overrides', { userId, storageKey, count: Object.keys(this.priceOverrides).length })
     } catch (error) {
       logger.error('Failed to save price overrides', error)
-      // Tentative de fallback
+
       try {
-        const fallbackKey = this.currentUser?.id 
+        const fallbackKey = this.currentUser?.id
           ? `backhub-price-overrides-${this.currentUser.id}`
           : 'backhub-price-overrides-temp'
         localStorage.setItem(fallbackKey, JSON.stringify(this.priceOverrides))
@@ -6555,28 +6525,26 @@ class BackHubApp {
     return escapeHtml(text)
   }
 
-  /**
-   * Afficher le modal de bienvenue pour les nouveaux utilisateurs
-   */
+
   showWelcomeModal() {
-    // Vérifier si le modal a déjà été affiché pour cet utilisateur
+
     if (!this.currentUser || !this.currentUser.id) {
       return
     }
 
     const welcomeKey = `backhub-welcome-shown-${this.currentUser.id}`
     const hasSeenWelcome = localStorage.getItem(welcomeKey)
-    
+
     if (hasSeenWelcome) {
-      return // L'utilisateur a déjà vu le message
+      return
     }
 
-    // Créer le modal
+
     const modal = document.createElement('div')
     modal.className = 'modal active'
     modal.id = 'welcome-modal'
     modal.style.zIndex = '100001'
-    
+
     modal.innerHTML = `
       <div class="modal-content" style="max-width: 700px; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);">
         <!-- Header avec gradient -->
@@ -6749,19 +6717,19 @@ class BackHubApp {
         </div>
       </div>
     `
-    
+
     document.body.appendChild(modal)
-    
+
     const closeBtn = document.getElementById('welcome-modal-close')
     const understandBtn = document.getElementById('welcome-understand-btn')
-    
+
     const closeModal = () => {
-      // Marquer comme vu dans localStorage
+
       localStorage.setItem(welcomeKey, 'true')
       modal.remove()
       document.body.style.overflow = ''
     }
-    
+
     if (closeBtn) {
       closeBtn.addEventListener('click', closeModal)
       closeBtn.addEventListener('mouseenter', () => {
@@ -6771,12 +6739,12 @@ class BackHubApp {
         closeBtn.style.background = 'rgba(255, 255, 255, 0.2)'
       })
     }
-    
+
     if (understandBtn) {
       understandBtn.addEventListener('click', closeModal)
     }
-    
-    // Fermer avec Escape
+
+
     const handleEscape = (e) => {
       if (e.key === 'Escape' && modal.parentElement) {
         closeModal()
@@ -6784,30 +6752,27 @@ class BackHubApp {
       }
     }
     document.addEventListener('keydown', handleEscape)
-    
-    // Empêcher la fermeture en cliquant à l'extérieur
+
+
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         e.stopPropagation()
       }
     })
-    
-    // Bloquer le scroll
+
+
     document.body.style.overflow = 'hidden'
   }
 
-  /**
-   * Ouvrir un modal pour demander le nom du vendeur
-   * @returns {Promise<string|null>} - Le nom du vendeur, '' si passé, ou null si annulé
-   */
+
   openSellerNameModal() {
     return new Promise((resolve) => {
-      // Créer le modal
+
       const modal = document.createElement('div')
       modal.className = 'modal active'
       modal.id = 'seller-name-modal'
       modal.style.zIndex = '100000'
-      
+
       modal.innerHTML = `
         <div class="modal-content" style="max-width: 400px;">
           <div class="modal-header">
@@ -6827,47 +6792,47 @@ class BackHubApp {
           </div>
         </div>
       `
-      
+
       document.body.appendChild(modal)
-      
+
       const input = document.getElementById('seller-name-input')
       const saveBtn = document.getElementById('seller-name-save')
       const skipBtn = document.getElementById('seller-name-skip')
       const cancelBtn = document.getElementById('seller-name-cancel')
       const closeBtn = document.getElementById('seller-name-modal-close')
-      
-      // S'assurer que l'input est focusable et peut recevoir du texte
+
+
       if (input) {
         input.setAttribute('readonly', false)
         input.removeAttribute('readonly')
         input.disabled = false
       }
-      
+
       const cleanup = () => {
         modal.remove()
       }
-      
+
       const save = () => {
         const sellerName = input ? input.value.trim() : ''
         cleanup()
         resolve(sellerName || '')
       }
-      
+
       const skip = () => {
         cleanup()
-        resolve('') // Retourne une chaîne vide pour "Passer"
+        resolve('')
       }
-      
+
       const cancel = () => {
         cleanup()
-        resolve(null) // Retourne null pour "Annuler"
+        resolve(null)
       }
-      
+
       if (saveBtn) saveBtn.addEventListener('click', save)
       if (skipBtn) skipBtn.addEventListener('click', skip)
       if (cancelBtn) cancelBtn.addEventListener('click', cancel)
       if (closeBtn) closeBtn.addEventListener('click', cancel)
-      
+
       if (input) {
         input.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') {
@@ -6878,8 +6843,8 @@ class BackHubApp {
             cancel()
           }
         })
-        
-        // Focus sur l'input après un court délai
+
+
         setTimeout(() => {
           if (input) {
             input.focus()
@@ -6887,8 +6852,8 @@ class BackHubApp {
           }
         }, 150)
       }
-      
-      // Empêcher la fermeture du modal en cliquant à l'extérieur
+
+
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           e.stopPropagation()
@@ -6897,20 +6862,15 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Ouvrir un modal pour éditer le prix d'un item
-   * @param {string} itemName - Nom de l'item
-   * @param {number} currentPrice - Prix actuel
-   * @returns {Promise<number|null>} - Le nouveau prix ou null si annulé
-   */
+
   openEditPriceModal(itemName, currentPrice) {
     return new Promise((resolve) => {
-      // Créer le modal
+
       const modal = document.createElement('div')
       modal.className = 'modal active'
       modal.id = 'edit-price-modal'
       modal.style.zIndex = '100000'
-      
+
       modal.innerHTML = `
         <div class="modal-content" style="max-width: 400px;">
           <div class="modal-header">
@@ -6933,50 +6893,50 @@ class BackHubApp {
           </div>
         </div>
       `
-      
+
       document.body.appendChild(modal)
       document.body.style.overflow = 'hidden'
-      
+
       const input = modal.querySelector('#edit-price-input')
       const saveBtn = modal.querySelector('#edit-price-save')
       const cancelBtn = modal.querySelector('#edit-price-cancel')
       const closeBtn = modal.querySelector('#edit-price-modal-close')
-      
-      // Focus sur l'input
+
+
       setTimeout(() => {
         input.focus()
         input.select()
       }, 100)
-      
-      // Fonction pour fermer le modal
+
+
       const closeModal = (result) => {
         document.body.removeChild(modal)
         document.body.style.overflow = ''
         resolve(result)
       }
-      
-      // Event listeners
+
+
       saveBtn.addEventListener('click', () => {
         const price = Math.max(0, parseFloat(input.value) || 0)
         closeModal(price)
       })
-      
+
       cancelBtn.addEventListener('click', () => {
         closeModal(null)
       })
-      
+
       closeBtn.addEventListener('click', () => {
         closeModal(null)
       })
-      
-      // Fermer en cliquant sur le fond
+
+
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           closeModal(null)
         }
       })
-      
-      // Entrée pour sauvegarder, Échap pour annuler
+
+
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault()
@@ -6993,14 +6953,12 @@ class BackHubApp {
     notificationService.show(message, type)
   }
 
-  /**
-   * Rendre la vue clan
-   */
+
   async renderClanView() {
     const clanView = document.getElementById('clan-view')
     if (!clanView) return
 
-    // Vérifier que le token est disponible pour les appels API
+
     if (this.useApi && !apiService.authToken) {
       const savedToken = apiService.getSavedToken()
       if (savedToken) {
@@ -7011,7 +6969,7 @@ class BackHubApp {
       }
     }
 
-    // Mettre à jour le nom d'utilisateur
+
     const currentUserEl = document.getElementById('clan-current-user')
     if (currentUserEl && this.currentUser) {
       currentUserEl.textContent = this.currentUser.username || 'Utilisateur'
@@ -7019,62 +6977,60 @@ class BackHubApp {
       currentUserEl.textContent = 'Non connecté'
     }
 
-    // Charger les données du clan si on utilise l'API
+
     if (this.useApi && this.currentUser && this.currentUser.id) {
       await this.loadClanData()
     }
 
-    // Charger et afficher la liste des clans
+
     await this.renderClansList()
 
-    // Mettre à jour l'état du bouton de création (cooldown)
+
     this.updateCreateClanButton()
 
-    // Afficher la bonne section selon si l'utilisateur a un clan ou non
+
     const noClanSection = document.getElementById('no-clan-section')
     const hasClanSection = document.getElementById('has-clan-section')
 
     if (this.currentClan) {
-      // Afficher la section avec le clan
+
       if (noClanSection) noClanSection.style.display = 'none'
       if (hasClanSection) hasClanSection.style.display = 'block'
 
-      // Afficher les informations du clan
+
       const clanNameDisplay = document.getElementById('clan-name-display')
       const invitationKeyDisplay = document.getElementById('clan-invitation-key-display')
-      
+
       if (clanNameDisplay) {
         clanNameDisplay.textContent = this.currentClan.name
       }
-      
+
       if (invitationKeyDisplay) {
-        // Formater la clé d'invitation (ajouter des tirets pour la lisibilité)
+
         const key = this.currentClan.invitation_key || ''
         const formattedKey = key.match(/.{1,8}/g)?.join('-') || key
         invitationKeyDisplay.textContent = formattedKey
       }
 
-      // Rendre les membres et l'historique
+
       this.renderClanMembers()
       await this.renderClanHistory()
     } else {
-      // Afficher la section pour créer/rejoindre un clan
+
       if (noClanSection) noClanSection.style.display = 'block'
       if (hasClanSection) hasClanSection.style.display = 'none'
     }
 
-    // Initialiser le bouton refresh
+
     this.initClansRefresh()
   }
 
-  /**
-   * Rendre la liste des clans disponibles
-   */
+
   async renderClansList() {
     const container = document.getElementById('clans-list-container')
     if (!container) return
 
-    // Vérifier que le token est disponible pour les appels API
+
     if (this.useApi && !apiService.authToken) {
       const savedToken = apiService.getSavedToken()
       if (savedToken) {
@@ -7091,7 +7047,7 @@ class BackHubApp {
       }
     }
 
-    // Afficher l'état de chargement
+
     container.innerHTML = `
       <div class="clan-loading-state">
         <div class="loading-spinner"></div>
@@ -7113,7 +7069,7 @@ class BackHubApp {
         return
       }
 
-      // Récupérer le nombre de membres pour chaque clan
+
       const clansWithMembers = await Promise.all(
         clans.map(async (clan) => {
           try {
@@ -7131,7 +7087,7 @@ class BackHubApp {
         })
       )
 
-      // Générer les cartes de clans
+
       container.innerHTML = ''
       const fragment = document.createDocumentFragment()
 
@@ -7140,7 +7096,7 @@ class BackHubApp {
         const card = document.createElement('div')
         card.className = 'clan-card-item'
         card.style.animationDelay = `${index * 0.05}s`
-        
+
         card.innerHTML = `
           <div class="clan-card-header">
             <h3 class="clan-card-name">${this.escapeHtml(clan.name)}</h3>
@@ -7165,7 +7121,7 @@ class BackHubApp {
 
       container.appendChild(fragment)
 
-      // Animer les cartes
+
       requestAnimationFrame(() => {
         const cards = container.querySelectorAll('.clan-card-item')
         cards.forEach((card, index) => {
@@ -7185,9 +7141,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Initialiser le bouton refresh des clans
-   */
+
   initClansRefresh() {
     const refreshBtn = document.getElementById('refresh-clans-btn')
     if (refreshBtn && !refreshBtn.dataset.listenerAttached) {
@@ -7199,9 +7153,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Rendre la liste des membres du clan
-   */
+
   renderClanMembers() {
     const membersList = document.getElementById('clan-members-list')
     if (!membersList) return
@@ -7217,7 +7169,7 @@ class BackHubApp {
       return
     }
 
-    // Mettre à jour le filtre des membres
+
     const memberFilter = document.getElementById('clan-member-filter')
     if (memberFilter) {
       const currentValue = memberFilter.value
@@ -7233,7 +7185,7 @@ class BackHubApp {
       })
     }
 
-    // Comparer les IDs en convertissant en string pour éviter les problèmes de type
+
     const currentUserId = String(this.currentUser?.id || '')
     const clanOwnerId = String(this.currentClan?.owner_id || '')
     const isOwner = this.currentClan && clanOwnerId === currentUserId
@@ -7273,7 +7225,7 @@ class BackHubApp {
       `
     }).join('')
 
-    // Event listeners pour retirer les membres
+
     membersList.querySelectorAll('.remove-member-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const memberId = btn.getAttribute('data-member-id')
@@ -7282,11 +7234,9 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Retirer un membre du clan
-   */
+
   async removeClanMember(memberId) {
-    // Convertir en string pour la comparaison
+
     const memberIdStr = String(memberId)
     const member = this.clanMembers.find(m => String(m.id || m.user_id) === memberIdStr)
     if (!member) return
@@ -7307,7 +7257,7 @@ class BackHubApp {
           notificationService.error('Erreur lors du retrait du membre')
         }
       } else {
-        // Mode local
+
         this.clanMembers = this.clanMembers.filter(m => String(m.id || m.user_id) !== memberIdStr)
         this.saveClanMembers()
         this.renderClanView()
@@ -7315,9 +7265,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Rendre l'historique du clan
-   */
+
   async renderClanHistory() {
     const historyList = document.getElementById('clan-history-list')
     const memberFilter = document.getElementById('clan-member-filter')
@@ -7325,7 +7273,7 @@ class BackHubApp {
 
     if (!historyList) return
 
-    // Mettre à jour le filtre des membres
+
     if (memberFilter) {
       const currentValue = memberFilter.value
       memberFilter.innerHTML = '<option value="">Tous les membres</option>'
@@ -7338,7 +7286,7 @@ class BackHubApp {
       })
     }
 
-    // Récupérer toutes les transactions des membres du clan
+
     let allTransactions = []
 
     if (this.clanMembers.length === 0) {
@@ -7352,40 +7300,40 @@ class BackHubApp {
       return
     }
 
-    // Charger l'historique de chaque membre
+
     if (this.useApi) {
       try {
         for (const member of this.clanMembers) {
           const memberId = member.id || member.user_id
           if (!memberId) continue
-          
+
           try {
             const memberHistory = await apiService.getUserHistory(memberId, 1000)
             if (!Array.isArray(memberHistory)) continue
-            
+
             memberHistory.forEach(transaction => {
-              // Normaliser les valeurs de la transaction
+
               allTransactions.push({
                 ...transaction,
                 memberUsername: member.username,
                 memberId: memberId,
                 totalBuy: transaction.totalBuy || transaction.total_buy || 0,
                 totalSell: transaction.totalSell || transaction.total_sell || 0,
-                margin: transaction.margin !== undefined ? transaction.margin : 
+                margin: transaction.margin !== undefined ? transaction.margin :
                         ((transaction.totalSell || transaction.total_sell || 0) - (transaction.totalBuy || transaction.total_buy || 0))
               })
             })
           } catch (memberHistoryError) {
-            // Logger sans notification - erreur silencieuse pour un membre
+
             logger.warn('Failed to load history for clan member', memberHistoryError, { memberId }, false)
           }
         }
       } catch (error) {
-        // Logger sans notification - erreur générale lors du chargement de l'historique du clan
+
         logger.error('Failed to load clan history', error, {}, false)
       }
     } else {
-      // Mode local - utiliser l'historique local
+
       this.history.forEach(transaction => {
         const member = this.clanMembers.find(m => m.username === transaction.user)
         if (member) {
@@ -7398,18 +7346,18 @@ class BackHubApp {
       })
     }
 
-    // Filtrer par membre
+
     const selectedMemberId = memberFilter?.value
     if (selectedMemberId) {
       allTransactions = allTransactions.filter(t => t.memberId === selectedMemberId)
     }
 
-    // Filtrer par date
+
     const dateFilterValue = dateFilter?.value
     if (dateFilterValue && dateFilterValue !== 'all') {
       const now = new Date()
       const filterDate = new Date()
-      
+
       if (dateFilterValue === 'today') {
         filterDate.setHours(0, 0, 0, 0)
         allTransactions = allTransactions.filter(t => new Date(t.date) >= filterDate)
@@ -7422,7 +7370,7 @@ class BackHubApp {
       }
     }
 
-    // Trier par date (plus récent en premier)
+
     allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date))
 
     if (allTransactions.length === 0) {
@@ -7436,12 +7384,12 @@ class BackHubApp {
       return
     }
 
-    // Utiliser DocumentFragment pour une insertion DOM plus rapide
+
     const fragment = document.createDocumentFragment()
     const rows = allTransactions.map((transaction, index) => {
       const date = new Date(transaction.date)
       const marginClass = transaction.margin >= 0 ? 'profit-positive' : 'profit-negative'
-      
+
       let itemsList = []
       if (transaction.items && transaction.items.length > 0) {
         if (typeof transaction.items[0] === 'string') {
@@ -7454,19 +7402,19 @@ class BackHubApp {
       const itemsCount = itemsList.length
       const totalItems = itemsList.reduce((sum, item) => sum + (item.quantity || 0), 0)
 
-      // Normaliser les valeurs pour éviter NaN
+
       const totalBuy = parseFloat(transaction.totalBuy || transaction.total_buy || 0) || 0
       const totalSell = parseFloat(transaction.totalSell || transaction.total_sell || 0) || 0
       const margin = parseFloat(transaction.margin !== undefined ? transaction.margin : (totalSell - totalBuy)) || 0
-      
-      // S'assurer que les valeurs sont des nombres valides
+
+
       const safeTotalBuy = isNaN(totalBuy) ? 0 : totalBuy
       const safeTotalSell = isNaN(totalSell) ? 0 : totalSell
       const safeMargin = isNaN(margin) ? 0 : margin
 
       const transactionId = transaction.id || transaction.transaction_id
       const canDelete = this.currentUser && (
-        this.currentUser.role === 'admin' || 
+        this.currentUser.role === 'admin' ||
         (transaction.user === this.currentUser.username || transaction.memberUsername === this.currentUser.username)
       )
 
@@ -7542,7 +7490,7 @@ class BackHubApp {
       `
     })
 
-    // Créer les éléments DOM une seule fois avec DocumentFragment
+
     const tempDiv = document.createElement('div')
     tempDiv.innerHTML = rows.join('')
     while (tempDiv.firstChild) {
@@ -7551,7 +7499,7 @@ class BackHubApp {
     historyList.innerHTML = ''
     historyList.appendChild(fragment)
 
-    // Animer les cartes
+
     requestAnimationFrame(() => {
       const cards = historyList.querySelectorAll('.transaction-card')
       cards.forEach((card, index) => {
@@ -7559,7 +7507,7 @@ class BackHubApp {
       })
     })
 
-    // Ajouter les event listeners pour les boutons de suppression
+
     historyList.querySelectorAll('.transaction-delete-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation()
@@ -7571,9 +7519,7 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Sauvegarder les membres du clan
-   */
+
   saveClanMembers() {
     try {
       localStorage.setItem('clan-members', JSON.stringify(this.clanMembers))
@@ -7582,9 +7528,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Gérer la demande de quitter le clan
-   */
+
   async handleLeaveClan() {
     if (!this.currentClan || !this.currentUser) {
       notificationService.error('Vous devez être connecté et membre d\'un clan')
@@ -7592,15 +7536,15 @@ class BackHubApp {
     }
 
     const isOwner = this.currentClan.owner_id === this.currentUser.id
-    const otherMembers = this.clanMembers.filter(m => 
+    const otherMembers = this.clanMembers.filter(m =>
       (m.id || m.user_id) !== this.currentUser.id
     )
 
     if (isOwner) {
-      // Si c'est le propriétaire
+
       if (otherMembers.length > 0) {
-        // Il y a d'autres membres, demander de choisir un successeur
-        const memberOptions = otherMembers.map(m => 
+
+        const memberOptions = otherMembers.map(m =>
           `<option value="${m.id || m.user_id}">${escapeHtml(m.username)}</option>`
         ).join('')
 
@@ -7629,7 +7573,7 @@ class BackHubApp {
           </div>
         `
 
-        // Créer le modal
+
         const existingModal = document.getElementById('transfer-ownership-modal')
         if (existingModal) {
           existingModal.remove()
@@ -7671,7 +7615,7 @@ class BackHubApp {
           })
         }
       } else {
-        // Pas d'autres membres, proposer de supprimer le clan
+
         if (confirm('Vous êtes le seul membre du clan. Voulez-vous supprimer le clan ?')) {
           if (confirm('⚠️ DERNIÈRE CONFIRMATION : Voulez-vous vraiment supprimer ce clan ?')) {
             await this.deleteClan()
@@ -7679,16 +7623,14 @@ class BackHubApp {
         }
       }
     } else {
-      // Membre normal, juste quitter
+
       if (confirm(`Voulez-vous vraiment quitter le clan "${this.currentClan.name}" ?`)) {
         await this.leaveClan()
       }
     }
   }
 
-  /**
-   * Transférer la propriété du clan
-   */
+
   async transferClanOwnership(successorId) {
     if (!this.currentClan || !this.currentUser || !this.useApi) return
 
@@ -7707,44 +7649,42 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Supprimer le clan
-   */
+
   async deleteClan() {
     if (!this.currentClan || !this.currentUser || !this.useApi) return
 
     try {
       const result = await apiService.deleteClan(this.currentClan.id)
       if (result.success) {
-        // Enregistrer le timestamp de suppression pour le cooldown de 30 secondes
+
         const deleteTimestamp = Date.now()
         localStorage.setItem('clan-delete-cooldown', deleteTimestamp.toString())
-        
+
         notificationService.success('Clan supprimé avec succès. Vous devez attendre 30 secondes avant de créer un nouveau clan.')
         this.currentClan = null
         this.clanMembers = []
-        
-        // Supprimer complètement le modal de transfert du DOM
+
+
         const transferModal = document.getElementById('transfer-ownership-modal')
         if (transferModal) {
           transferModal.style.display = 'none'
           transferModal.remove()
         }
-        
-        // Fermer et réinitialiser le modal de création de clan
+
+
         const createClanModal = document.getElementById('create-clan-modal')
         const createClanForm = document.getElementById('create-clan-form')
-        
+
         if (createClanModal) {
           createClanModal.style.display = 'none'
         }
-        
-        // Réinitialiser complètement le formulaire
+
+
         if (createClanForm) {
           createClanForm.reset()
         }
-        
-        // Forcer la réinitialisation du champ de saisie
+
+
         const clanNameInput = document.getElementById('clan-name')
         if (clanNameInput) {
           clanNameInput.value = ''
@@ -7754,10 +7694,10 @@ class BackHubApp {
           clanNameInput.style.opacity = '1'
           clanNameInput.blur()
         }
-        
-        // Démarrer la mise à jour du bouton de création
+
+
         this.updateCreateClanButton()
-        
+
         await this.renderClanView()
       } else {
         notificationService.error(result.error || 'Erreur lors de la suppression du clan')
@@ -7768,43 +7708,39 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Vérifier si le cooldown de suppression de clan est actif
-   */
+
   getClanDeleteCooldownRemaining() {
     const cooldownTimestamp = localStorage.getItem('clan-delete-cooldown')
     if (!cooldownTimestamp) return 0
-    
+
     const deleteTime = parseInt(cooldownTimestamp, 10)
-    const cooldownDuration = 30000 // 30 secondes en millisecondes
+    const cooldownDuration = 30000
     const elapsed = Date.now() - deleteTime
     const remaining = cooldownDuration - elapsed
-    
+
     if (remaining <= 0) {
       localStorage.removeItem('clan-delete-cooldown')
       return 0
     }
-    
-    return Math.ceil(remaining / 1000) // Retourner en secondes
+
+    return Math.ceil(remaining / 1000)
   }
 
-  /**
-   * Mettre à jour l'état du bouton de création de clan
-   */
+
   updateCreateClanButton() {
     const createClanBtn = document.getElementById('create-clan-btn')
     if (!createClanBtn) return
-    
+
     const remainingSeconds = this.getClanDeleteCooldownRemaining()
-    
+
     if (remainingSeconds > 0) {
-      // Cooldown actif : désactiver le bouton et afficher le temps restant
+
       createClanBtn.disabled = true
       createClanBtn.innerHTML = `<span>⏳ Attendre ${remainingSeconds}s</span>`
       createClanBtn.style.opacity = '0.6'
       createClanBtn.style.cursor = 'not-allowed'
-      
-      // Programmer la prochaine mise à jour
+
+
       if (this.cooldownInterval) {
         clearTimeout(this.cooldownInterval)
       }
@@ -7812,13 +7748,13 @@ class BackHubApp {
         this.updateCreateClanButton()
       }, 1000)
     } else {
-      // Cooldown terminé : réactiver le bouton
+
       createClanBtn.disabled = false
       createClanBtn.innerHTML = `<span>➕ Créer un clan</span>`
       createClanBtn.style.opacity = '1'
       createClanBtn.style.cursor = 'pointer'
-      
-      // Nettoyer l'intervalle si le cooldown est terminé
+
+
       if (this.cooldownInterval) {
         clearTimeout(this.cooldownInterval)
         this.cooldownInterval = null
@@ -7826,33 +7762,29 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Démarrer la vérification continue du cooldown
-   */
+
   startCooldownCheck() {
-    // Vérifier immédiatement
+
     this.updateCreateClanButton()
-    
-    // Vérifier toutes les secondes si un cooldown est actif
+
+
     const checkInterval = setInterval(() => {
       const remainingSeconds = this.getClanDeleteCooldownRemaining()
       if (remainingSeconds > 0) {
-        // Cooldown actif, mettre à jour le bouton
+
         this.updateCreateClanButton()
       } else {
-        // Plus de cooldown, arrêter la vérification
+
         clearInterval(checkInterval)
         this.updateCreateClanButton()
       }
     }, 1000)
-    
-    // Stocker l'intervalle pour pouvoir le nettoyer si nécessaire
+
+
     this.cooldownCheckInterval = checkInterval
   }
 
-  /**
-   * Quitter le clan (pour les membres non-propriétaires)
-   */
+
   async leaveClan() {
     if (!this.currentClan || !this.currentUser || !this.useApi) return
 
@@ -7872,18 +7804,16 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Supprimer une transaction de l'historique du clan
-   */
+
   async deleteClanTransaction(transactionId) {
     if (!transactionId) return
 
-    // Trouver la transaction dans l'historique
-    const transaction = this.history.find(entry => 
-      String(entry.id) === String(transactionId) || 
+
+    const transaction = this.history.find(entry =>
+      String(entry.id) === String(transactionId) ||
       String(entry.transaction_id) === String(transactionId)
     )
-    
+
     if (!transaction) {
       notificationService.warning('Transaction introuvable')
       return
@@ -7901,7 +7831,7 @@ class BackHubApp {
     const userName = isAdmin ? (transaction.memberUsername || transaction.user) : 'votre'
     if (confirm(`Êtes-vous sûr de vouloir supprimer ${isAdmin ? `la transaction de ${userName}` : 'cette transaction'} ?`)) {
       try {
-        // Supprimer via l'API si activée
+
         if (this.useApi && this.currentUser && this.currentUser.id) {
           try {
             const result = await apiService.deleteTransaction(transactionId)
@@ -7911,31 +7841,31 @@ class BackHubApp {
               return
             }
           } catch (apiError) {
-            // Logger sans notification automatique
+
             logger.error('Failed to delete transaction from API', apiError, { transactionId }, false)
-            // Extraire le message d'erreur de la réponse API si disponible
+
             const errorMessage = apiError.data?.error || apiError.data?.message || apiError.message || 'Erreur lors de la suppression de la transaction sur le serveur'
             notificationService.error(errorMessage)
             return
           }
         }
 
-        // Supprimer de l'historique local
-        this.history = this.history.filter(entry => 
-          String(entry.id) !== String(transactionId) && 
+
+        this.history = this.history.filter(entry =>
+          String(entry.id) !== String(transactionId) &&
           String(entry.transaction_id) !== String(transactionId) &&
           String(entry.id) !== String(transaction.id)
         )
 
-        // Sauvegarder l'historique local (backup)
+
         await this.saveHistory()
 
-        // Recharger l'historique depuis l'API pour s'assurer que tout est à jour
+
         if (this.useApi && this.currentUser && this.currentUser.id) {
           await this.loadUserDataFromApi(this.currentUser.id)
         }
 
-        // Recharger l'historique du clan
+
         await this.renderClanHistory()
         notificationService.success('Transaction supprimée définitivement')
       } catch (error) {
@@ -7945,20 +7875,18 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Initialiser les paramètres
-   */
+
   initSettings() {
-    // Charger les préférences sauvegardées
+
     this.loadSettings()
 
-    // Initialiser la navigation par onglets
+
     this.initSettingsTabs()
 
-    // Attacher les listeners pour le changement de mot de passe
+
     this.attachChangePasswordListeners()
 
-    // Gérer la fermeture du modal
+
     const changePasswordModal = document.getElementById('change-password-modal')
     const changePasswordModalClose = document.getElementById('change-password-modal-close')
     const cancelChangePasswordBtn = document.getElementById('cancel-change-password-btn')
@@ -7969,16 +7897,16 @@ class BackHubApp {
       })
     }
 
-    // Fermer le modal en cliquant sur l'overlay (le modal lui-même)
+
     if (changePasswordModal) {
       changePasswordModal.addEventListener('click', (e) => {
-        // Fermer seulement si on clique directement sur le modal (pas sur le contenu)
+
         if (e.target === changePasswordModal) {
           this.closeChangePasswordModal()
         }
       })
-      
-      // Empêcher la propagation du clic sur le contenu du modal
+
+
       const modalContent = changePasswordModal.querySelector('.modal-content')
       if (modalContent) {
         modalContent.addEventListener('click', (e) => {
@@ -7993,7 +7921,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer le formulaire de changement de mot de passe
+
     const changePasswordForm = document.getElementById('change-password-form')
     if (changePasswordForm) {
       changePasswordForm.addEventListener('submit', async (e) => {
@@ -8002,7 +7930,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer les toggles
+
     const rememberSessionToggle = document.getElementById('settings-remember-session')
     if (rememberSessionToggle) {
       rememberSessionToggle.addEventListener('change', (e) => {
@@ -8017,7 +7945,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer les toggles de notifications
+
     ['success', 'error', 'warning'].forEach(type => {
       const toggle = document.getElementById(`settings-notif-${type}`)
       if (toggle) {
@@ -8027,10 +7955,10 @@ class BackHubApp {
       }
     })
 
-    // Initialiser le système de feedback
+
     this.initFeedback()
 
-    // Gérer le bouton de suppression de compte
+
     const deleteAccountBtn = document.getElementById('delete-account-btn')
     if (deleteAccountBtn) {
       deleteAccountBtn.addEventListener('click', () => {
@@ -8038,7 +7966,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer la fermeture du modal de suppression
+
     const deleteAccountModal = document.getElementById('delete-account-modal')
     const deleteAccountModalClose = document.getElementById('delete-account-modal-close')
     const deleteAccountModalOverlay = document.getElementById('delete-account-modal-overlay')
@@ -8062,7 +7990,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer le formulaire de suppression de compte
+
     const deleteAccountForm = document.getElementById('delete-account-form')
     if (deleteAccountForm) {
       deleteAccountForm.addEventListener('submit', async (e) => {
@@ -8071,7 +7999,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer l'annulation de la suppression
+
     const cancelDeletionModalClose = document.getElementById('cancel-deletion-modal-close')
     const cancelDeletionModalOverlay = document.getElementById('cancel-deletion-modal-overlay')
     const cancelDeletionNoBtn = document.getElementById('cancel-deletion-no-btn')
@@ -8102,29 +8030,27 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Rendre la vue de la carte interactive de Chernarus
-   */
+
   renderMapView() {
     const mapView = document.getElementById('map-view')
     if (!mapView) return
 
-    // Attendre que la vue soit visible avant d'initialiser la carte
+
     requestAnimationFrame(() => {
       setTimeout(() => {
-        // Vérifier si la carte n'est pas déjà initialisée
+
         if (!mapService.map) {
           mapService.initMap()
         } else {
-          // Forcer le redimensionnement si la carte existe déjà
+
           mapService.invalidateSize()
-          // Réajuster la vue pour voir toute la carte
+
           setTimeout(() => {
             if (mapService.map && mapService.imageBounds) {
               mapService.map.fitBounds(mapService.imageBounds, {
                 padding: [50, 50]
               })
-              // Forcer un zoom encore plus éloigné si nécessaire
+
               if (mapService.map.getZoom() > -3) {
                 mapService.map.setZoom(-4)
               }
@@ -8138,7 +8064,7 @@ class BackHubApp {
   async renderSettings() {
     if (!this.currentUser) return
 
-    // Mettre à jour les informations du compte
+
     const usernameInput = document.getElementById('settings-username')
     if (usernameInput) {
       usernameInput.value = this.currentUser.username
@@ -8158,39 +8084,37 @@ class BackHubApp {
       }
     }
 
-    // Charger les préférences
+
     this.loadSettings()
 
-    // Initialiser la navigation par onglets
+
     this.initSettingsTabs()
 
-    // Réattacher les listeners pour le changement de mot de passe
+
     this.attachChangePasswordListeners()
 
-    // Vérifier le statut de suppression
+
     await this.checkDeletionStatus()
   }
 
-  /**
-   * Initialiser la navigation par onglets dans les paramètres
-   */
+
   initSettingsTabs() {
     const tabs = document.querySelectorAll('.settings-nav-tab')
     const tabContents = document.querySelectorAll('.settings-tab-content')
 
     tabs.forEach(tab => {
-      // Supprimer les anciens listeners pour éviter les doublons
+
       const newTab = tab.cloneNode(true)
       tab.parentNode.replaceChild(newTab, tab)
-      
+
       newTab.addEventListener('click', () => {
         const targetTab = newTab.dataset.tab
 
-        // Retirer la classe active de tous les onglets et contenus
+
         document.querySelectorAll('.settings-nav-tab').forEach(t => t.classList.remove('active'))
         tabContents.forEach(content => content.classList.remove('active'))
 
-        // Ajouter la classe active à l'onglet cliqué et son contenu
+
         newTab.classList.add('active')
         const targetContent = document.getElementById(`settings-tab-${targetTab}`)
         if (targetContent) {
@@ -8200,25 +8124,23 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Charger les paramètres sauvegardés
-   */
+
   loadSettings() {
-    // Charger "Garder la session active"
+
     const rememberSession = localStorage.getItem('savedSession') !== null
     const rememberSessionToggle = document.getElementById('settings-remember-session')
     if (rememberSessionToggle) {
       rememberSessionToggle.checked = rememberSession
     }
 
-    // Charger la vue par défaut
+
     const defaultView = localStorage.getItem('defaultView') || 'dashboard'
     const defaultViewSelect = document.getElementById('settings-default-view')
     if (defaultViewSelect) {
       defaultViewSelect.value = defaultView
     }
 
-    // Charger les préférences de notifications
+
     const notifications = JSON.parse(localStorage.getItem('notifications') || '{"success":true,"error":true,"warning":true}')
     Object.keys(notifications).forEach(type => {
       const toggle = document.getElementById(`settings-notif-${type}`)
@@ -8227,35 +8149,35 @@ class BackHubApp {
       }
     })
 
-    // Charger l'état de la notification de vote
-    // Initialiser les toggles de notification de vote (il peut y en avoir plusieurs : paramètres et page de vote)
+
+
     const voteNotificationEnabled = this.isVoteNotificationEnabled()
     const voteNotificationToggles = document.querySelectorAll('#vote-notification-toggle')
-    
+
     voteNotificationToggles.forEach(toggle => {
       toggle.checked = voteNotificationEnabled
-      
-      // Supprimer les anciens listeners pour éviter les doublons
+
+
       const newToggle = toggle.cloneNode(true)
       toggle.parentNode.replaceChild(newToggle, toggle)
-      
+
       newToggle.addEventListener('change', (e) => {
         const isEnabled = e.target.checked
         localStorage.setItem('vote-notification-enabled', isEnabled ? 'true' : 'false')
-        
-        // Synchroniser tous les autres toggles
+
+
         document.querySelectorAll('#vote-notification-toggle').forEach(otherToggle => {
           if (otherToggle !== newToggle) {
             otherToggle.checked = isEnabled
           }
         })
-        
-        // Afficher/masquer les options de son UNIQUEMENT sur la page vote (pas dans les paramètres)
+
+
         const optionsContainer = document.querySelector('#vote-view #vote-notification-options')
         if (optionsContainer) {
           optionsContainer.style.display = isEnabled ? 'block' : 'none'
         }
-        
+
         if (isEnabled && 'Notification' in window && Notification.permission === 'default') {
           Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
@@ -8267,9 +8189,7 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Sauvegarder un paramètre
-   */
+
   saveSetting(key, value) {
     if (key.includes('.')) {
       const [parent, child] = key.split('.')
@@ -8281,12 +8201,10 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Attacher les listeners pour le changement de mot de passe
-   */
+
   attachChangePasswordListeners() {
-    // Utiliser la délégation d'événements pour être sûr que ça fonctionne
-    // même si le bouton est ajouté dynamiquement
+
+
     document.addEventListener('click', (e) => {
       if (e.target && e.target.id === 'change-password-btn') {
         e.preventDefault()
@@ -8294,10 +8212,10 @@ class BackHubApp {
         this.openChangePasswordModal()
       }
     })
-    
-    // Aussi attacher directement au bouton s'il existe
+
+
     const changePasswordBtn = document.getElementById('change-password-btn')
-    
+
     if (changePasswordBtn) {
       changePasswordBtn.addEventListener('click', (e) => {
         e.preventDefault()
@@ -8307,23 +8225,21 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Ouvrir le modal de changement de mot de passe
-   */
+
   openChangePasswordModal() {
     let modal = document.getElementById('change-password-modal')
-    
+
     if (!modal) {
       logger.error('Modal change-password-modal not found')
       return
     }
-    
-    // Déplacer le modal directement dans le body pour éviter les problèmes de z-index/overflow
+
+
     if (modal.parentElement !== document.body) {
       document.body.appendChild(modal)
     }
-    
-    // Utiliser à la fois la classe et style.display pour forcer l'affichage
+
+
     modal.classList.add('active')
     modal.style.display = 'flex'
     modal.style.visibility = 'visible'
@@ -8338,68 +8254,64 @@ class BackHubApp {
     modal.style.height = '100%'
     modal.style.margin = '0'
     modal.style.padding = '0'
-    
-    // S'assurer que le modal-content a aussi un z-index élevé
+
+
     const modalContent = modal.querySelector('.modal-content')
     if (modalContent) {
       modalContent.style.zIndex = '100001'
       modalContent.style.position = 'relative'
     }
-    
-    document.body.style.overflow = 'hidden' // Empêcher le scroll de la page
-    
+
+    document.body.style.overflow = 'hidden'
+
     const form = document.getElementById('change-password-form')
     if (form) {
       form.reset()
-      // Réinitialiser les messages d'erreur visuels
+
       this.clearPasswordValidationMessages()
-      // Ajouter les listeners de validation en temps réel
+
       this.initPasswordValidation()
     }
   }
 
-  /**
-   * Fermer le modal de changement de mot de passe
-   */
+
   closeChangePasswordModal() {
     const modal = document.getElementById('change-password-modal')
     if (modal) {
       modal.classList.remove('active')
       modal.style.display = 'none'
       modal.style.visibility = 'hidden'
-      document.body.style.overflow = '' // Réactiver le scroll
+      document.body.style.overflow = ''
       const form = document.getElementById('change-password-form')
       if (form) {
         form.reset()
-        // Réinitialiser les messages d'erreur visuels
+
         this.clearPasswordValidationMessages()
       }
     }
   }
 
-  /**
-   * Initialiser la validation en temps réel du mot de passe
-   */
+
   initPasswordValidation() {
     const newPasswordInput = document.getElementById('new-password')
     const confirmPasswordInput = document.getElementById('confirm-new-password')
 
     if (!newPasswordInput || !confirmPasswordInput) return
 
-    // Vérifier si les listeners sont déjà attachés pour éviter les doublons
+
     if (newPasswordInput.dataset.validationAttached === 'true') {
       return
     }
 
-    // Marquer comme attachés
+
     newPasswordInput.dataset.validationAttached = 'true'
     confirmPasswordInput.dataset.validationAttached = 'true'
 
-    // Validation de la confirmation en temps réel
+
     const validatePasswordMatch = () => {
       const newPassword = newPasswordInput.value
       const confirmPassword = confirmPasswordInput.value
-      
+
       if (confirmPassword.length > 0) {
         if (newPassword !== confirmPassword) {
           confirmPasswordInput.setCustomValidity('Les mots de passe ne correspondent pas')
@@ -8414,7 +8326,7 @@ class BackHubApp {
       }
     }
 
-    // Validation de la longueur du nouveau mot de passe
+
     const validatePasswordLength = () => {
       const newPassword = newPasswordInput.value
       if (newPassword.length > 0 && newPassword.length < 6) {
@@ -8424,7 +8336,7 @@ class BackHubApp {
         newPasswordInput.setCustomValidity('')
         newPasswordInput.classList.remove('input-error')
       }
-      // Re-valider la correspondance si la confirmation est déjà remplie
+
       if (confirmPasswordInput.value.length > 0) {
         validatePasswordMatch()
       }
@@ -8436,9 +8348,7 @@ class BackHubApp {
     confirmPasswordInput.addEventListener('blur', validatePasswordMatch)
   }
 
-  /**
-   * Réinitialiser les messages de validation visuels
-   */
+
   clearPasswordValidationMessages() {
     const inputs = ['current-password', 'new-password', 'confirm-new-password']
     inputs.forEach(inputId => {
@@ -8446,7 +8356,7 @@ class BackHubApp {
       if (input) {
         input.setCustomValidity('')
         input.classList.remove('input-error')
-        // Réinitialiser le flag pour permettre la réattache des listeners
+
         if (inputId === 'new-password' || inputId === 'confirm-new-password') {
           input.dataset.validationAttached = 'false'
         }
@@ -8454,9 +8364,7 @@ class BackHubApp {
     })
   }
 
-  /**
-   * Gérer le changement de mot de passe
-   */
+
   async handleChangePassword() {
     const currentPasswordInput = document.getElementById('current-password')
     const newPasswordInput = document.getElementById('new-password')
@@ -8466,7 +8374,7 @@ class BackHubApp {
     const newPassword = newPasswordInput?.value.trim()
     const confirmPassword = confirmPasswordInput?.value.trim()
 
-    // Validation de l'ancien mot de passe
+
     if (!currentPassword || currentPassword.length === 0) {
       notificationService.error('Veuillez entrer votre mot de passe actuel')
       if (currentPasswordInput) {
@@ -8476,7 +8384,7 @@ class BackHubApp {
       return
     }
 
-    // Validation du nouveau mot de passe
+
     if (!newPassword || newPassword.length === 0) {
       notificationService.error('Veuillez entrer un nouveau mot de passe')
       if (newPasswordInput) {
@@ -8495,7 +8403,7 @@ class BackHubApp {
       return
     }
 
-    // Validation de la confirmation
+
     if (!confirmPassword || confirmPassword.length === 0) {
       notificationService.error('Veuillez confirmer votre nouveau mot de passe')
       if (confirmPasswordInput) {
@@ -8514,7 +8422,7 @@ class BackHubApp {
       return
     }
 
-    // Vérifier que le nouveau mot de passe est différent de l'ancien
+
     if (currentPassword === newPassword) {
       notificationService.error('Le nouveau mot de passe doit être différent de l\'ancien')
       if (newPasswordInput) {
@@ -8529,7 +8437,7 @@ class BackHubApp {
       return
     }
 
-    // Désactiver le bouton de soumission pendant le traitement
+
     const submitButton = document.querySelector('#change-password-form button[type="submit"]')
     const originalButtonText = submitButton?.textContent
     if (submitButton) {
@@ -8538,18 +8446,18 @@ class BackHubApp {
     }
 
     try {
-      // Changer le mot de passe via l'API
+
       const changeResult = await apiService.changeOwnPassword(this.currentUser.id, currentPassword, newPassword)
       if (changeResult && changeResult.success) {
         notificationService.success('Mot de passe changé avec succès')
         this.closeChangePasswordModal()
       } else {
-        // Afficher le message d'erreur spécifique (ex: mot de passe actuel incorrect)
+
         const errorMessage = changeResult?.message || changeResult?.error || 'Erreur lors du changement de mot de passe'
         notificationService.error(errorMessage)
-        
-        // Si c'est une erreur d'authentification, mettre en évidence le champ ancien mot de passe
-        if (errorMessage.toLowerCase().includes('mot de passe actuel') || 
+
+
+        if (errorMessage.toLowerCase().includes('mot de passe actuel') ||
             errorMessage.toLowerCase().includes('incorrect') ||
             errorMessage.toLowerCase().includes('invalid')) {
           if (currentPasswordInput) {
@@ -8559,23 +8467,23 @@ class BackHubApp {
         }
       }
     } catch (error) {
-      // Ne pas logger comme erreur pour éviter les notifications automatiques du logger
-      // Extraire le message d'erreur de la réponse API si disponible
+
+
       let errorMessage = 'Erreur lors du changement de mot de passe'
-      
-      // Si l'erreur contient les données de la réponse API (ajouté dans api-service.js)
+
+
       if (error.data) {
         errorMessage = error.data.message || error.data.error || error.message || errorMessage
       } else if (error.message) {
         errorMessage = error.message
       }
-      
-      // Afficher une seule notification avec le message approprié
+
+
       notificationService.error(errorMessage)
-      
-      // Mettre en évidence le champ approprié selon l'erreur
+
+
       const errorLower = errorMessage.toLowerCase()
-      if (errorLower.includes('mot de passe actuel') || 
+      if (errorLower.includes('mot de passe actuel') ||
           errorLower.includes('incorrect') ||
           errorLower.includes('invalid') ||
           errorLower.includes('actuel incorrect')) {
@@ -8585,7 +8493,7 @@ class BackHubApp {
         }
       }
     } finally {
-      // Réactiver le bouton de soumission
+
       if (submitButton) {
         submitButton.disabled = false
         submitButton.textContent = originalButtonText || 'Changer le mot de passe'
@@ -8593,13 +8501,11 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Initialiser la page de feedback (désactivé - maintenant en modal)
-   */
+
   initFeedbackPage() {
-    // Cette fonction n'est plus utilisée car le feedback est maintenant un modal
+
     return
-    // Gérer le formulaire de feedback de la page
+
     const feedbackPageForm = document.getElementById('feedback-page-form')
     if (feedbackPageForm) {
       feedbackPageForm.addEventListener('submit', async (e) => {
@@ -8608,7 +8514,7 @@ class BackHubApp {
       })
     }
 
-    // Compteur de caractères pour le titre (page)
+
     const titleInputPage = document.getElementById('feedback-page-title')
     const titleCountPage = document.getElementById('feedback-page-title-count')
     if (titleInputPage && titleCountPage) {
@@ -8617,7 +8523,7 @@ class BackHubApp {
       })
     }
 
-    // Compteur de caractères pour la description (page)
+
     const descriptionInputPage = document.getElementById('feedback-page-description')
     const descriptionCountPage = document.getElementById('feedback-page-description-count')
     if (descriptionInputPage && descriptionCountPage) {
@@ -8626,7 +8532,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer l'upload de fichier avec drag & drop (page)
+
     const attachmentInputPage = document.getElementById('feedback-page-attachment')
     const attachmentZonePage = document.getElementById('feedback-page-attachment-zone')
     const attachmentPreviewPage = document.getElementById('feedback-page-attachment-preview')
@@ -8636,21 +8542,21 @@ class BackHubApp {
     const handleFileSelectionPage = (file) => {
       if (!file) return
 
-      // Vérifier la taille (10MB max)
+
       if (file.size > 10 * 1024 * 1024) {
         notificationService.error('Le fichier est trop volumineux (max 10MB)')
         if (attachmentInputPage) attachmentInputPage.value = ''
         return
       }
 
-      // Vérifier le type
+
       if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
         notificationService.error('Type de fichier non autorisé. Utilisez une image ou une vidéo.')
         if (attachmentInputPage) attachmentInputPage.value = ''
         return
       }
 
-      // Afficher la prévisualisation
+
       if (file.type.startsWith('image/')) {
         const reader = new FileReader()
         reader.onload = (e) => {
@@ -8666,7 +8572,7 @@ class BackHubApp {
         }
         reader.readAsDataURL(file)
       } else {
-        // Pour les vidéos, on affiche juste le nom
+
         if (attachmentPreviewPage) {
           attachmentPreviewPage.style.display = 'block'
           if (attachmentPreviewImgPage) {
@@ -8687,7 +8593,7 @@ class BackHubApp {
       })
     }
 
-    // Drag & Drop (page)
+
     if (attachmentZonePage) {
       attachmentZonePage.addEventListener('dragover', (e) => {
         e.preventDefault()
@@ -8722,11 +8628,9 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Initialiser le système de feedback
-   */
+
   initFeedback() {
-    // Bouton pour ouvrir le modal de feedback dans la sidebar
+
     const feedbackNavBtn = document.getElementById('feedback-nav-btn')
     if (feedbackNavBtn) {
       feedbackNavBtn.addEventListener('click', () => {
@@ -8734,7 +8638,7 @@ class BackHubApp {
       })
     }
 
-    // Bouton pour ouvrir le modal de feedback (ancien, dans les paramètres - pour compatibilité)
+
     const feedbackBtn = document.getElementById('feedback-btn')
     if (feedbackBtn) {
       feedbackBtn.addEventListener('click', () => {
@@ -8742,7 +8646,7 @@ class BackHubApp {
       })
     }
 
-    // Bouton pour voir mes feedbacks
+
     const myFeedbacksBtn = document.getElementById('my-feedbacks-btn')
     if (myFeedbacksBtn) {
       myFeedbacksBtn.addEventListener('click', () => {
@@ -8750,7 +8654,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer la fermeture du modal feedback
+
     const feedbackModal = document.getElementById('feedback-modal')
     const feedbackModalClose = document.getElementById('feedback-modal-close')
     const cancelFeedbackBtn = document.getElementById('cancel-feedback-btn')
@@ -8773,7 +8677,7 @@ class BackHubApp {
           this.closeFeedbackModal()
         }
       })
-      
+
       const modalContent = feedbackModal.querySelector('.feedback-modal-content-v2')
       if (modalContent) {
         modalContent.addEventListener('click', (e) => {
@@ -8782,7 +8686,7 @@ class BackHubApp {
       }
     }
 
-    // Gérer la fermeture du modal mes feedbacks
+
     const myFeedbacksModal = document.getElementById('my-feedbacks-modal')
     const myFeedbacksModalClose = document.getElementById('my-feedbacks-modal-close')
 
@@ -8798,7 +8702,7 @@ class BackHubApp {
           this.closeMyFeedbacksModal()
         }
       })
-      
+
       const modalContent = myFeedbacksModal.querySelector('.modal-content')
       if (modalContent) {
         modalContent.addEventListener('click', (e) => {
@@ -8807,7 +8711,7 @@ class BackHubApp {
       }
     }
 
-    // Gérer le formulaire de feedback
+
     const feedbackForm = document.getElementById('feedback-form')
     if (feedbackForm) {
       feedbackForm.addEventListener('submit', async (e) => {
@@ -8816,7 +8720,7 @@ class BackHubApp {
       })
     }
 
-    // Compteur de caractères pour le titre
+
     const titleInput = document.getElementById('feedback-title')
     const titleCount = document.getElementById('feedback-title-count')
     if (titleInput && titleCount) {
@@ -8825,7 +8729,7 @@ class BackHubApp {
       })
     }
 
-    // Compteur de caractères pour la description
+
     const descriptionInput = document.getElementById('feedback-description')
     const descriptionCount = document.getElementById('feedback-description-count')
     if (descriptionInput && descriptionCount) {
@@ -8834,7 +8738,7 @@ class BackHubApp {
       })
     }
 
-    // Gérer l'upload de fichier avec drag & drop
+
     const attachmentInput = document.getElementById('feedback-attachment')
     const attachmentZone = document.getElementById('feedback-attachment-zone')
     const attachmentPreview = document.getElementById('feedback-attachment-preview')
@@ -8844,21 +8748,21 @@ class BackHubApp {
     const handleFileSelection = (file) => {
       if (!file) return
 
-      // Vérifier la taille (10MB max)
+
       if (file.size > 10 * 1024 * 1024) {
         notificationService.error('Le fichier est trop volumineux (max 10MB)')
         if (attachmentInput) attachmentInput.value = ''
         return
       }
 
-      // Vérifier le type
+
       if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
         notificationService.error('Type de fichier non autorisé. Utilisez une image ou une vidéo.')
         if (attachmentInput) attachmentInput.value = ''
         return
       }
 
-      // Afficher la prévisualisation
+
       if (file.type.startsWith('image/')) {
         const reader = new FileReader()
         reader.onload = (e) => {
@@ -8874,7 +8778,7 @@ class BackHubApp {
         }
         reader.readAsDataURL(file)
       } else {
-        // Pour les vidéos, on affiche juste le nom
+
         if (attachmentPreview) {
           attachmentPreview.style.display = 'block'
           if (attachmentPreviewImg) {
@@ -8895,7 +8799,7 @@ class BackHubApp {
       })
     }
 
-    // Drag & Drop
+
     if (attachmentZone) {
       attachmentZone.addEventListener('dragover', (e) => {
         e.preventDefault()
@@ -8931,14 +8835,12 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Ouvrir le modal de feedback
-   */
+
   openFeedbackModal() {
     const modal = document.getElementById('feedback-modal')
     if (!modal) return
 
-    // Déplacer le modal dans le body si nécessaire
+
     if (modal.parentElement !== document.body) {
       document.body.appendChild(modal)
     }
@@ -8955,16 +8857,16 @@ class BackHubApp {
     modal.style.bottom = '0'
     document.body.style.overflow = 'hidden'
 
-    // Réinitialiser le formulaire
+
     const form = document.getElementById('feedback-form')
     if (form) {
       form.reset()
-      // Réinitialiser le compteur de caractères
+
       const titleCount = document.getElementById('feedback-title-count')
       const descriptionCount = document.getElementById('feedback-description-count')
       if (titleCount) titleCount.textContent = '0'
       if (descriptionCount) descriptionCount.textContent = '0'
-      // Réinitialiser la prévisualisation
+
       const attachmentPreview = document.getElementById('feedback-attachment-preview')
       const attachmentZone = document.getElementById('feedback-attachment-zone')
       if (attachmentPreview) attachmentPreview.style.display = 'none'
@@ -8972,9 +8874,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Fermer le modal de feedback
-   */
+
   closeFeedbackModal() {
     const modal = document.getElementById('feedback-modal')
     if (modal) {
@@ -8982,15 +8882,15 @@ class BackHubApp {
       modal.style.display = 'none'
       modal.style.visibility = 'hidden'
       document.body.style.overflow = ''
-      
-      // Réinitialiser le formulaire
+
+
       const form = document.getElementById('feedback-form')
       if (form) {
         form.reset()
-        // Réinitialiser le compteur de caractères
+
         const titleCount = document.getElementById('feedback-title-count')
         if (titleCount) titleCount.textContent = '0'
-        // Réinitialiser la prévisualisation
+
         const attachmentPreview = document.getElementById('feedback-attachment-preview')
         const attachmentZone = document.getElementById('feedback-attachment-zone')
         if (attachmentPreview) attachmentPreview.style.display = 'none'
@@ -9001,15 +8901,13 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Gérer la soumission du feedback
-   */
+
   async handleSubmitFeedback(source = 'modal') {
-    // Déterminer les IDs selon la source
+
     const prefix = source === 'page' ? 'feedback-page-' : 'feedback-'
     const typeName = source === 'page' ? 'feedback-page-type' : 'feedback-type'
-    
-    // Récupérer le type sélectionné depuis les radio buttons
+
+
     const typeRadio = document.querySelector(`input[name="${typeName}"]:checked`)
     const titleInput = document.getElementById(`${prefix}title`)
     const descriptionInput = document.getElementById(`${prefix}description`)
@@ -9020,7 +8918,7 @@ class BackHubApp {
     const description = descriptionInput?.value.trim() || ''
     const attachmentFile = attachmentInput?.files[0] || null
 
-    // Validation
+
     if (!title || title.length === 0) {
       notificationService.error('Veuillez entrer un titre')
       if (titleInput) {
@@ -9053,7 +8951,7 @@ class BackHubApp {
       return
     }
 
-    // Désactiver le bouton de soumission
+
     const formId = source === 'page' ? 'feedback-page-form' : 'feedback-form'
     const submitButton = document.querySelector(`#${formId} button[type="submit"]`)
     const originalButtonText = submitButton?.textContent
@@ -9066,21 +8964,21 @@ class BackHubApp {
       const result = await apiService.submitFeedback(type, title, description, attachmentFile)
       if (result && result.success) {
         notificationService.success('Feedback envoyé avec succès ! Merci pour votre contribution.')
-        
+
         if (source === 'modal') {
           this.closeFeedbackModal()
         }
-        
-        // Réinitialiser le formulaire
+
+
         const form = document.getElementById(formId)
         if (form) {
           form.reset()
-          // Réinitialiser le compteur de caractères
+
           const titleCount = document.getElementById(`${prefix}title-count`)
           const descriptionCount = document.getElementById(`${prefix}description-count`)
           if (titleCount) titleCount.textContent = '0'
           if (descriptionCount) descriptionCount.textContent = '0'
-          // Réinitialiser la prévisualisation
+
           const attachmentPreview = document.getElementById(`${prefix}attachment-preview`)
           const attachmentZone = document.getElementById(`${prefix}attachment-zone`)
           if (attachmentPreview) attachmentPreview.style.display = 'none'
@@ -9100,14 +8998,12 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Ouvrir le modal mes feedbacks
-   */
+
   async openMyFeedbacksModal() {
     const modal = document.getElementById('my-feedbacks-modal')
     if (!modal) return
 
-    // Déplacer le modal dans le body si nécessaire
+
     if (modal.parentElement !== document.body) {
       document.body.appendChild(modal)
     }
@@ -9124,13 +9020,11 @@ class BackHubApp {
     modal.style.bottom = '0'
     document.body.style.overflow = 'hidden'
 
-    // Charger les feedbacks
+
     await this.loadMyFeedbacks()
   }
 
-  /**
-   * Fermer le modal mes feedbacks
-   */
+
   closeMyFeedbacksModal() {
     const modal = document.getElementById('my-feedbacks-modal')
     if (modal) {
@@ -9141,9 +9035,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Charger et afficher les feedbacks de l'utilisateur
-   */
+
   async loadMyFeedbacks() {
     const feedbacksList = document.getElementById('my-feedbacks-list')
     if (!feedbacksList) return
@@ -9167,9 +9059,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Rendre la liste des feedbacks de l'utilisateur
-   */
+
   renderMyFeedbacks(feedbacks) {
     const feedbacksList = document.getElementById('my-feedbacks-list')
     if (!feedbacksList) return
@@ -9282,7 +9172,7 @@ class BackHubApp {
     // Créer ou mettre à jour l'affichage du statut
     let statusDiv = document.getElementById('delete-account-status')
     const settingsSection = document.querySelector('.settings-section')
-    
+
     if (!statusDiv && settingsSection) {
       const sectionContent = settingsSection.querySelector('.settings-section-content')
       if (sectionContent) {
@@ -9296,7 +9186,7 @@ class BackHubApp {
     if (statusDiv) {
       const deletionDateObj = new Date(deletionDate)
       const daysRemaining = this.calculateWorkingDaysRemaining(new Date(), deletionDateObj)
-      
+
       statusDiv.innerHTML = `
         <div class="settings-item-info">
           <label class="settings-item-label" style="color: #ef4444;">⚠️ Suppression programmée</label>
@@ -9317,7 +9207,7 @@ class BackHubApp {
         })
       }
 
-      // Masquer le bouton de suppression
+
       const deleteBtn = document.getElementById('delete-account-btn')
       if (deleteBtn) {
         deleteBtn.style.display = 'none'
@@ -9325,25 +9215,21 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Masquer le statut de suppression
-   */
+
   hideDeletionStatus() {
     const statusDiv = document.getElementById('delete-account-status')
     if (statusDiv) {
       statusDiv.remove()
     }
 
-    // Afficher le bouton de suppression
+
     const deleteBtn = document.getElementById('delete-account-btn')
     if (deleteBtn) {
       deleteBtn.style.display = 'inline-flex'
     }
   }
 
-  /**
-   * Calculer le nombre de jours ouvrés restants
-   */
+
   calculateWorkingDaysRemaining(startDate, endDate) {
     let count = 0
     const current = new Date(startDate)
@@ -9351,7 +9237,7 @@ class BackHubApp {
 
     while (current < end) {
       const dayOfWeek = current.getDay()
-      // 0 = Dimanche, 6 = Samedi
+
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
         count++
       }
@@ -9361,9 +9247,7 @@ class BackHubApp {
     return count
   }
 
-  /**
-   * Ouvrir le modal de suppression de compte
-   */
+
   openDeleteAccountModal() {
     const modal = document.getElementById('delete-account-modal')
     if (modal && this.currentUser) {
@@ -9379,9 +9263,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Fermer le modal de suppression de compte
-   */
+
   closeDeleteAccountModal() {
     const modal = document.getElementById('delete-account-modal')
     if (modal) {
@@ -9393,9 +9275,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Ouvrir le modal d'annulation de suppression
-   */
+
   openCancelDeletionModal() {
     const modal = document.getElementById('cancel-deletion-modal')
     if (modal) {
@@ -9403,9 +9283,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Fermer le modal d'annulation de suppression
-   */
+
   closeCancelDeletionModal() {
     const modal = document.getElementById('cancel-deletion-modal')
     if (modal) {
@@ -9413,9 +9291,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Gérer la demande de suppression de compte
-   */
+
   async handleDeleteAccountRequest() {
     if (!this.useApi || !this.currentUser) {
       notificationService.error('Impossible de supprimer le compte en mode hors ligne')
@@ -9446,9 +9322,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Gérer l'annulation de la suppression
-   */
+
   async handleCancelDeletion() {
     if (!this.useApi || !this.currentUser) {
       notificationService.error('Impossible d\'annuler la suppression en mode hors ligne')
@@ -9471,17 +9345,15 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Initialiser la page de vote
-   */
+
   initVotePage() {
-    
-    // Afficher un état de chargement immédiatement
+
+
     const cooldownTimer = document.getElementById('vote-cooldown-timer')
     const cooldownDesc = document.getElementById('vote-cooldown-desc')
     const voteCountElement = document.getElementById('vote-count-month')
     const rankingElement = document.getElementById('vote-ranking')
-    
+
     if (cooldownTimer) {
       cooldownTimer.textContent = 'Chargement...'
       cooldownTimer.className = 'vote-stat-value-new loading'
@@ -9490,9 +9362,9 @@ class BackHubApp {
       cooldownDesc.textContent = 'Récupération du cooldown...'
       cooldownDesc.classList.add('loading')
     }
-    
-    // Ne PAS nettoyer voteStatsInterval ici car il doit continuer même hors page vote
-    // Il est géré globalement par startGlobalVoteStatsUpdate()
+
+
+
     if (this.voteCooldownInterval) {
       clearInterval(this.voteCooldownInterval)
       this.voteCooldownInterval = null
@@ -9501,10 +9373,10 @@ class BackHubApp {
       clearInterval(this.voteCooldownDisplayInterval)
       this.voteCooldownDisplayInterval = null
     }
-    
-    // Charger TOUT immédiatement et en parallèle pour un chargement instantané (sans délai)
-    
-    // Charger le cooldown et les stats en parallèle immédiatement (sans attendre)
+
+
+
+
     const loadPromises = [
       this.updateVoteCooldown().catch(err => {
         logger.error('Failed to load initial cooldown', err)
@@ -9513,44 +9385,44 @@ class BackHubApp {
         logger.error('Failed to load initial vote stats', err)
       })
     ]
-    
-    // Ne pas attendre Promise.all, démarrer les intervalles immédiatement
+
+
     Promise.all(loadPromises).then(() => {
     }).catch(() => {
-      // Ignorer les erreurs, on continue quand même
+
     })
-    
-    // Démarrer les intervalles IMMÉDIATEMENT (pas besoin d'attendre le chargement initial)
+
+
     this.startVoteCooldownCheck()
-    
-    // Les stats de vote sont déjà mises à jour globalement par startGlobalVoteStatsUpdate()
-    // On met juste à jour l'affichage immédiatement avec les données actuelles
+
+
+
     this.updateVotePageDisplay()
-    
-    
-    // Initialiser le toggle de notification de vote sur la page de vote
+
+
+
     const voteNotificationEnabled = this.isVoteNotificationEnabled()
     const voteNotificationToggle = document.querySelector('#vote-view #vote-notification-toggle')
     if (voteNotificationToggle) {
       voteNotificationToggle.checked = voteNotificationEnabled
-      
-      // Supprimer les anciens listeners pour éviter les doublons
+
+
       const newToggle = voteNotificationToggle.cloneNode(true)
       voteNotificationToggle.parentNode.replaceChild(newToggle, voteNotificationToggle)
-      
+
       newToggle.addEventListener('change', (e) => {
         const isEnabled = e.target.checked
         localStorage.setItem('vote-notification-enabled', isEnabled ? 'true' : 'false')
-        
-        // Les options de notification ont été supprimées (remplacées par overlay)
-        
-        // Synchroniser tous les autres toggles (paramètres et page de vote)
+
+
+
+
         document.querySelectorAll('#vote-notification-toggle').forEach(otherToggle => {
           if (otherToggle !== newToggle) {
             otherToggle.checked = isEnabled
           }
         })
-        
+
         if (isEnabled && 'Notification' in window && Notification.permission === 'default') {
           Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
@@ -9559,17 +9431,17 @@ class BackHubApp {
           })
         }
       })
-      
-      // Les options de notification ont été supprimées (remplacées par overlay)
+
+
     }
-    
-    // Gérer le clic sur le bouton de vote
+
+
     const voteButton = document.getElementById('vote-button-link')
     if (voteButton) {
       voteButton.addEventListener('click', async () => {
-        // Marquer qu'un cooldown était actif (pour la notification future)
+
         this.voteCooldownWasActive = true
-        // Mettre à jour le cooldown après un court délai pour laisser le site se mettre à jour
+
         setTimeout(() => {
           this.updateVoteCooldown()
         }, 2000)
@@ -9577,17 +9449,15 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Mettre à jour l'affichage de la page vote avec les stats actuelles
-   */
+
   updateVotePageDisplay() {
     const voteView = document.getElementById('vote-view')
     if (!voteView || voteView.classList.contains('hidden')) {
-      // Pas sur la page vote, ne pas mettre à jour l'affichage
+
       return
     }
-    
-    // Mettre à jour les votes du mois
+
+
     if (this.voteStats.voteCount !== null && this.voteStats.voteCount !== undefined && this.voteStats.voteCount > 0) {
       const voteCountElement = document.getElementById('vote-count-month')
       if (voteCountElement) {
@@ -9596,8 +9466,8 @@ class BackHubApp {
         voteCountElement.classList.remove('loading')
       }
     }
-    
-    // Mettre à jour le classement
+
+
     if (this.voteStats.ranking !== null && this.voteStats.ranking !== undefined && this.voteStats.ranking > 0) {
       const rankingElement = document.getElementById('vote-ranking')
       if (rankingElement) {
@@ -9607,39 +9477,37 @@ class BackHubApp {
       }
     }
   }
-  
-  /**
-   * Charger les statistiques de vote (fonctionne même hors page vote)
-   */
+
+
   async loadVoteStats() {
     if (this.isLoadingVoteStats) {
       return
     }
     this.isLoadingVoteStats = true
     try {
-      // Récupérer le cooldown de vote, les votes du mois et le classement
+
       const cooldownData = await apiService.getVoteCooldown()
-      
+
       if (cooldownData && cooldownData.success) {
-        // Stocker les stats globalement pour les utiliser partout (même hors page vote)
+
         if (cooldownData.voteCount !== null && cooldownData.voteCount !== undefined && cooldownData.voteCount > 0) {
           this.voteStats.voteCount = cooldownData.voteCount
         }
         if (cooldownData.ranking !== null && cooldownData.ranking !== undefined && cooldownData.ranking > 0) {
           this.voteStats.ranking = cooldownData.ranking
         }
-        
-        // Mettre à jour l'affichage seulement si on est sur la page vote
+
+
         this.updateVotePageDisplay()
-        
-        // Mettre à jour aussi le cooldown avec les mêmes données pour éviter un double appel
-        // MAIS seulement si on n'a pas déjà un cooldown actif (pour éviter les conflits)
+
+
+
         if (cooldownData.available !== undefined && !this.lastCooldownUpdate) {
           if (cooldownData.available) {
             const hadCooldown = this.voteCooldownWasActive
             this.setVoteAvailable()
             this.voteCooldownWasActive = false
-            
+
             if (hadCooldown && this.isVoteNotificationEnabled()) {
               this.triggerVoteAvailableNotification()
             }
@@ -9654,14 +9522,14 @@ class BackHubApp {
           }
         }
       } else {
-        // Si pas de données, essayer quand même de mettre à jour le cooldown
+
         if (!this.lastCooldownUpdate) {
           await this.updateVoteCooldown()
         }
       }
     } catch (error) {
       logger.error('Failed to load vote stats', error)
-      // En cas d'erreur, essayer quand même de mettre à jour le cooldown
+
       try {
         await this.updateVoteCooldown()
       } catch (cooldownError) {
@@ -9672,40 +9540,38 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Récupérer et mettre à jour le cooldown de vote depuis Top Serveurs (temps réel)
-   */
+
   async updateVoteCooldown() {
     try {
-      
-      // Récupérer le cooldown directement depuis le site Top Serveurs
+
+
       const cooldownData = await apiService.getVoteCooldown()
-      
+
       if (cooldownData && cooldownData.success) {
-        // Retirer immédiatement le texte "Récupération du cooldown..." dès qu'on a des données
+
         const cooldownDesc = document.getElementById('vote-cooldown-desc')
         if (cooldownDesc && cooldownDesc.textContent === 'Récupération du cooldown...') {
           cooldownDesc.classList.remove('loading')
         }
-        
+
         if (cooldownData.available) {
-          // Vérifier si on avait un cooldown actif avant (pour la notification)
+
           const hadCooldown = this.voteCooldownWasActive
           this.setVoteAvailable()
           this.voteCooldownWasActive = false
-          
-          // Déclencher la notification si le vote vient de redevenir disponible
+
+
           if (hadCooldown && this.isVoteNotificationEnabled()) {
             this.triggerVoteAvailableNotification()
           }
-          // Sauvegarder le timestamp pour le décrément local
+
           this.lastCooldownUpdate = null
           return
         }
-        
+
         if (cooldownData.remainingMs && cooldownData.remainingMs > 0) {
           this.voteCooldownWasActive = true
-          // Sauvegarder le temps réel récupéré et le timestamp
+
           this.lastCooldownUpdate = {
             remainingMs: cooldownData.remainingMs,
             timestamp: Date.now()
@@ -9714,13 +9580,13 @@ class BackHubApp {
           return
         }
       }
-      
-      // Si l'API ne retourne pas de données valides, considérer comme disponible
+
+
       this.setVoteAvailable()
       this.lastCooldownUpdate = null
     } catch (error) {
       logger.error('Failed to update vote cooldown', error)
-      // En cas d'erreur, utiliser le dernier cooldown connu si disponible
+
       if (this.lastCooldownUpdate) {
         const elapsed = Date.now() - this.lastCooldownUpdate.timestamp
         const remaining = this.lastCooldownUpdate.remainingMs - elapsed
@@ -9731,7 +9597,7 @@ class BackHubApp {
           this.lastCooldownUpdate = null
         }
       } else {
-        // Afficher un message d'erreur stylisé
+
         const cooldownTimer = document.getElementById('vote-cooldown-timer')
         const cooldownDesc = document.getElementById('vote-cooldown-desc')
         if (cooldownTimer) {
@@ -9748,9 +9614,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Définir l'état "vote disponible"
-   */
+
   setVoteAvailable() {
     const cooldownTimer = document.getElementById('vote-cooldown-timer')
     const cooldownDesc = document.getElementById('vote-cooldown-desc')
@@ -9775,9 +9639,7 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Définir l'état "cooldown actif"
-   */
+
   setVoteCooldown(remainingMs) {
     const cooldownTimer = document.getElementById('vote-cooldown-timer')
     const cooldownDesc = document.getElementById('vote-cooldown-desc')
@@ -9787,7 +9649,7 @@ class BackHubApp {
 
     if (cooldownTimer) {
       cooldownTimer.className = 'vote-stat-value-new vote-cooldown-active'
-      // S'assurer que la classe loading est retirée pour éviter les points de suspension
+
       cooldownTimer.classList.remove('loading')
     }
     if (cooldownDesc) {
@@ -9806,33 +9668,29 @@ class BackHubApp {
     this.updateCooldownDisplay(remainingMs, cooldownDisplay, cooldownTimer)
   }
 
-  /**
-   * Mettre à jour l'affichage du cooldown
-   */
+
   updateCooldownDisplay(remainingMs, displayElement, timerElement) {
     const hours = Math.floor(remainingMs / (1000 * 60 * 60))
     const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60))
     const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000)
 
     const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-    
+
     if (displayElement) {
       displayElement.textContent = timeString
-      // Retirer la classe loading pour éviter les points de suspension
+
       displayElement.classList.remove('loading')
     }
     if (timerElement) {
       timerElement.textContent = timeString
-      // Retirer la classe loading pour éviter les points de suspension
+
       timerElement.classList.remove('loading')
     }
   }
 
-  /**
-   * Démarrer la vérification du cooldown de vote en temps réel
-   */
+
   startVoteCooldownCheck() {
-    // Nettoyer les intervalles précédents s'ils existent (important pour le reload)
+
     if (this.voteCooldownInterval) {
       clearInterval(this.voteCooldownInterval)
       this.voteCooldownInterval = null
@@ -9848,101 +9706,95 @@ class BackHubApp {
       this.voteCooldownDisplayAnimationFrame = null
     }
 
-    // Récupérer le cooldown directement depuis le site toutes les 200ms pour avoir le temps réel quasi-instantané
-    // Note: Le premier appel est déjà fait dans initVotePage(), donc on démarre l'intervalle directement
+
+
     this.voteCooldownInterval = setInterval(() => {
       this.updateVoteCooldown()
-    }, 200) // Vérifier toutes les 200ms pour une mise à jour quasi-instantanée
+    }, 200)
 
-    // Utiliser requestAnimationFrame pour un affichage ultra-fluide et instantané (60 FPS)
+
     let lastUpdateTime = 0
     const updateDisplay = (currentTime) => {
-      // Limiter à ~60 FPS (environ 16ms entre chaque frame)
+
       if (currentTime - lastUpdateTime >= 16) {
         lastUpdateTime = currentTime
-        
+
         if (this.lastCooldownUpdate) {
           const elapsed = Date.now() - this.lastCooldownUpdate.timestamp
           const remaining = this.lastCooldownUpdate.remainingMs - elapsed
-          
+
           if (remaining > 0) {
-            // Mettre à jour l'affichage avec le temps restant calculé
+
             const cooldownDisplay = document.getElementById('vote-cooldown-display')
             const cooldownTimer = document.getElementById('vote-cooldown-timer')
             const cooldownDesc = document.getElementById('vote-cooldown-desc')
-            
-            // Mettre à jour le timer
+
+
             this.updateCooldownDisplay(remaining, cooldownDisplay, cooldownTimer)
-            
-            // S'assurer que la description est correcte (retirer "Récupération du cooldown...")
+
+
             if (cooldownDesc && (cooldownDesc.textContent === 'Récupération du cooldown...' || cooldownDesc.classList.contains('loading'))) {
               cooldownDesc.textContent = 'Temps restant avant le prochain vote'
               cooldownDesc.classList.remove('loading')
             }
-            
-            // Vérifier si le cooldown vient de se terminer (pour la notification)
+
+
             if (remaining <= 1000 && this.isVoteNotificationEnabled()) {
               this.triggerVoteAvailableNotification()
             }
           } else {
-            // Le cooldown est terminé, vérifier immédiatement avec l'API
+
             this.updateVoteCooldown()
           }
         } else {
-          // Pas de cooldown actif, vérifier quand même périodiquement
+
           const cooldownTimer = document.getElementById('vote-cooldown-timer')
           const cooldownDesc = document.getElementById('vote-cooldown-desc')
           if (cooldownTimer && (cooldownTimer.textContent === 'Chargement...' || cooldownTimer.textContent.includes('...'))) {
             this.updateVoteCooldown()
           }
-          // Si la description est toujours sur "Récupération du cooldown..." mais qu'on a pas de cooldown, vérifier
+
           if (cooldownDesc && cooldownDesc.textContent === 'Récupération du cooldown...') {
             this.updateVoteCooldown()
           }
         }
       }
-      
-      // Continuer l'animation si l'animation frame est toujours actif
+
+
       if (this.voteCooldownDisplayAnimationFrame !== null) {
         this.voteCooldownDisplayAnimationFrame = requestAnimationFrame(updateDisplay)
       }
     }
-    
-    // Démarrer l'animation
+
+
     this.voteCooldownDisplayAnimationFrame = requestAnimationFrame(updateDisplay)
-    // Marquer l'intervalle comme actif pour la vérification dans l'animation
+
     this.voteCooldownDisplayInterval = true
-    
+
   }
 
-  /**
-   * Vérifier si les notifications de vote sont activées
-   */
+
   isVoteNotificationEnabled() {
     const enabled = localStorage.getItem('vote-notification-enabled')
     return enabled === 'true'
   }
 
-  /**
-   * Fonctions de son supprimées - remplacées par overlay
-   */
-  
-  /**
-   * Déclencher une notification quand le vote est disponible
-   */
+
+
+
   triggerVoteAvailableNotification() {
-    // Vérifier si on a déjà notifié pour éviter les doublons
+
     const lastNotification = localStorage.getItem('vote-notification-last')
     const now = Date.now()
-    
-    // Ne notifier qu'une fois toutes les 5 minutes maximum
+
+
     if (lastNotification && (now - parseInt(lastNotification, 10)) < 5 * 60 * 1000) {
       return
     }
-    
+
     localStorage.setItem('vote-notification-last', now.toString())
-    
-    // Afficher l'overlay de notification
+
+
     if (window.electronAPI && window.electronAPI.showOverlayNotification) {
       window.electronAPI.showOverlayNotification(
         '🗳️ Vote disponible !',
@@ -9951,36 +9803,32 @@ class BackHubApp {
     }
   }
 
-  /**
-   * Démarrer la vérification périodique des nouveaux feedbacks (pour les développeurs)
-   */
+
   startFeedbackCheck() {
-    // Arrêter toute vérification existante
+
     this.stopFeedbackCheck()
-    
+
     if (!this.currentUser || this.currentUser.role !== 'developpeur') {
       return
     }
-    
+
     if (!this.useApi) {
       return
     }
-    
-    // Initialiser la dernière vérification à maintenant
+
+
     this.lastFeedbackCheck = new Date().toISOString()
-    
-    // Vérifier immédiatement
+
+
     this.checkNewFeedbacks()
-    
-    // Vérifier toutes les 30 secondes
+
+
     this.feedbackCheckInterval = setInterval(() => {
       this.checkNewFeedbacks()
-    }, 30000) // 30 secondes
+    }, 30000)
   }
 
-  /**
-   * Arrêter la vérification des nouveaux feedbacks
-   */
+
   stopFeedbackCheck() {
     if (this.feedbackCheckInterval) {
       clearInterval(this.feedbackCheckInterval)
@@ -9989,19 +9837,17 @@ class BackHubApp {
     this.lastFeedbackCheck = null
   }
 
-  /**
-   * Vérifier les nouveaux feedbacks et notifier les développeurs
-   */
+
   async checkNewFeedbacks() {
     if (!this.currentUser || this.currentUser.role !== 'developpeur') {
       return
     }
-    
+
     if (!this.useApi) {
       return
     }
-    
-    // Vérifier que le token est disponible
+
+
     if (!apiService.authToken) {
       const savedToken = apiService.getSavedToken()
       if (savedToken) {
@@ -10011,39 +9857,39 @@ class BackHubApp {
         return
       }
     }
-    
+
     try {
       const lastCheck = this.lastFeedbackCheck || new Date(Date.now() - 3600000).toISOString()
       const result = await apiService.checkNewFeedbacks(lastCheck)
-      
+
       if (result && result.success && result.new_count > 0) {
-        // Mettre à jour la dernière vérification
+
         if (result.last_check) {
           this.lastFeedbackCheck = result.last_check
         }
-        
-        // Préparer le message de notification
+
+
         const count = result.new_count
         const feedbacks = result.feedbacks || []
-        
-        // Notification overlay personnalisée pour les feedbacks
+
+
         if (count === 1 && feedbacks.length > 0) {
           const feedback = feedbacks[0]
-          
-          // Notification overlay moderne avec bouton cliquable
+
+
           if (window.electronAPI && window.electronAPI.showOverlayNotification) {
             window.electronAPI.showOverlayNotification(
-              null, // title (non utilisé pour feedback)
-              null, // message (non utilisé pour feedback)
-              'feedback', // type
-              feedback.type || 'other', // feedbackType
-              feedback.username || 'Utilisateur', // username
-              feedback.title || 'Sans titre', // feedbackTitle
-              feedback.description || '' // feedbackDescription
+              null,
+              null,
+              'feedback',
+              feedback.type || 'other',
+              feedback.username || 'Utilisateur',
+              feedback.title || 'Sans titre',
+              feedback.description || ''
             )
           }
-          
-          // Notification système Windows/macOS via Electron (fallback)
+
+
           if (window.electronAPI && window.electronAPI.showNotification) {
             const typeLabels = {
               'bug': '🐛 Bug',
@@ -10058,15 +9904,15 @@ class BackHubApp {
             )
           }
         } else {
-          // Plusieurs feedbacks
+
           const notificationBody = `Vous avez ${count} nouveau${count > 1 ? 'x' : ''} feedback${count > 1 ? 's' : ''}`
-          
-          // Notification système Windows/macOS via Electron
+
+
           if (window.electronAPI && window.electronAPI.showNotification) {
             window.electronAPI.showNotification('💬 Nouveaux Feedbacks', notificationBody)
           }
-          
-          // Notification overlay avec le premier feedback si disponible
+
+
           if (feedbacks.length > 0 && window.electronAPI && window.electronAPI.showOverlayNotification) {
             const feedback = feedbacks[0]
             window.electronAPI.showOverlayNotification(
@@ -10080,18 +9926,18 @@ class BackHubApp {
             )
           }
         }
-        
-        // Notification dans l'app
-        const notificationBody = count === 1 
+
+
+        const notificationBody = count === 1
           ? `Nouveau feedback de ${feedbacks[0]?.username || 'un utilisateur'}`
           : `Vous avez ${count} nouveau${count > 1 ? 'x' : ''} feedback${count > 1 ? 's' : ''}`
         notificationService.info(notificationBody, 5000)
       } else if (result && result.last_check) {
-        // Mettre à jour la dernière vérification même s'il n'y a pas de nouveaux feedbacks
+
         this.lastFeedbackCheck = result.last_check
       }
     } catch (error) {
-      // Ignorer les erreurs silencieusement pour ne pas perturber l'utilisateur
+
       console.error('Erreur lors de la vérification des feedbacks:', error)
     }
   }

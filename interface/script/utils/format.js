@@ -1,6 +1,6 @@
 
 export function formatPrice(price) {
-  // S'assurer que la valeur est un nombre valide
+
   const numPrice = parseFloat(price) || 0
   if (isNaN(numPrice)) {
     return '0 €'

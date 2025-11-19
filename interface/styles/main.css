@@ -1,4 +1,4 @@
-/* Layout principal */
+
 .content {
   display: flex;
   height: calc(100vh - 28px);
@@ -10,7 +10,7 @@
   display: none;
 }
 
-/* Page de connexion/inscription - Design Ultra-Moderne & Professionnel */
+
 .login-container {
   display: flex;
   align-items: center;
@@ -74,7 +74,7 @@
   z-index: 2;
 }
 
-/* Onglets - Design Ultra-Moderne */
+
 .auth-tabs {
   display: flex;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -161,7 +161,7 @@
   transform: scale(1.05);
 }
 
-/* Formulaires - Design Ultra-Moderne */
+
 .auth-form {
   display: none;
   padding: 56px 48px;
@@ -246,7 +246,7 @@
   letter-spacing: 0.1px;
 }
 
-/* Champs de formulaire - Design Ultra-Moderne */
+
 .form-group {
   margin-bottom: 28px;
   position: relative;
@@ -350,7 +350,7 @@
   letter-spacing: 0;
 }
 
-/* Checkbox personnalisé - Design Ultra-Moderne */
+
 .checkbox-group {
   margin-bottom: 32px;
 }
@@ -482,7 +482,7 @@
   width: 100%;
 }
 
-/* Modal Conditions d'utilisation - Design Moderne */
+
 .terms-modal {
   display: none;
   position: fixed;
@@ -637,7 +637,7 @@
   max-width: 100%;
 }
 
-/* Sections */
+
 .terms-section {
   margin-bottom: 32px;
   padding: 24px;
@@ -732,7 +732,7 @@
   margin-bottom: 0;
 }
 
-/* Features List */
+
 .terms-features {
   display: flex;
   flex-direction: column;
@@ -769,7 +769,7 @@
   line-height: 1.6;
 }
 
-/* List Items */
+
 .terms-list {
   display: flex;
   flex-direction: column;
@@ -817,7 +817,7 @@
   font-style: italic;
 }
 
-/* Footer */
+
 .terms-footer {
   margin-top: 40px;
   padding-top: 24px;
@@ -850,7 +850,7 @@
   color: #ffffff;
 }
 
-/* Modal Footer */
+
 .terms-modal-footer {
   padding: 24px 32px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -923,7 +923,7 @@
   }
 }
 
-/* Boutons améliorés - Design Ultra-Moderne */
+
 .btn-primary {
   background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
   border: none;
@@ -970,7 +970,7 @@
   transform: none;
 }
 
-/* Boutons - Design Ultra-Moderne */
+
 .btn-arrow {
   font-size: 16px;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
@@ -995,7 +995,7 @@
   margin-top: 8px;
 }
 
-/* Messages d'erreur et succès - Design Ultra-Moderne */
+
 .error-message {
   color: #ff6b6b;
   font-size: 13px;
@@ -1113,7 +1113,7 @@
   font-weight: 600;
 }
 
-/* Barre latérale - Design moderne */
+
 .sidebar {
   width: 280px;
   background: #0f0f10;
@@ -1642,7 +1642,7 @@
   color: #a5b4fc !important;
 }
 
-/* Contenu principal */
+
 .main-content {
   flex: 1;
   display: flex;
@@ -1694,7 +1694,7 @@
   overflow-x: hidden;
 }
 
-/* ===== PAGE ADMIN - REFONTE COMPLÈTE ===== */
+
 .admin-modern-wrapper {
   padding: 24px;
   max-width: 100%;
@@ -1702,7 +1702,7 @@
   animation: fadeInUp 0.6s ease-out;
 }
 
-/* Hero Section */
+
 .admin-hero-modern {
   position: relative;
   padding: 32px 36px;
@@ -1825,7 +1825,7 @@
   line-height: 1;
 }
 
-/* Navigation Tabs */
+
 .admin-nav-modern {
   margin-bottom: 24px;
   background: rgba(20, 20, 20, 0.6);
@@ -1893,7 +1893,7 @@
   font-size: 14px;
 }
 
-/* Tab Content */
+
 .admin-tab-content {
   display: none;
 }
@@ -1903,7 +1903,7 @@
   animation: fadeInUp 0.4s ease-out;
 }
 
-/* Stats Grid */
+
 .admin-stats-modern-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -2047,7 +2047,7 @@
   overflow-wrap: break-word;
 }
 
-/* Charts Grid */
+
 .admin-charts-modern-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -2102,7 +2102,7 @@
   max-height: 400px;
 }
 
-/* Table Card */
+
 .admin-table-modern-card {
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(26, 26, 26, 0.98) 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2179,7 +2179,7 @@
   background: rgba(249, 115, 22, 0.05);
 }
 
-/* Feedbacks */
+
 .admin-feedbacks-modern-card {
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(26, 26, 26, 0.98) 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2519,10 +2519,8 @@
   box-sizing: border-box;
 }
 
-/* Modal de réponse au feedback - Refonte moderne */
-/* ============================================
-   FEEDBACK RESPONSE MODAL - PROFESSIONAL DESIGN
-   ============================================ */
+
+
 
 .feedback-response-modal-overlay {
   position: fixed;
@@ -2570,7 +2568,7 @@
   }
 }
 
-/* Header */
+
 .feedback-response-modal-header {
   padding: 28px 32px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -2657,7 +2655,7 @@
   transform: scale(0.95);
 }
 
-/* Body */
+
 .feedback-response-modal-body {
   padding: 32px;
   overflow-y: auto;
@@ -2684,7 +2682,7 @@
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* Context Section (Original Feedback) */
+
 .feedback-response-context-section {
   display: flex;
   flex-direction: column;
@@ -2848,7 +2846,7 @@
   border-radius: 3px;
 }
 
-/* Form Section (Response Input) */
+
 .feedback-response-form-section {
   display: flex;
   flex-direction: column;
@@ -2963,7 +2961,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Footer */
+
 .feedback-response-modal-footer {
   padding: 24px 32px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -3087,7 +3085,7 @@
   font-style: italic;
 }
 
-/* Loading & Empty States */
+
 .admin-loading-state {
   display: flex;
   flex-direction: column;
@@ -3132,7 +3130,7 @@
   margin: 0;
 }
 
-/* Responsive */
+
 @media (max-width: 1200px) {
   .admin-charts-modern-grid {
     grid-template-columns: 1fr;
@@ -3183,7 +3181,7 @@
   }
 }
 
-/* Anciens styles admin (à supprimer progressivement) */
+
 #admin-view-old,
 #clan-view,
 #settings-view {
@@ -3196,7 +3194,7 @@
   visibility: hidden !important;
 }
 
-/* Forcer l'affichage de la vue historique quand elle n'est pas cachée */
+
 #history-view:not(.hidden) {
   display: flex !important;
   visibility: visible !important;
@@ -3252,7 +3250,7 @@
   font-size: 13px;
 }
 
-/* Boutons */
+
 .btn {
   padding: 8px 16px;
   border: none;
@@ -3271,7 +3269,7 @@
   box-sizing: border-box;
 }
 
-/* Styles génériques pour .btn-primary - Ne pas utiliser, utiliser les styles spécifiques */
+
 
 .btn-secondary {
   background: #3a3a3a;
@@ -3297,7 +3295,7 @@
   background: #f97316;
 }
 
-/* Tableau */
+
 .table-container {
   width: 100%;
   min-height: 200px;
@@ -3314,7 +3312,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Assurer que le tableau est toujours visible dans le conteneur */
+
 .table-container .items-table {
   margin: 0;
   border-spacing: 0;
@@ -3360,7 +3358,7 @@
   border-bottom: none;
 }
 
-/* Actions dans le tableau */
+
 .table-actions {
   display: flex;
   gap: 8px;
@@ -3393,7 +3391,7 @@
   color: #4fc1ff;
 }
 
-/* Modal */
+
 .modal {
   display: none;
   position: fixed;
@@ -3459,7 +3457,7 @@
   background: #3a3a3a;
 }
 
-/* Formulaire */
+
 form {
   padding: 20px;
 }
@@ -3497,7 +3495,7 @@ form {
   border-color: #f97316;
 }
 
-/* Form hint dans le modal */
+
 .modal .form-hint {
   display: block;
   color: #6a6a6a;
@@ -3519,8 +3517,8 @@ form {
   border-top: 1px solid #2d2d2d;
 }
 
-/* Scrollbar personnalisée - Moderne et stylisée - Plus apparente */
-/* Scrollbar Firefox (toutes les sections) */
+
+
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(249, 115, 22, 0.7) rgba(26, 26, 27, 0.95);
@@ -3534,7 +3532,7 @@ form {
   scrollbar-color: rgba(249, 115, 22, 0.8) rgba(26, 26, 27, 0.95);
 }
 
-/* Scrollbar stylisée pour toutes les sections */
+
 .table-container::-webkit-scrollbar,
 .modal-content::-webkit-scrollbar,
 .view::-webkit-scrollbar,
@@ -3620,7 +3618,7 @@ form {
     inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Scrollbar horizontale */
+
 .table-container::-webkit-scrollbar:horizontal,
 .drug-table-container::-webkit-scrollbar:horizontal {
   height: 14px;
@@ -3648,7 +3646,7 @@ form {
   box-shadow: 0 2px 8px rgba(249, 115, 22, 0.5);
 }
 
-/* Utilitaires */
+
 .text-right {
   text-align: right;
 }
@@ -3672,7 +3670,7 @@ form {
   margin-bottom: 16px;
 }
 
-/* Carte de résumé */
+
 .summary-card {
   background: #252526;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -3688,7 +3686,7 @@ form {
   overflow: visible;
 }
 
-/* Barre de recherche */
+
 .search-toolbar {
   display: flex;
   justify-content: space-between;
@@ -3702,7 +3700,7 @@ form {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Barre de recherche stylisée pour les armes - Design Épuré */
+
 .search-toolbar-armes {
   background: #252526;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -3876,7 +3874,7 @@ form {
   color: #f59e0b;
 }
 
-/* Catégories */
+
 .categories-container {
   display: flex;
   flex-direction: column;
@@ -3904,7 +3902,7 @@ form {
   margin-bottom: 20px;
 }
 
-/* Assurer que le conteneur de tableau dans category-section est bien configuré */
+
 .category-section .table-container {
   position: relative;
   width: 100%;
@@ -3931,7 +3929,7 @@ form {
   gap: 10px;
 }
 
-/* Tableau d'items */
+
 .items-table {
   width: 100%;
   min-width: 800px;
@@ -4069,7 +4067,7 @@ form {
   color: #ffffff;
 }
 
-/* Cellules avec price-cell - le conteneur flex gère l'alignement */
+
 .items-table td.text-right .price-cell {
   display: inline-flex;
   align-items: center;
@@ -4096,7 +4094,7 @@ form {
   line-height: 1.4;
 }
 
-/* Checkbox et quantité */
+
 .checkbox-quantity-container {
   display: flex;
   align-items: center;
@@ -4165,7 +4163,7 @@ form {
   height: 16px;
 }
 
-/* Prix d'achat - affichage & éditeur - Design minimaliste */
+
 .price-cell {
   display: inline-flex;
   align-items: center;
@@ -4241,7 +4239,7 @@ form {
   background: #1e1e1e;
 }
 
-/* Badges */
+
 .badge {
   display: inline-block;
   padding: 4px 12px;
@@ -4271,7 +4269,7 @@ form {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ===== PAGE SUPPORT - REFONTE COMPLÈTE ===== */
+
 #support-view {
   padding: 0 !important;
 }
@@ -4288,7 +4286,7 @@ form {
   overflow-x: hidden;
 }
 
-/* Hero Section */
+
 .support-hero-modern {
   position: relative;
   padding: 32px 36px;
@@ -4340,7 +4338,7 @@ form {
   font-weight: 400;
 }
 
-/* Navigation Tabs */
+
 .support-nav-modern {
   margin-bottom: 24px;
   background: rgba(20, 20, 20, 0.6);
@@ -4408,7 +4406,7 @@ form {
   font-size: 14px;
 }
 
-/* Content */
+
 .support-content-modern {
   width: 100%;
 }
@@ -4466,7 +4464,7 @@ form {
   padding: 24px;
 }
 
-/* Content Blocks */
+
 .support-content-block {
   margin-bottom: 32px;
 }
@@ -4566,7 +4564,7 @@ form {
   font-weight: bold;
 }
 
-/* Alerts */
+
 .support-alert {
   display: flex;
   gap: 12px;
@@ -4613,7 +4611,7 @@ form {
   margin-bottom: 4px;
 }
 
-/* FAQ Grid */
+
 .support-faq-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -4652,7 +4650,7 @@ form {
   margin: 0;
 }
 
-/* Formula */
+
 .support-formula {
   background: rgba(20, 20, 20, 0.6);
   border: 1px solid rgba(249, 115, 22, 0.3);
@@ -4665,7 +4663,7 @@ form {
   font-weight: 600;
 }
 
-/* Info Grid */
+
 .support-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -4697,7 +4695,7 @@ form {
   font-weight: 600;
 }
 
-/* Contact Grid */
+
 .support-contact-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -4742,7 +4740,7 @@ form {
   margin: 0;
 }
 
-/* Responsive */
+
 @media (max-width: 1200px) {
   .support-faq-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -4961,7 +4959,7 @@ form {
   pointer-events: none !important;
 }
 
-/* Interface Drogue */
+
 .drug-calculator-container {
   display: flex;
   flex-direction: column;
@@ -5201,7 +5199,7 @@ form {
   box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
 }
 
-/* Styles pour les inputs de prix d'achat - Design minimaliste */
+
 .drug-buy-price-input {
   width: 90px;
   max-width: 100%;
@@ -5235,7 +5233,7 @@ form {
   box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
 }
 
-/* Style pour les prix personnalisés (non-zéro) - Design minimaliste */
+
 .drug-buy-price-input.custom-price {
   border-color: #22c55e;
   background: #ffffff;
@@ -5253,7 +5251,7 @@ form {
   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
-/* Conteneur pour le prix - simplifié */
+
 .drug-buy-price-wrapper {
   display: inline-flex;
   align-items: center;
@@ -5410,7 +5408,7 @@ form {
   color: #f59e0b;
 }
 
-/* Wrapper pour les armes */
+
 .armes-wrapper {
   display: flex;
   flex-direction: column;
@@ -5446,7 +5444,7 @@ form {
   flex: 1;
 }
 
-/* Input de quantité pour les armes - Design minimaliste */
+
 .armes-quantity-input {
   width: 70px;
   max-width: 100%;
@@ -5479,7 +5477,7 @@ form {
   background: #1e1e1e;
 }
 
-/* Récapitulatif pour les armes (en bas) */
+
 .armes-summary-section {
   background: linear-gradient(135deg, rgba(37, 37, 38, 0.95) 0%, rgba(30, 30, 30, 0.98) 100%);
   border: 1px solid rgba(249, 115, 22, 0.2);
@@ -5613,7 +5611,7 @@ form {
   color: #f59e0b;
 }
 
-/* ===== PAGE HISTORIQUE - REFONTE COMPLÈTE ===== */
+
 #history-view {
   display: flex !important;
   flex-direction: column;
@@ -5645,7 +5643,7 @@ form {
   box-sizing: border-box;
 }
 
-/* Hero Section */
+
 .history-hero-modern {
   position: relative;
   padding: 32px 36px;
@@ -5732,7 +5730,7 @@ form {
   line-height: 1;
 }
 
-/* Statistiques Grid */
+
 .history-stats-modern-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -5881,7 +5879,7 @@ form {
   background-clip: text;
 }
 
-/* Controls */
+
 .history-controls-modern {
   display: flex;
   gap: 16px;
@@ -5987,7 +5985,7 @@ form {
   padding: 8px;
 }
 
-/* Transactions Container */
+
 .history-transactions-modern-container {
   width: 100%;
   max-width: 100%;
@@ -6000,7 +5998,7 @@ form {
   gap: 16px;
 }
 
-/* Transaction Cards */
+
 .transaction-card {
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(26, 26, 26, 0.98) 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -6253,7 +6251,7 @@ form {
   color: #f59e0b;
 }
 
-/* Empty State */
+
 .history-empty-state {
   display: flex;
   flex-direction: column;
@@ -6283,7 +6281,7 @@ form {
   margin: 0;
 }
 
-/* Responsive */
+
 @media (max-width: 1200px) {
   .financial-row {
     grid-template-columns: 1fr;
@@ -6525,7 +6523,7 @@ form {
   }
 }
 
-/* Header Section */
+
 .history-header-section {
   background: linear-gradient(135deg, rgba(37, 37, 38, 0.95) 0%, rgba(26, 26, 27, 0.98) 100%);
   border: 1px solid rgba(249, 115, 22, 0.2);
@@ -6605,7 +6603,7 @@ form {
   font-size: 16px;
 }
 
-/* Statistiques Grid */
+
 .history-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -6721,7 +6719,7 @@ form {
   color: #f48771;
 }
 
-/* Controls Bar */
+
 .history-controls-bar {
   display: flex;
   gap: 16px;
@@ -6805,7 +6803,7 @@ form {
   color: #ffffff;
 }
 
-/* Transactions Wrapper */
+
 .history-transactions-wrapper {
   flex: 1;
   min-height: 200px;
@@ -6817,7 +6815,7 @@ form {
   gap: 16px;
 }
 
-/* Transaction Cards */
+
 .transaction-card {
   background: linear-gradient(135deg, rgba(37, 37, 38, 0.9) 0%, rgba(26, 26, 27, 0.95) 100%);
   border: 1px solid rgba(249, 115, 22, 0.15);
@@ -7091,7 +7089,7 @@ form {
   color: #f48771;
 }
 
-/* État vide */
+
 .history-empty-state {
   text-align: center;
   padding: 100px 40px;
@@ -7164,7 +7162,7 @@ form {
   }
 }
 
-/* Responsive pour les sections drogue */
+
 @media (max-width: 768px) {
   .drug-category-section {
     padding: 20px 16px;
@@ -7235,7 +7233,7 @@ form {
   }
 }
 
-/* Responsive pour la section armes */
+
 @media (max-width: 1200px) {
   .items-table {
     min-width: 700px;
@@ -7367,7 +7365,7 @@ form {
   }
 }
 
-/* ===== NOTIFICATIONS (TOAST) ===== */
+
 .notification-container {
   position: fixed;
   top: 80px;
@@ -7460,7 +7458,7 @@ form {
   border-left: 4px solid #3b82f6;
 }
 
-/* ===== ANIMATIONS ===== */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -7513,7 +7511,7 @@ form {
   animation: fadeOut 0.3s ease-in;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
+
 @media (max-width: 1024px) {
   .sidebar {
     width: 240px;
@@ -7588,7 +7586,7 @@ form {
   }
 }
 
-/* ===== COMPACT MODE ===== */
+
 .compact-mode .sidebar {
   width: 200px;
 }
@@ -7625,7 +7623,7 @@ form {
   padding: 8px;
 }
 
-/* ===== TOOLTIPS ===== */
+
 .tooltip-container {
   position: fixed;
   z-index: 10001;
@@ -7690,7 +7688,7 @@ form {
   border-right-color: #1a1a1a;
 }
 
-/* ===== INTERACTIVE GUIDE ===== */
+
 .guide-overlay {
   position: fixed;
   top: 0;
@@ -7825,7 +7823,7 @@ form {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* ===== DRAG & DROP ===== */
+
 .dragging {
   opacity: 0.5;
   cursor: grabbing;
@@ -7860,7 +7858,7 @@ body.drag-over::before {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* ===== DASHBOARD STYLES - REFONTE COMPLÈTE ===== */
+
 .dashboard-modern-wrapper {
   width: 100%;
   height: 100%;
@@ -7873,7 +7871,7 @@ body.drag-over::before {
   box-sizing: border-box;
 }
 
-/* Hero Section */
+
 .dashboard-hero-modern {
   position: relative;
   padding: 32px 36px;
@@ -8003,7 +8001,7 @@ body.drag-over::before {
   animation-delay: 4s;
 }
 
-/* Statistiques Grid */
+
 .dashboard-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -8190,7 +8188,7 @@ body.drag-over::before {
   font-weight: 500;
 }
 
-/* Main Content */
+
 .dashboard-main-modern {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -8206,7 +8204,7 @@ body.drag-over::before {
   gap: 24px;
 }
 
-/* Modern Cards */
+
 .dashboard-modern-card {
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(26, 26, 26, 0.98) 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -8286,7 +8284,7 @@ body.drag-over::before {
   padding: 24px;
 }
 
-/* Quick Actions */
+
 .quick-actions-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -8385,7 +8383,7 @@ body.drag-over::before {
   border-color: rgba(34, 197, 94, 0.4);
 }
 
-/* Top Transactions List */
+
 .top-transactions-list,
 .recent-transactions-list {
   display: flex;
@@ -8516,7 +8514,7 @@ body.drag-over::before {
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
-/* Empty State */
+
 .empty-state-modern {
   display: flex;
   flex-direction: column;
@@ -8545,7 +8543,7 @@ body.drag-over::before {
   color: #888;
 }
 
-/* Advanced Stats */
+
 .advanced-stats-grid {
   display: flex;
   flex-direction: column;
@@ -8601,7 +8599,7 @@ body.drag-over::before {
   color: #ffffff;
 }
 
-/* Responsive */
+
 @media (max-width: 1600px) {
   .dashboard-stats-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -8780,7 +8778,7 @@ body.drag-over::before {
   }
 }
 
-/* Statistiques principales */
+
 .stats-overview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -8896,7 +8894,7 @@ body.drag-over::before {
 }
 
 
-/* Contenu principal */
+
 .dashboard-main {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -8910,7 +8908,7 @@ body.drag-over::before {
   gap: 24px;
 }
 
-/* Cartes du dashboard */
+
 .dashboard-card {
   background: #1e1e1f;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -8956,7 +8954,7 @@ body.drag-over::before {
   border-color: rgba(249, 115, 22, 0.5);
 }
 
-/* Boutons d'action */
+
 .action-buttons {
   display: grid;
   grid-template-columns: 1fr;
@@ -9032,7 +9030,7 @@ body.drag-over::before {
   line-height: 1.4;
 }
 
-/* Liste des transactions récentes */
+
 .recent-list {
   display: flex;
   flex-direction: column;
@@ -9087,7 +9085,7 @@ body.drag-over::before {
   color: #f87171;
 }
 
-/* Liste top transactions */
+
 .top-list {
   display: flex;
   flex-direction: column;
@@ -9150,7 +9148,7 @@ body.drag-over::before {
   text-align: right;
 }
 
-/* Statistiques détaillées */
+
 .detail-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -9186,7 +9184,7 @@ body.drag-over::before {
   font-weight: 700;
 }
 
-/* Message vide */
+
 .empty-message {
   text-align: center;
   padding: 50px 20px;
@@ -9204,7 +9202,7 @@ body.drag-over::before {
   font-weight: 500;
 }
 
-/* Responsive */
+
 @media (max-width: 1200px) {
   .dashboard-main {
     grid-template-columns: 1fr;
@@ -9241,7 +9239,7 @@ body.drag-over::before {
   }
 }
 
-/* ===== PAGE CLAN - REFONTE COMPLÈTE ===== */
+
 #clan-view {
   padding: 0 !important;
 }
@@ -9258,7 +9256,7 @@ body.drag-over::before {
   overflow-x: hidden;
 }
 
-/* Hero Section */
+
 .clan-hero-modern {
   position: relative;
   padding: 32px 36px;
@@ -9310,7 +9308,7 @@ body.drag-over::before {
   font-weight: 400;
 }
 
-/* Sections */
+
 .clan-modern-section {
   margin-bottom: 24px;
 }
@@ -9369,14 +9367,14 @@ body.drag-over::before {
   padding: 24px;
 }
 
-/* Clans List Grid */
+
 .clans-list-modern-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
 
-/* Centrer l'état vide dans la liste des clans */
+
 .clans-list-modern-grid .empty-state-modern {
   grid-column: 1 / -1;
   width: 100%;
@@ -9508,7 +9506,7 @@ body.drag-over::before {
   margin: 0;
 }
 
-/* Buttons */
+
 .clan-refresh-btn {
   display: flex;
   align-items: center;
@@ -9572,7 +9570,7 @@ body.drag-over::before {
   transform: translateY(-2px);
 }
 
-/* Actions Grid */
+
 .clan-actions-modern-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -9657,7 +9655,7 @@ body.drag-over::before {
   transform: translateX(4px);
 }
 
-/* Clan Info */
+
 .clan-info-modern-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -9719,7 +9717,7 @@ body.drag-over::before {
   transform: scale(1.1);
 }
 
-/* Members List */
+
 .clan-members-modern-list {
   display: flex;
   flex-direction: column;
@@ -9812,7 +9810,7 @@ body.drag-over::before {
   transform: scale(1.1);
 }
 
-/* Filters */
+
 .clan-filters-modern {
   display: flex;
   gap: 12px;
@@ -9848,14 +9846,14 @@ body.drag-over::before {
   padding: 8px;
 }
 
-/* History List */
+
 .clan-history-modern-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* Responsive */
+
 @media (max-width: 1200px) {
   .clans-list-modern-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -9897,7 +9895,7 @@ body.drag-over::before {
   }
 }
 
-/* Liste des membres */
+
 .clan-members-list {
   display: flex;
   flex-direction: column;
@@ -9906,11 +9904,11 @@ body.drag-over::before {
   overflow-y: auto;
   overflow-x: hidden;
   max-height: 500px;
-  min-height: 0; /* Permet au flex de rétrécir */
+  min-height: 0; 
   padding-right: 8px;
 }
 
-/* Style de la scrollbar pour la liste des membres */
+
 .clan-members-list::-webkit-scrollbar {
   width: 8px;
 }
@@ -10000,7 +9998,7 @@ body.drag-over::before {
   color: #ffffff;
 }
 
-/* Historique du clan */
+
 .clan-history-list {
   display: flex;
   flex-direction: column;
@@ -10013,7 +10011,7 @@ body.drag-over::before {
   padding-right: 8px;
 }
 
-/* Style de la scrollbar pour l'historique */
+
 .clan-history-list::-webkit-scrollbar {
   width: 8px;
 }
@@ -10124,7 +10122,7 @@ body.drag-over::before {
   transform: scale(1.1);
 }
 
-/* Actions clan (créer/rejoindre) */
+
 .clan-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -10161,7 +10159,7 @@ body.drag-over::before {
   line-height: 1.5;
 }
 
-/* Informations du clan */
+
 .clan-info-section {
   margin-bottom: 24px;
 }
@@ -10228,9 +10226,7 @@ body.drag-over::before {
   transform: scale(1.05);
 }
 
-/* ========================================
-   VUE PARAMÈTRES - REFONTE COMPLÈTE
-   ======================================== */
+
 
 #settings-view {
   padding: 0 !important;
@@ -10244,7 +10240,7 @@ body.drag-over::before {
   animation: fadeInUp 0.4s ease-out;
 }
 
-/* Hero Section */
+
 .settings-hero-modern {
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(251, 146, 60, 0.05) 100%);
   border-bottom: 1px solid rgba(249, 115, 22, 0.2);
@@ -10286,7 +10282,7 @@ body.drag-over::before {
   margin: 0;
 }
 
-/* Navigation Tabs */
+
 .settings-nav-modern {
   background: rgba(20, 20, 20, 0.5);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -10358,7 +10354,7 @@ body.drag-over::before {
   font-size: 14px;
 }
 
-/* Content */
+
 .settings-content-modern {
   max-width: 1400px;
   margin: 0 auto;
@@ -10412,7 +10408,7 @@ body.drag-over::before {
   gap: 16px;
 }
 
-/* Cards */
+
 .settings-card-modern {
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.8) 0%, rgba(26, 26, 26, 0.8) 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -10509,7 +10505,7 @@ body.drag-over::before {
   gap: 12px;
 }
 
-/* Inputs */
+
 .settings-input-modern {
   padding: 10px 14px;
   background: rgba(20, 20, 20, 0.6);
@@ -10561,7 +10557,7 @@ body.drag-over::before {
   box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
 }
 
-/* Toggle */
+
 .settings-toggle-modern {
   position: relative;
   display: inline-block;
@@ -10615,7 +10611,7 @@ body.drag-over::before {
   border-color: rgba(249, 115, 22, 0.5);
 }
 
-/* Badge */
+
 .settings-badge-modern {
   display: inline-block;
   padding: 8px 16px;
@@ -10647,7 +10643,7 @@ body.drag-over::before {
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
 }
 
-/* Value */
+
 .settings-value-modern {
   font-size: 14px;
   color: #ffffff;
@@ -10658,7 +10654,7 @@ body.drag-over::before {
   border: 1px solid rgba(249, 115, 22, 0.2);
 }
 
-/* Buttons */
+
 .settings-btn-modern {
   display: inline-flex;
   align-items: center;
@@ -10713,7 +10709,7 @@ body.drag-over::before {
   border: 1px solid rgba(249, 115, 22, 0.1);
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .settings-hero-modern {
     padding: 24px 20px;
@@ -10774,7 +10770,7 @@ body.drag-over::before {
   background-color: #fb923c;
 }
 
-/* Modal changement de mot de passe */
+
 #change-password-modal .modal-content {
   max-width: 500px;
 }
@@ -10848,7 +10844,7 @@ body.drag-over::before {
   transform: translateY(0);
 }
 
-/* Modal suppression de compte */
+
 #delete-account-modal .modal-content {
   max-width: 600px;
 }
@@ -10922,17 +10918,15 @@ body.drag-over::before {
   }
 }
 
-/* ========================================
-   SYSTÈME DE FEEDBACK
-   ======================================== */
 
-/* Modal large pour les listes */
+
+
 .modal-large .modal-content {
   max-width: 800px;
   max-height: 85vh;
 }
 
-/* ===== MODAL FEEDBACK - REFONTE COMPLÈTE ===== */
+
 .feedback-modal-content-v2 {
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.98) 0%, rgba(26, 26, 26, 0.98) 100%);
   border-radius: 20px;
@@ -10961,7 +10955,7 @@ body.drag-over::before {
   }
 }
 
-/* Header */
+
 .feedback-modal-header-v2 {
   display: flex;
   align-items: flex-start;
@@ -11028,7 +11022,7 @@ body.drag-over::before {
   height: 20px;
 }
 
-/* Body */
+
 .feedback-modal-body-v2 {
   padding: 32px;
   overflow-y: auto;
@@ -11076,7 +11070,7 @@ body.drag-over::before {
   margin-left: 4px;
 }
 
-/* Type Selector */
+
 .feedback-type-selector {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -11140,7 +11134,7 @@ body.drag-over::before {
   line-height: 1.3;
 }
 
-/* Inputs */
+
 .feedback-form-input,
 .feedback-form-textarea {
   width: 100%;
@@ -11177,7 +11171,7 @@ body.drag-over::before {
   line-height: 1.4;
 }
 
-/* Attachment Zone */
+
 .feedback-attachment-zone {
   position: relative;
   border: 2px dashed rgba(255, 255, 255, 0.2);
@@ -11283,7 +11277,7 @@ body.drag-over::before {
   height: 16px;
 }
 
-/* Footer */
+
 .feedback-actions {
   display: flex;
   gap: 12px;
@@ -11362,7 +11356,7 @@ body.drag-over::before {
   line-height: 1;
 }
 
-/* My Feedbacks List */
+
 .my-feedbacks-list-modern {
   display: flex;
   flex-direction: column;
@@ -11413,7 +11407,7 @@ body.drag-over::before {
   }
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .feedback-modal-content {
     width: 95%;
@@ -11444,7 +11438,7 @@ body.drag-over::before {
   }
 }
 
-/* Liste des feedbacks */
+
 .feedbacks-list {
   display: flex;
   flex-direction: column;
@@ -11639,7 +11633,7 @@ body.drag-over::before {
   color: #10b981;
 }
 
-/* États de chargement et vides */
+
 .loading-state,
 .empty-message,
 .error-message {
@@ -11669,7 +11663,7 @@ body.drag-over::before {
   color: #ef4444;
 }
 
-/* Interface admin pour les feedbacks */
+
 .admin-feedbacks-header {
   margin-bottom: 24px;
 }
@@ -11745,7 +11739,7 @@ body.drag-over::before {
   font-size: 12px;
 }
 
-/* Responsive pour les feedbacks */
+
 @media (max-width: 768px) {
   .feedback-header {
     flex-direction: column;
@@ -11780,7 +11774,7 @@ body.drag-over::before {
   }
 }
 
-/* ===== CARTE INTERACTIVE CHERNARUS ===== */
+
 .map-container {
   width: 100%;
   height: calc(100vh - 200px);
@@ -11798,7 +11792,7 @@ body.drag-over::before {
   background: #0a0a0b;
 }
 
-/* Styles pour les contrôles Leaflet personnalisés */
+
 .map-reset-control {
   background: rgba(15, 15, 16, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -11826,7 +11820,7 @@ body.drag-over::before {
   transform: translateY(-1px);
 }
 
-/* Personnalisation des contrôles Leaflet */
+
 .leaflet-control-zoom {
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   background: rgba(15, 15, 16, 0.95) !important;
@@ -11869,7 +11863,7 @@ body.drag-over::before {
   color: #ffffff !important;
 }
 
-/* Responsive pour la carte */
+
 @media (max-width: 768px) {
   .map-container {
     height: calc(100vh - 150px);
@@ -11877,7 +11871,7 @@ body.drag-over::before {
   }
 }
 
-/* ===== REFONTE COMPLÈTE SECTION ARMES - DESIGN MODERNE ===== */
+
 .weapons-modern-container {
   display: flex;
   flex-direction: column;
@@ -11900,7 +11894,7 @@ body.drag-over::before {
   }
 }
 
-/* Header Section */
+
 .weapons-header {
   display: flex;
   flex-direction: column;
@@ -11966,7 +11960,7 @@ body.drag-over::before {
   margin: 0;
 }
 
-/* Search Bar Moderne */
+
 .weapons-search-modern {
   position: relative;
   display: flex;
@@ -12033,7 +12027,7 @@ body.drag-over::before {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Stats Bar */
+
 .weapons-stats-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -12108,7 +12102,7 @@ body.drag-over::before {
   color: #4ec9b0;
 }
 
-/* Categories Tabs */
+
 .weapons-categories-tabs {
   display: flex;
   gap: 8px;
@@ -12194,7 +12188,7 @@ body.drag-over::before {
   color: #ffffff;
 }
 
-/* Weapons Grid */
+
 .weapons-grid-container {
   flex: 1;
   min-height: 0;
@@ -12494,7 +12488,7 @@ body.drag-over::before {
   color: #f59e0b;
 }
 
-/* Empty State */
+
 .weapons-empty-state {
   display: flex;
   flex-direction: column;
@@ -12533,7 +12527,7 @@ body.drag-over::before {
   color: #888;
 }
 
-/* Summary Section */
+
 .weapons-summary-modern {
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(26, 26, 26, 0.98) 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -12609,7 +12603,7 @@ body.drag-over::before {
   color: #4ec9b0;
 }
 
-/* Actions dans le résumé */
+
 .summary-actions {
   margin-top: 24px;
   padding-top: 24px;
@@ -12682,7 +12676,7 @@ body.drag-over::before {
   white-space: nowrap;
 }
 
-/* Scrollbar pour weapons-grid-container */
+
 .weapons-grid-container::-webkit-scrollbar {
   width: 8px;
 }
@@ -12702,7 +12696,7 @@ body.drag-over::before {
   background: linear-gradient(180deg, rgba(249, 115, 22, 0.8) 0%, rgba(251, 146, 60, 0.7) 100%);
 }
 
-/* Responsive */
+
 @media (max-width: 1200px) {
   .weapons-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -12771,7 +12765,7 @@ body.drag-over::before {
   }
 }
 
-/* ===== REFONTE COMPLÈTE SECTION DROGUES - DESIGN MODERNE ===== */
+
 .drugs-modern-container {
   display: flex;
   flex-direction: column;
@@ -12783,7 +12777,7 @@ body.drag-over::before {
   animation: fadeInUp 0.6s ease-out;
 }
 
-/* Header Section Drogues */
+
 .drugs-header {
   display: flex;
   flex-direction: column;
@@ -12831,7 +12825,7 @@ body.drag-over::before {
   margin: 0;
 }
 
-/* Search Bar Moderne Drogues */
+
 .drugs-search-modern {
   position: relative;
   display: flex;
@@ -12869,7 +12863,7 @@ body.drag-over::before {
   color: #f97316;
 }
 
-/* Stats Bar Drogues */
+
 .drugs-stats-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -12944,7 +12938,7 @@ body.drag-over::before {
   color: #4ec9b0;
 }
 
-/* Categories Tabs Drogues */
+
 .drugs-categories-tabs {
   display: flex;
   gap: 8px;
@@ -13010,7 +13004,7 @@ body.drag-over::before {
   color: #ffffff;
 }
 
-/* Drugs Grid */
+
 .drugs-grid-container {
   flex: 1;
   min-height: 0;
@@ -13286,7 +13280,7 @@ body.drag-over::before {
   color: #f59e0b;
 }
 
-/* Empty State Drogues */
+
 .drugs-empty-state {
   display: flex;
   flex-direction: column;
@@ -13297,7 +13291,7 @@ body.drag-over::before {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Scrollbar pour drugs-grid-container */
+
 .drugs-grid-container::-webkit-scrollbar {
   width: 8px;
 }
@@ -13317,7 +13311,7 @@ body.drag-over::before {
   background: linear-gradient(180deg, rgba(249, 115, 22, 0.8) 0%, rgba(251, 146, 60, 0.7) 100%);
 }
 
-/* Responsive Drogues */
+
 @media (max-width: 1200px) {
   .drugs-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -13382,7 +13376,7 @@ body.drag-over::before {
   }
 }
 
-/* Styles pour le lien Discord */
+
 .discord-link {
   display: inline-flex;
   align-items: center;
@@ -13404,7 +13398,7 @@ body.drag-over::before {
   transform: translateY(-1px);
 }
 
-/* ===== PAGE VOTE - REFONTE COMPLÈTE ===== */
+
 #vote-view {
   overflow-y: auto;
   overflow-x: hidden;
@@ -13416,7 +13410,7 @@ body.drag-over::before {
   background: linear-gradient(135deg, #1a1a1b 0%, #151516 100%);
 }
 
-/* Hero Section */
+
 .vote-hero-new {
   position: relative;
   padding: 80px 32px 60px;
@@ -13498,14 +13492,14 @@ body.drag-over::before {
   margin-right: auto;
 }
 
-/* Content */
+
 .vote-page-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 32px 60px;
 }
 
-/* Stats Section */
+
 .vote-stats-section {
   margin-bottom: 48px;
 }
@@ -13720,7 +13714,7 @@ body.drag-over::before {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* Notification Section */
+
 .vote-notification-section {
   margin-top: 32px;
 }
@@ -13861,7 +13855,7 @@ body.drag-over::before {
   border-color: rgba(249, 115, 22, 0.4);
 }
 
-/* Options de notification */
+
 .vote-notification-options {
   margin-top: 20px;
   padding: 20px;
@@ -13906,7 +13900,7 @@ body.drag-over::before {
   flex: 1;
 }
 
-/* Contrôle du volume */
+
 .vote-notification-volume-control {
   margin-top: 8px;
 }
@@ -13964,7 +13958,7 @@ body.drag-over::before {
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.6);
 }
 
-/* Grille de sélection de sons (cartes modernes) */
+
 .vote-notification-sounds-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -14082,7 +14076,7 @@ body.drag-over::before {
   border-style: solid;
 }
 
-/* Son personnalisé */
+
 .vote-notification-custom-sound {
   margin-top: 20px;
   padding-top: 20px;
@@ -14199,7 +14193,7 @@ body.drag-over::before {
   height: 14px;
 }
 
-/* Action Section */
+
 .vote-action-section {
   margin-top: 48px;
 }
@@ -14371,7 +14365,7 @@ body.drag-over::before {
   letter-spacing: 2px;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .vote-hero-new {
     padding: 60px 24px 40px;
@@ -14471,7 +14465,7 @@ body.drag-over::before {
   }
 }
 
-/* Styles partagés pour le formulaire de feedback (modal et page) */
+
 .feedback-form-v2 {
   display: flex;
   flex-direction: column;
@@ -14522,7 +14516,7 @@ body.drag-over::before {
   margin-left: 8px;
 }
 
-/* Type Grid */
+
 .feedback-type-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -14642,7 +14636,7 @@ body.drag-over::before {
   height: 12px;
 }
 
-/* Inputs */
+
 .feedback-input-wrapper,
 .feedback-textarea-wrapper {
   position: relative;
@@ -14692,7 +14686,7 @@ body.drag-over::before {
   border-radius: 6px;
 }
 
-/* Attachment */
+
 .feedback-attachment-wrapper {
   position: relative;
 }
@@ -14842,7 +14836,7 @@ body.drag-over::before {
   align-items: center;
 }
 
-/* Responsive Modal */
+
 @media (max-width: 768px) {
   .feedback-modal-content-v2 {
     width: 95%;

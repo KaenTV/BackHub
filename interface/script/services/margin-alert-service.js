@@ -5,7 +5,7 @@ import { formatPrice } from '../utils/format.js'
 class MarginAlertService {
   constructor() {
     this.enabled = true
-    this.alertThreshold = 0 
+    this.alertThreshold = 0
     this.lastAlertedMargin = null
   }
 

@@ -1,18 +1,134 @@
+# Dépendances
 node_modules/
+package-lock.json
+yarn.lock
+
+# Build et distribution
 dist/
-*.log
-.DS_Store
+*.exe
+*.exe.blockmap
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.AppImage
+*.snap
+*.tar.gz
+*.zip
+
+# Fichiers de configuration sensibles
+.env
 .env.local
 .env.*.local
 *.local
-gh-token.txt
-GH_TOKEN.txt
+.env.production
+.env.development
 
-# Certificats (ne pas commiter les clés privées)
+# Certificats et clés privées
 *.pfx
+*.p12
+*.key
+*.pem
+*.cer
 certificate.pfx
 build/*.pfx
+build/*.key
+build/*.pem
 
-# Mais on peut commiter les certificats publics (.cer)
-# build/BackHub.cer est OK à commiter
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+*.log.*
 
+# Fichiers système
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE et éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.cache
+.cache/
+.temp/
+tmp/
+temp/
+
+# Coverage et tests
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+
+# Fichiers de debug
+*.map
+*.map.js
+debug.log
+*.debug
+
+# Fichiers Electron
+out/
+app/dist/
+*.asar.unpacked
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+*.old
+*~
+
+# Fichiers de configuration OS
+*.iml
+*.o
+*.hprof
+*.orig
+*.pyc
+*.pyo
+*.rbc
+*.swp
+*.csproj
+*.sln
+*.xproj
+
+# Autres
+.flowconfig
+.vs/
+.nyc_output/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg

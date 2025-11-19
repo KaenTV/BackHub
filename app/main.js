@@ -196,7 +196,7 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: true,
+      devTools: false,
       sandbox: true,
       partition: 'persist:main',
       backgroundThrottling: true,
@@ -210,49 +210,55 @@ function createWindow () {
   mainWindow.loadFile(path.join(__dirname, '..', 'interface', 'home.html'))
 
 
-  // TEMPORAIRE : DevTools activés pour debug
-  // mainWindow.webContents.on('context-menu', (event) => {
-  //   event.preventDefault()
-  // })
+  mainWindow.webContents.on('context-menu', (event) => {
+    event.preventDefault()
+  })
 
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12') {
+      event.preventDefault()
+      return
+    }
 
-  // mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.key === 'F12') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.key.toLowerCase() === 'u') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'k') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.key.toLowerCase() === 'u') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.key.toLowerCase() === 'r') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'k') {
-  //     event.preventDefault()
-  //     return
-  //   }
-  // })
+    if (input.control && input.key.toLowerCase() === 'shift+r') {
+      event.preventDefault()
+      return
+    }
+  })
 
-
-  // mainWindow.webContents.on('devtools-opened', () => {
-  //   mainWindow.webContents.closeDevTools()
-  // })
+  mainWindow.webContents.on('devtools-opened', () => {
+    mainWindow.webContents.closeDevTools()
+  })
 
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
@@ -406,44 +412,50 @@ function createOverlayWindow() {
   overlayWindow.loadFile(path.join(__dirname, '..', 'interface', 'overlay.html'))
 
 
-  // TEMPORAIRE : DevTools activés pour debug
-  // overlayWindow.webContents.on('context-menu', (event) => {
-  //   event.preventDefault()
-  // })
+  overlayWindow.webContents.on('context-menu', (event) => {
+    event.preventDefault()
+  })
 
+  overlayWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12') {
+      event.preventDefault()
+      return
+    }
 
-  // overlayWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.key === 'F12') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.key.toLowerCase() === 'u') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.key.toLowerCase() === 'r') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.key.toLowerCase() === 'u') {
-  //     event.preventDefault()
-  //     return
-  //   }
-  // })
+    if (input.control && input.shift && input.key.toLowerCase() === 'r') {
+      event.preventDefault()
+      return
+    }
+  })
 
-
-  // overlayWindow.webContents.on('devtools-opened', () => {
-  //   overlayWindow.webContents.closeDevTools()
-  // })
+  overlayWindow.webContents.on('devtools-opened', () => {
+    overlayWindow.webContents.closeDevTools()
+  })
 
 
   if (process.platform === 'win32') {
@@ -594,7 +606,7 @@ function getFetchHtmlView() {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: true,
+        devTools: false,
         backgroundThrottling: true,
         sandbox: true,
         partition: 'persist:fetch',
@@ -610,26 +622,25 @@ function getFetchHtmlView() {
     fetchHtmlView.setBounds({ x: -10000, y: -10000, width: 1, height: 1 })
 
 
-    // TEMPORAIRE : DevTools activés pour debug
-    // fetchHtmlView.webContents.on('context-menu', (event) => {
-    //   event.preventDefault()
-    // })
+    fetchHtmlView.webContents.on('context-menu', (event) => {
+      event.preventDefault()
+    })
 
+    fetchHtmlView.webContents.on('before-input-event', (event, input) => {
+      if (input.key === 'F12' ||
+          (input.control && input.shift && input.key.toLowerCase() === 'i') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'j') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'c') ||
+          (input.control && input.key.toLowerCase() === 'u') ||
+          (input.control && input.key.toLowerCase() === 'r') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'r')) {
+        event.preventDefault()
+      }
+    })
 
-    // fetchHtmlView.webContents.on('before-input-event', (event, input) => {
-    //   if (input.key === 'F12' ||
-    //       (input.control && input.shift && input.key.toLowerCase() === 'i') ||
-    //       (input.control && input.shift && input.key.toLowerCase() === 'j') ||
-    //       (input.control && input.shift && input.key.toLowerCase() === 'c') ||
-    //       (input.control && input.key.toLowerCase() === 'u')) {
-    //     event.preventDefault()
-    //   }
-    // })
-
-
-    // fetchHtmlView.webContents.on('devtools-opened', () => {
-    //   fetchHtmlView.webContents.closeDevTools()
-    // })
+    fetchHtmlView.webContents.on('devtools-opened', () => {
+      fetchHtmlView.webContents.closeDevTools()
+    })
   }
 
   return fetchHtmlView
@@ -1364,8 +1375,7 @@ function processFetchHtmlQueue() {
 
 app.on('ready', () => {
 
-  // TEMPORAIRE : Menu activé pour accéder aux DevTools
-  // Menu.setApplicationMenu(null)
+  Menu.setApplicationMenu(null)
 
   createWindow()
   createTray()

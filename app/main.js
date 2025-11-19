@@ -12,7 +12,7 @@ let fetchHtmlInProgress = false
 let fetchHtmlQueue = []
 
 
-autoUpdater.autoDownload = false
+autoUpdater.autoDownload = true
 autoUpdater.autoInstallOnAppQuit = true
 
 

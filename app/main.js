@@ -12,40 +12,77 @@ let fetchHtmlInProgress = false
 let fetchHtmlQueue = []
 
 
-autoUpdater.autoDownload = true
+autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
+
+autoUpdater.setFeedURL({
+  provider: 'github',
+  owner: 'KaenTV',
+  repo: 'BackHub',
+  private: true
+})
 
 
 autoUpdater.on('checking-for-update', () => {
   console.log('Vérification des mises à jour...')
   if (mainWindow && !mainWindow.isDestroyed()) {
+    console.log('Envoi de la notification de vérification...')
     mainWindow.webContents.send('update-status', { status: 'checking', message: 'Vérification des mises à jour...' })
+    mainWindow.webContents.send('app-notification', { 
+      message: 'Recherche de nouvelles versions disponibles...', 
+      type: 'info', 
+      duration: 0,
+      id: 'update-checking'
+    })
+    console.log('Notification envoyée au renderer')
+  } else {
+    console.warn('MainWindow non disponible pour envoyer la notification')
   }
 })
 
 autoUpdater.on('update-available', (info) => {
   console.log('Mise à jour disponible:', info.version)
   if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('update-status', { status: 'available', message: 'Mise à jour disponible' })
+    mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
     mainWindow.webContents.send('update-available', {
       version: info.version,
       releaseDate: info.releaseDate,
       releaseNotes: info.releaseNotes
     })
+    mainWindow.webContents.send('update-available-notification', {
+      version: info.version,
+      releaseDate: info.releaseDate,
+      releaseNotes: info.releaseNotes
+    })
   }
-  showNotification('Mise à jour disponible', `Version ${info.version} disponible. Cliquez pour télécharger.`)
 })
 
 autoUpdater.on('update-not-available', (info) => {
   console.log('Aucune mise à jour disponible')
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-status', { status: 'up-to-date', message: 'Vous utilisez la dernière version' })
+    mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+    mainWindow.webContents.send('app-notification', { message: 'Vous utilisez déjà la dernière version disponible', type: 'info', duration: 3000 })
   }
 })
 
 autoUpdater.on('error', (err) => {
   console.error('Erreur lors de la vérification des mises à jour:', err)
+  console.error('Détails de l\'erreur:', {
+    message: err.message,
+    stack: err.stack,
+    code: err.code
+  })
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-status', { status: 'error', message: 'Erreur lors de la vérification des mises à jour' })
+    mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+    const errorMessage = err.message || err.toString() || 'Erreur inconnue'
+    mainWindow.webContents.send('app-notification', { 
+      message: `Erreur lors de la vérification des mises à jour: ${errorMessage}`, 
+      type: 'error', 
+      duration: 5000 
+    })
   }
 })
 
@@ -58,6 +95,11 @@ autoUpdater.on('download-progress', (progressObj) => {
       transferred: progressObj.transferred,
       total: progressObj.total
     })
+    mainWindow.webContents.send('app-notification', {
+      message: `Téléchargement en cours: ${Math.round(progressObj.percent)}%`,
+      type: 'info',
+      duration: 0
+    })
   }
 })
 
@@ -68,8 +110,8 @@ autoUpdater.on('update-downloaded', (info) => {
       version: info.version,
       releaseDate: info.releaseDate
     })
+    mainWindow.webContents.send('app-notification', { message: `Mise à jour ${info.version} téléchargée. Elle sera installée au redémarrage.`, type: 'success' })
   }
-  showNotification('Mise à jour téléchargée', 'La mise à jour sera installée au redémarrage de l\'application.')
 })
 
 function createTray() {
@@ -154,7 +196,7 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: false,
+      devTools: true,
       sandbox: true,
       partition: 'persist:main',
       backgroundThrottling: true,
@@ -168,48 +210,49 @@ function createWindow () {
   mainWindow.loadFile(path.join(__dirname, '..', 'interface', 'home.html'))
 
 
-  mainWindow.webContents.on('context-menu', (event) => {
-    event.preventDefault()
-  })
+  // TEMPORAIRE : DevTools activés pour debug
+  // mainWindow.webContents.on('context-menu', (event) => {
+  //   event.preventDefault()
+  // })
 
 
-  mainWindow.webContents.on('before-input-event', (event, input) => {
+  // mainWindow.webContents.on('before-input-event', (event, input) => {
 
-    if (input.key === 'F12') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.key === 'F12') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.key.toLowerCase() === 'u') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.key.toLowerCase() === 'u') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'k') {
-      event.preventDefault()
-      return
-    }
-  })
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'k') {
+  //     event.preventDefault()
+  //     return
+  //   }
+  // })
 
 
-  mainWindow.webContents.on('devtools-opened', () => {
-    mainWindow.webContents.closeDevTools()
-  })
+  // mainWindow.webContents.on('devtools-opened', () => {
+  //   mainWindow.webContents.closeDevTools()
+  // })
 
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
@@ -349,7 +392,7 @@ function createOverlayWindow() {
         preload: path.join(__dirname, 'preload.js'),
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: false,
+        devTools: true,
         backgroundThrottling: false,
         sandbox: true,
         partition: 'persist:overlay',
@@ -363,43 +406,44 @@ function createOverlayWindow() {
   overlayWindow.loadFile(path.join(__dirname, '..', 'interface', 'overlay.html'))
 
 
-  overlayWindow.webContents.on('context-menu', (event) => {
-    event.preventDefault()
-  })
+  // TEMPORAIRE : DevTools activés pour debug
+  // overlayWindow.webContents.on('context-menu', (event) => {
+  //   event.preventDefault()
+  // })
 
 
-  overlayWindow.webContents.on('before-input-event', (event, input) => {
+  // overlayWindow.webContents.on('before-input-event', (event, input) => {
 
-    if (input.key === 'F12') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.key === 'F12') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.key.toLowerCase() === 'u') {
-      event.preventDefault()
-      return
-    }
-  })
+  //   if (input.control && input.key.toLowerCase() === 'u') {
+  //     event.preventDefault()
+  //     return
+  //   }
+  // })
 
 
-  overlayWindow.webContents.on('devtools-opened', () => {
-    overlayWindow.webContents.closeDevTools()
-  })
+  // overlayWindow.webContents.on('devtools-opened', () => {
+  //   overlayWindow.webContents.closeDevTools()
+  // })
 
 
   if (process.platform === 'win32') {
@@ -550,7 +594,7 @@ function getFetchHtmlView() {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: false,
+        devTools: true,
         backgroundThrottling: true,
         sandbox: true,
         partition: 'persist:fetch',
@@ -566,25 +610,26 @@ function getFetchHtmlView() {
     fetchHtmlView.setBounds({ x: -10000, y: -10000, width: 1, height: 1 })
 
 
-    fetchHtmlView.webContents.on('context-menu', (event) => {
-      event.preventDefault()
-    })
+    // TEMPORAIRE : DevTools activés pour debug
+    // fetchHtmlView.webContents.on('context-menu', (event) => {
+    //   event.preventDefault()
+    // })
 
 
-    fetchHtmlView.webContents.on('before-input-event', (event, input) => {
-      if (input.key === 'F12' ||
-          (input.control && input.shift && input.key.toLowerCase() === 'i') ||
-          (input.control && input.shift && input.key.toLowerCase() === 'j') ||
-          (input.control && input.shift && input.key.toLowerCase() === 'c') ||
-          (input.control && input.key.toLowerCase() === 'u')) {
-        event.preventDefault()
-      }
-    })
+    // fetchHtmlView.webContents.on('before-input-event', (event, input) => {
+    //   if (input.key === 'F12' ||
+    //       (input.control && input.shift && input.key.toLowerCase() === 'i') ||
+    //       (input.control && input.shift && input.key.toLowerCase() === 'j') ||
+    //       (input.control && input.shift && input.key.toLowerCase() === 'c') ||
+    //       (input.control && input.key.toLowerCase() === 'u')) {
+    //     event.preventDefault()
+    //   }
+    // })
 
 
-    fetchHtmlView.webContents.on('devtools-opened', () => {
-      fetchHtmlView.webContents.closeDevTools()
-    })
+    // fetchHtmlView.webContents.on('devtools-opened', () => {
+    //   fetchHtmlView.webContents.closeDevTools()
+    // })
   }
 
   return fetchHtmlView
@@ -1319,20 +1364,40 @@ function processFetchHtmlQueue() {
 
 app.on('ready', () => {
 
-  Menu.setApplicationMenu(null)
+  // TEMPORAIRE : Menu activé pour accéder aux DevTools
+  // Menu.setApplicationMenu(null)
 
   createWindow()
   createTray()
   createOverlayWindow()
 
 
-  setTimeout(() => {
-    if (process.env.NODE_ENV === 'production') {
-      autoUpdater.checkForUpdates().catch(err => {
-        console.error('Erreur lors de la vérification initiale des mises à jour:', err)
-      })
-    }
-  }, 5000)
+  mainWindow.webContents.once('did-finish-load', () => {
+    setTimeout(() => {
+      console.log('Vérification des mises à jour au démarrage...')
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        console.log('Envoi de la notification de vérification...')
+        mainWindow.webContents.send('app-notification', { 
+          message: 'Recherche de nouvelles versions disponibles...', 
+          type: 'info', 
+          duration: 0,
+          id: 'update-checking'
+        })
+        console.log('Notification envoyée, démarrage de la vérification GitHub...')
+        autoUpdater.checkForUpdates().catch(err => {
+          console.error('Erreur lors de la vérification initiale des mises à jour:', err)
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+            mainWindow.webContents.send('app-notification', { 
+              message: `Erreur lors de la vérification: ${err.message || 'Erreur inconnue'}`, 
+              type: 'error', 
+              duration: 5000 
+            })
+          }
+        })
+      }
+    }, 5000)
+  })
 
 
   setInterval(() => {

@@ -42,6 +42,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onUpdateDownloaded: (callback) => {
     ipcRenderer.on('update-downloaded', (event, data) => callback(data))
   },
+  onAppNotification: (callback) => {
+    ipcRenderer.on('app-notification', (event, data) => callback(data))
+  },
+  onUpdateAvailableNotification: (callback) => {
+    ipcRenderer.on('update-available-notification', (event, data) => callback(data))
+  },
+  onRemoveNotification: (callback) => {
+    ipcRenderer.on('remove-notification', (event, data) => callback(data))
+  },
 
   removeAllListeners: (channel) => {
     ipcRenderer.removeAllListeners(channel)

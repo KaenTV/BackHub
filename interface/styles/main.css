@@ -7458,6 +7458,61 @@ form {
   border-left: 4px solid #3b82f6;
 }
 
+.notification-with-actions {
+  padding-bottom: 12px;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.notification-action {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 100px;
+}
+
+.notification-action-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.notification-action-primary:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.notification-action-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #cccccc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.notification-action-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.notification-action-default {
+  background: rgba(255, 255, 255, 0.1);
+  color: #cccccc;
+}
+
+.notification-action-default:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
 
 @keyframes fadeIn {
   from {

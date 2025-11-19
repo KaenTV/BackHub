@@ -1,6 +1,6 @@
 {
   "name": "BackHub",
-  "version": "1.5.1-BETA",
+  "version": "1.5.2-BETA",
   "description": "L'outil de gestion complet pour RevolutionDayZ",
   "main": "app/main.js",
   "repository": {
@@ -82,7 +82,8 @@
       "provider": "github",
       "owner": "KaenTV",
       "repo": "BackHub",
-      "releaseType": "release"
+      "releaseType": "release",
+      "token": "${GH_TOKEN}"
     },
     "compression": "maximum",
     "asar": true

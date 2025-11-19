@@ -44,6 +44,7 @@ class BackHubApp {
     this.feedbackCheckInterval = null
     this.lastFeedbackCheck = null
     this.updateProgressNotificationId = null
+    this.dismissedUpdateVersions = new Set()
 
     window.app = this
 
@@ -147,20 +148,33 @@ class BackHubApp {
         if (window.electronAPI.onUpdateDownloadProgress) {
           window.electronAPI.onUpdateDownloadProgress((progress) => {
             const percent = Math.round(progress.percent || 0)
-            if (this.updateProgressNotificationId) {
-              notificationService.remove(this.updateProgressNotificationId)
+            const notificationId = 'update-download-progress'
+            const newMessage = `Téléchargement en cours: ${percent}%`
+            const updated = notificationService.updateMessageByCustomId(notificationId, newMessage)
+            if (!updated) {
+              this.updateProgressNotificationId = notificationService.show(newMessage, 'info', 0, notificationId)
             }
-            this.updateProgressNotificationId = notificationService.show(`Téléchargement en cours: ${percent}%`, 'info', 0)
+          })
+        }
+
+        if (window.electronAPI.onMainLog) {
+          window.electronAPI.onMainLog((data) => {
+            if (data && data.level && data.message) {
+              if (data.level === 'error') {
+                console.error('[MAIN]', data.message)
+              } else {
+                console.log('[MAIN]', data.message)
+              }
+            }
           })
         }
 
         if (window.electronAPI.onUpdateDownloaded) {
           window.electronAPI.onUpdateDownloaded((data) => {
-            if (this.updateProgressNotificationId) {
-              notificationService.remove(this.updateProgressNotificationId)
-              this.updateProgressNotificationId = null
-            }
-            notificationService.success('Mise à jour téléchargée. Elle sera installée au redémarrage.', 5000)
+            notificationService.removeById('update-download-progress')
+            notificationService.removeById('update-checking')
+            notificationService.removeById('update-available-' + (data?.version || ''))
+            this.updateProgressNotificationId = null
             localStorage.removeItem('pending-update-version')
           })
         }
@@ -192,13 +206,28 @@ class BackHubApp {
   showUpdateAvailableNotification(updateInfo) {
     const version = updateInfo.version || 'nouvelle version'
     const message = `Une nouvelle version est disponible : ${version}`
+    const notificationId = `update-available-${version}`
+    
+    notificationService.removeById('update-checking')
+    
+    if (this.dismissedUpdateVersions.has(version)) {
+      return
+    }
+
+    const existingNotification = notificationService.notifications?.find(n => n.customId === notificationId)
+    if (existingNotification) {
+      return
+    }
     
     const actions = [
       {
         label: 'Télécharger',
         type: 'primary',
         callback: async () => {
-          this.updateProgressNotificationId = notificationService.show('Téléchargement de la mise à jour en cours...', 'info', 0)
+          this.dismissedUpdateVersions.add(version)
+          notificationService.removeById(notificationId)
+          const progressNotificationId = 'update-download-progress'
+          this.updateProgressNotificationId = notificationService.show('Téléchargement en cours: 0%', 'info', 0, progressNotificationId)
           
           try {
             if (window.electronAPI && window.electronAPI.downloadUpdate) {
@@ -206,7 +235,7 @@ class BackHubApp {
               if (result && result.success) {
               } else {
                 if (this.updateProgressNotificationId) {
-                  notificationService.remove(this.updateProgressNotificationId)
+                  notificationService.removeById(progressNotificationId)
                   this.updateProgressNotificationId = null
                 }
                 notificationService.error(`Erreur lors du téléchargement: ${result?.error || 'Erreur inconnue'}`, 5000)
@@ -214,7 +243,7 @@ class BackHubApp {
             }
           } catch (error) {
             if (this.updateProgressNotificationId) {
-              notificationService.remove(this.updateProgressNotificationId)
+              notificationService.removeById(progressNotificationId)
               this.updateProgressNotificationId = null
             }
             notificationService.error(`Erreur lors du téléchargement: ${error.message || 'Erreur inconnue'}`, 5000)
@@ -226,12 +255,14 @@ class BackHubApp {
         type: 'secondary',
         callback: () => {
           localStorage.setItem('pending-update-version', version)
+          this.dismissedUpdateVersions.add(version)
+          notificationService.removeById(notificationId)
           notificationService.info('La mise à jour sera proposée au prochain redémarrage.', 3000)
         }
       }
     ]
 
-    notificationService.showWithActions(message, 'success', actions)
+    notificationService.showWithActions(message, 'success', actions, 0, notificationId)
   }
 
   initKeyboardShortcuts() {

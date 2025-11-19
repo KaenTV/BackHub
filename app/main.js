@@ -13,24 +13,47 @@ let fetchHtmlView = null
 let fetchHtmlInProgress = false
 let fetchHtmlQueue = []
 
+let updateCheckInProgress = false
+let lastUpdateCheckResult = null
+let detectedUpdateInfo = null
+let updateDownloadInProgress = false
+
 
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
 
 autoUpdater.allowPrerelease = true
 
+autoUpdater.channel = 'latest'
+
 autoUpdater.setFeedURL({
   provider: 'github',
   owner: 'KaenTV',
-  repo: 'BackHub'
+  repo: 'BackHub',
+  channel: 'latest'
 })
 
+function sendLogToRenderer(level, ...args) {
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+    try {
+      mainWindow.webContents.send('main-log', { level, message: args.join(' ') })
+    } catch (error) {
+    }
+  }
+}
+
 async function checkForUpdatesWithCurrentVersion() {
+  if (app.isQuitting || updateDownloadInProgress || detectedUpdateInfo) {
+    return
+  }
+  
   const currentVersion = app.getVersion()
   const versionTag = `v${currentVersion}`
   const latestYmlUrl = `https://github.com/KaenTV/BackHub/releases/download/${versionTag}/latest.yml`
   
-  autoUpdater.emit('checking-for-update')
+  if (!detectedUpdateInfo && !updateDownloadInProgress) {
+    autoUpdater.emit('checking-for-update')
+  }
   
   try {
     const ymlContent = await new Promise((resolve, reject) => {
@@ -80,78 +103,152 @@ async function checkForUpdatesWithCurrentVersion() {
 }
 
 autoUpdater.on('checking-for-update', () => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('update-status', { status: 'checking', message: 'Vérification des mises à jour...' })
-    mainWindow.webContents.send('app-notification', { 
-      message: 'Recherche de nouvelles versions disponibles...', 
-      type: 'info', 
-      duration: 0,
-      id: 'update-checking'
-    })
+  if (app.isQuitting || updateDownloadInProgress || detectedUpdateInfo) {
+    return
+  }
+  
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+    try {
+      mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+      mainWindow.webContents.send('update-status', { status: 'checking', message: 'Vérification des mises à jour...' })
+      mainWindow.webContents.send('app-notification', { 
+        message: 'Recherche de nouvelles versions disponibles...', 
+        type: 'info', 
+        duration: 0,
+        id: 'update-checking'
+      })
+    } catch (error) {
+    }
   }
 })
 
 autoUpdater.on('update-available', (info) => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('update-status', { status: 'available', message: 'Mise à jour disponible' })
-    mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
-    mainWindow.webContents.send('update-available', {
-      version: info.version,
-      releaseDate: info.releaseDate,
-      releaseNotes: info.releaseNotes
-    })
-    mainWindow.webContents.send('update-available-notification', {
-      version: info.version,
-      releaseDate: info.releaseDate,
-      releaseNotes: info.releaseNotes
-    })
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+    try {
+      mainWindow.webContents.send('update-status', { status: 'available', message: 'Mise à jour disponible' })
+      mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+      mainWindow.webContents.send('update-available', {
+        version: info.version,
+        releaseDate: info.releaseDate,
+        releaseNotes: info.releaseNotes
+      })
+      mainWindow.webContents.send('update-available-notification', {
+        version: info.version,
+        releaseDate: info.releaseDate,
+        releaseNotes: info.releaseNotes
+      })
+    } catch (error) {
+    }
   }
 })
 
 autoUpdater.on('update-not-available', (info) => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('update-status', { status: 'up-to-date', message: 'Vous utilisez la dernière version' })
-    mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
-    mainWindow.webContents.send('app-notification', { message: 'Vous utilisez déjà la dernière version disponible', type: 'info', duration: 3000 })
+  if (detectedUpdateInfo) {
+    return
+  }
+  
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+    try {
+      mainWindow.webContents.send('update-status', { status: 'up-to-date', message: 'Vous utilisez la dernière version' })
+      mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+      mainWindow.webContents.send('app-notification', { 
+        message: 'Vous utilisez déjà la dernière version disponible', 
+        type: 'info', 
+        duration: 3000,
+        id: 'update-not-available'
+      })
+    } catch (error) {
+    }
   }
 })
 
 autoUpdater.on('error', (err) => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('update-status', { status: 'error', message: 'Erreur lors de la vérification des mises à jour' })
-    mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
-    const errorMessage = err.message || err.toString() || 'Erreur inconnue'
-    mainWindow.webContents.send('app-notification', { 
-      message: `Erreur lors de la vérification des mises à jour: ${errorMessage}`, 
-      type: 'error', 
-      duration: 5000 
-    })
+  const errorMessage = err.message || err.toString() || 'Erreur inconnue'
+  
+  if (errorMessage.includes('No published versions') && (updateCheckInProgress || detectedUpdateInfo)) {
+    return
+  }
+  
+  if (detectedUpdateInfo) {
+    return
+  }
+  
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+    try {
+      mainWindow.webContents.send('update-status', { status: 'error', message: 'Erreur lors de la vérification des mises à jour' })
+      mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+      mainWindow.webContents.send('app-notification', { 
+        message: `Erreur lors de la vérification des mises à jour: ${errorMessage}`, 
+        type: 'error', 
+        duration: 8000,
+        id: 'update-error-check'
+      })
+    } catch (error) {
+    }
   }
 })
 
 autoUpdater.on('download-progress', (progressObj) => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('update-download-progress', {
-      percent: progressObj.percent,
-      transferred: progressObj.transferred,
-      total: progressObj.total
-    })
-    mainWindow.webContents.send('app-notification', {
-      message: `Téléchargement en cours: ${Math.round(progressObj.percent)}%`,
-      type: 'info',
-      duration: 0
-    })
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+    try {
+      mainWindow.webContents.send('update-download-progress', {
+        percent: progressObj.percent,
+        transferred: progressObj.transferred,
+        total: progressObj.total
+      })
+    } catch (error) {
+    }
   }
 })
 
 autoUpdater.on('update-downloaded', (info) => {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('update-downloaded', {
-      version: info.version,
-      releaseDate: info.releaseDate
-    })
-    mainWindow.webContents.send('app-notification', { message: `Mise à jour ${info.version} téléchargée. Elle sera installée au redémarrage.`, type: 'success' })
+  app.isQuitting = true
+  updateDownloadInProgress = false
+  
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+    try {
+      mainWindow.webContents.send('update-downloaded', {
+        version: info.version,
+        releaseDate: info.releaseDate
+      })
+      mainWindow.webContents.send('remove-notification', { id: 'update-download-progress' })
+      mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+    } catch (error) {
+    }
   }
+  
+  const closeAllWindows = () => {
+    try {
+      const allWindowsToClose = BrowserWindow.getAllWindows()
+      allWindowsToClose.forEach(window => {
+        if (window && !window.isDestroyed()) {
+          try {
+            window.removeAllListeners('close')
+            window.removeAllListeners()
+            window.destroy()
+          } catch (e) {
+          }
+        }
+      })
+      
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        try {
+          overlayWindow.removeAllListeners('close')
+          overlayWindow.removeAllListeners()
+          overlayWindow.destroy()
+        } catch (e) {
+        }
+      }
+    } catch (e) {
+    }
+  }
+  
+  closeAllWindows()
+  
+  setTimeout(() => {
+    closeAllWindows()
+    autoUpdater.quitAndInstall(false, true)
+  }, 100)
 })
 
 function createTray() {
@@ -236,7 +333,7 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: false,
+      devTools: true,
       sandbox: true,
       partition: 'persist:main',
       backgroundThrottling: true,
@@ -248,57 +345,6 @@ function createWindow () {
   })
 
   mainWindow.loadFile(path.join(__dirname, '..', 'interface', 'home.html'))
-
-
-  mainWindow.webContents.on('context-menu', (event) => {
-    event.preventDefault()
-  })
-
-  mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'F12') {
-      event.preventDefault()
-      return
-    }
-
-    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-      event.preventDefault()
-      return
-    }
-
-    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-      event.preventDefault()
-      return
-    }
-
-    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-      event.preventDefault()
-      return
-    }
-
-    if (input.control && input.key.toLowerCase() === 'u') {
-      event.preventDefault()
-      return
-    }
-
-    if (input.control && input.shift && input.key.toLowerCase() === 'k') {
-      event.preventDefault()
-      return
-    }
-
-    if (input.control && input.key.toLowerCase() === 'r') {
-      event.preventDefault()
-      return
-    }
-
-    if (input.control && input.key.toLowerCase() === 'shift+r') {
-      event.preventDefault()
-      return
-    }
-  })
-
-  mainWindow.webContents.on('devtools-opened', () => {
-    mainWindow.webContents.closeDevTools()
-  })
 
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
@@ -384,21 +430,521 @@ function createWindow () {
     }
   })
 
+  const fs = require('fs')
+  const os = require('os')
+
+  const downloadFile = async (url, maxRedirects = 5) => {
+    return new Promise((resolve, reject) => {
+      let redirectCount = 0
+      const makeRequest = (requestUrl) => {
+        if (redirectCount >= maxRedirects) {
+          reject(new Error('Too many redirects'))
+          return
+        }
+
+        const urlObj = new URL(requestUrl)
+        const client = urlObj.protocol === 'https:' ? https : http
+
+        sendLogToRenderer('log', '📥 [IPC] Téléchargement depuis:', requestUrl)
+
+        const request = client.get(requestUrl, (res) => {
+          if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+            redirectCount++
+            const redirectUrl = res.headers.location.startsWith('http')
+              ? res.headers.location
+              : `${urlObj.protocol}//${urlObj.host}${res.headers.location}`
+            sendLogToRenderer('log', '🔄 [IPC] Redirection 302 vers:', redirectUrl)
+            makeRequest(redirectUrl)
+            return
+          }
+
+          if (res.statusCode !== 200) {
+            reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`))
+            return
+          }
+
+          const totalBytes = parseInt(res.headers['content-length'] || '0', 10)
+          let downloadedBytes = 0
+          const downloadPath = path.join(os.tmpdir(), 'BackHub-Setup.exe')
+
+          const file = fs.createWriteStream(downloadPath)
+
+          res.on('data', (chunk) => {
+            downloadedBytes += chunk.length
+            if (totalBytes > 0 && mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+              const percent = (downloadedBytes / totalBytes) * 100
+              try {
+                mainWindow.webContents.send('update-download-progress', {
+                  percent: percent,
+                  transferred: downloadedBytes,
+                  total: totalBytes
+                })
+              } catch (error) {
+              }
+            }
+          })
+
+          res.on('end', () => {
+            file.end(() => {
+              sendLogToRenderer('log', '✅ [IPC] Téléchargement terminé:', downloadPath)
+              sendLogToRenderer('log', '📊 [IPC] Taille téléchargée: ' + (downloadedBytes / 1024 / 1024).toFixed(2) + ' MB')
+              resolve(downloadPath)
+            })
+          })
+
+          res.on('error', (error) => {
+            file.destroy()
+            fs.unlink(downloadPath, () => {})
+            reject(error)
+          })
+
+          res.pipe(file)
+        })
+
+        request.on('error', reject)
+      }
+
+      makeRequest(url)
+    })
+  }
 
   ipcMain.handle('check-for-updates', async () => {
+    if (updateCheckInProgress) {
+      sendLogToRenderer('log', '⏳ [IPC] Vérification déjà en cours...')
+      return lastUpdateCheckResult || { success: false, error: 'Check already in progress' }
+    }
+
+    updateCheckInProgress = true
+    sendLogToRenderer('log', '═══════════════════════════════════════════════════════════')
+    sendLogToRenderer('log', '🔍 [IPC] check-for-updates appelé')
+    sendLogToRenderer('log', '═══════════════════════════════════════════════════════════')
+
     try {
+      sendLogToRenderer('log', '📊 [IPC] État actuel: ' + JSON.stringify({
+        hasDetectedUpdateInfo: !!detectedUpdateInfo,
+        detectedVersion: detectedUpdateInfo?.version || 'none',
+        hasLastUpdateCheckResult: !!lastUpdateCheckResult
+      }))
+
+      sendLogToRenderer('log', '🔄 [IPC] Appel de autoUpdater.checkForUpdates()...')
       await autoUpdater.checkForUpdates()
-      return { success: true }
+      lastUpdateCheckResult = { success: true }
+      updateCheckInProgress = false
+      return lastUpdateCheckResult
     } catch (error) {
-      return { success: false, error: error.message }
+      const errorMessage = error.message || 'Unknown error'
+      const isNoPublishedVersions = errorMessage.includes('No published versions')
+      
+      if (!isNoPublishedVersions) {
+        sendLogToRenderer('error', '❌ [IPC] autoUpdater.checkForUpdates() a échoué:', errorMessage)
+        sendLogToRenderer('error', '❌ [IPC] Stack:', error.stack)
+      } else {
+        sendLogToRenderer('log', '⚠️ [IPC] autoUpdater n\'a pas trouvé de versions, utilisation du fallback manuel...')
+      }
+
+      sendLogToRenderer('log', '📡 [IPC] Étape 2: Utilisation de la méthode manuelle pour détecter les mises à jour...')
+
+      try {
+        const currentVersion = app.getVersion()
+        const apiUrl = 'https://api.github.com/repos/KaenTV/BackHub/releases'
+        
+        const releasesData = await new Promise((resolve, reject) => {
+          https.get(apiUrl, {
+            headers: {
+              'User-Agent': 'BackHub-Updater'
+            }
+          }, (res) => {
+            let data = ''
+            res.on('data', (chunk) => { data += chunk })
+            res.on('end', () => {
+              try {
+                resolve(JSON.parse(data))
+              } catch (e) {
+                reject(e)
+              }
+            })
+          }).on('error', reject)
+        })
+
+        const publishedReleases = releasesData
+          .filter(release => !release.draft && (release.prerelease || !release.prerelease))
+          .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+
+        if (publishedReleases.length === 0) {
+          lastUpdateCheckResult = { success: false, error: 'No published versions on GitHub' }
+          updateCheckInProgress = false
+          return lastUpdateCheckResult
+        }
+
+        const latestRelease = publishedReleases[0]
+        const latestVersion = latestRelease.tag_name.replace(/^v/, '')
+
+        if (latestVersion !== currentVersion) {
+          detectedUpdateInfo = {
+            version: latestVersion,
+            releaseDate: latestRelease.published_at,
+            releaseNotes: latestRelease.body
+          }
+
+          sendLogToRenderer('log', '✅ [IPC] Mise à jour trouvée via méthode manuelle: ' + JSON.stringify({
+            version: detectedUpdateInfo.version,
+            releaseDate: detectedUpdateInfo.releaseDate
+          }))
+
+          if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+            try {
+              mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+              mainWindow.webContents.send('remove-notification', { id: 'update-error-check' })
+              mainWindow.webContents.send('remove-notification', { id: 'update-not-available' })
+              
+              setTimeout(() => {
+                if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed() && detectedUpdateInfo) {
+                  try {
+                    mainWindow.webContents.send('update-available', {
+                      version: latestVersion,
+                      releaseDate: latestRelease.published_at,
+                      releaseNotes: latestRelease.body
+                    })
+                    mainWindow.webContents.send('update-available-notification', {
+                      version: latestVersion,
+                      releaseDate: latestRelease.published_at,
+                      releaseNotes: latestRelease.body
+                    })
+                  } catch (sendError) {
+                  }
+                }
+              }, 200)
+            } catch (sendError) {
+            }
+          }
+
+          lastUpdateCheckResult = { success: true }
+        } else {
+          if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+            try {
+              mainWindow.webContents.send('remove-notification', { id: 'update-error-check' })
+              mainWindow.webContents.send('update-not-available')
+            } catch (sendError) {
+            }
+          }
+          lastUpdateCheckResult = { success: true }
+        }
+      } catch (manualError) {
+        sendLogToRenderer('error', '❌ [IPC] Méthode manuelle échouée:', manualError.message)
+        lastUpdateCheckResult = { success: false, error: manualError.message }
+      }
+
+      updateCheckInProgress = false
+      return lastUpdateCheckResult
     }
   })
 
   ipcMain.handle('download-update', async () => {
+    sendLogToRenderer('log', '═══════════════════════════════════════════════════════════')
+    sendLogToRenderer('log', '📥 [IPC] download-update appelé')
+    sendLogToRenderer('log', '═══════════════════════════════════════════════════════════')
+
+    sendLogToRenderer('log', '📊 [IPC] État actuel:', {
+      hasDetectedUpdateInfo: !!detectedUpdateInfo,
+      detectedVersion: detectedUpdateInfo?.version || 'none',
+      hasLastUpdateCheckResult: !!lastUpdateCheckResult
+    })
+
+    sendLogToRenderer('log', '🔍 [IPC] Étape 1: Vérification des mises à jour avant téléchargement...')
+
     try {
-      await autoUpdater.downloadUpdate()
-      return { success: true }
+      autoUpdater.channel = 'latest'
+      autoUpdater.setFeedURL({
+        provider: 'github',
+        owner: 'KaenTV',
+        repo: 'BackHub',
+        channel: 'latest'
+      })
+      sendLogToRenderer('log', '✅ [IPC] Feed URL configuré avec channel: latest')
+      sendLogToRenderer('log', '🔄 [IPC] Appel de autoUpdater.checkForUpdates()...')
+      await autoUpdater.checkForUpdates()
+    } catch (checkError) {
+      sendLogToRenderer('error', '❌ [IPC] autoUpdater.checkForUpdates() a échoué:', checkError.message)
+      sendLogToRenderer('error', '❌ [IPC] Stack:', checkError.stack)
+
+      sendLogToRenderer('log', '📡 [IPC] Étape 2: Utilisation de la méthode manuelle pour détecter les mises à jour...')
+
+      try {
+        const currentVersion = app.getVersion()
+        const apiUrl = 'https://api.github.com/repos/KaenTV/BackHub/releases'
+        
+        const releasesData = await new Promise((resolve, reject) => {
+          https.get(apiUrl, {
+            headers: {
+              'User-Agent': 'BackHub-Updater'
+            }
+          }, (res) => {
+            let data = ''
+            res.on('data', (chunk) => { data += chunk })
+            res.on('end', () => {
+              try {
+                resolve(JSON.parse(data))
+              } catch (e) {
+                reject(e)
+              }
+            })
+          }).on('error', reject)
+        })
+
+        const publishedReleases = releasesData
+          .filter(release => !release.draft && (release.prerelease || !release.prerelease))
+          .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+
+        if (publishedReleases.length > 0) {
+          const latestRelease = publishedReleases[0]
+          const latestVersion = latestRelease.tag_name.replace(/^v/, '')
+          detectedUpdateInfo = {
+            version: latestVersion,
+            releaseDate: latestRelease.published_at,
+            releaseNotes: latestRelease.body
+          }
+          
+          if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+            try {
+              mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+              mainWindow.webContents.send('remove-notification', { id: 'update-error-check' })
+              mainWindow.webContents.send('remove-notification', { id: 'update-not-available' })
+              
+              setTimeout(() => {
+                if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed() && detectedUpdateInfo) {
+                  try {
+                    mainWindow.webContents.send('update-available', {
+                      version: latestVersion,
+                      releaseDate: latestRelease.published_at,
+                      releaseNotes: latestRelease.body
+                    })
+                    mainWindow.webContents.send('update-available-notification', {
+                      version: latestVersion,
+                      releaseDate: latestRelease.published_at,
+                      releaseNotes: latestRelease.body
+                    })
+                  } catch (sendError) {
+                  }
+                }
+              }, 100)
+            } catch (e) {
+            }
+          }
+        }
+      } catch (manualError) {
+        sendLogToRenderer('error', '❌ [IPC] Méthode manuelle échouée:', manualError.message)
+      }
+
+      sendLogToRenderer('log', '📊 [IPC] Après méthode manuelle: ' + JSON.stringify({
+        hasDetectedUpdateInfo: !!detectedUpdateInfo,
+        detectedVersion: detectedUpdateInfo?.version || 'none'
+      }))
+
+      if (detectedUpdateInfo) {
+        sendLogToRenderer('log', '🔧 [IPC] Étape 3: Configuration de autoUpdater avec le tag spécifique: v' + detectedUpdateInfo.version)
+        try {
+          autoUpdater.channel = 'latest'
+          autoUpdater.setFeedURL({
+            provider: 'github',
+            owner: 'KaenTV',
+            repo: 'BackHub',
+            channel: 'latest'
+          })
+          sendLogToRenderer('log', '🔄 [IPC] Réessai avec channel latest...')
+          await autoUpdater.checkForUpdates()
+        } catch (retryError) {
+          sendLogToRenderer('log', '⚠️ [IPC] Réessai échoué (normal si fallback manuel utilisé):', retryError.message)
+        }
+        
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+          try {
+            mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+          } catch (e) {
+          }
+        }
+      }
+    }
+
+    sendLogToRenderer('log', '📊 [IPC] Étape 4: Vérification finale avant téléchargement...')
+    const checkSuccess = lastUpdateCheckResult?.success || false
+    const hasUpdateInfo = autoUpdater.updateInfo && autoUpdater.updateInfo.version
+    sendLogToRenderer('log', '📊 [IPC] État:', {
+      checkSuccess,
+      hasLastUpdateCheckResult: !!lastUpdateCheckResult,
+      hasUpdateInfo,
+      hasDetectedUpdateInfo: !!detectedUpdateInfo
+    })
+
+    try {
+      if (hasUpdateInfo) {
+        sendLogToRenderer('log', '📥 [IPC] Étape 5: Téléchargement via autoUpdater...')
+        await autoUpdater.downloadUpdate()
+        return { success: true }
+      } else if (detectedUpdateInfo) {
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+          try {
+            mainWindow.webContents.send('remove-notification', { id: 'update-error-check' })
+            mainWindow.webContents.send('remove-notification', { id: 'update-not-available' })
+          } catch (e) {
+          }
+        }
+        
+        sendLogToRenderer('log', '📥 [IPC] Étape 5: Téléchargement manuel depuis GitHub...')
+        sendLogToRenderer('log', '📦 [IPC] Version à télécharger:', detectedUpdateInfo.version)
+
+        const tagName = 'v' + detectedUpdateInfo.version
+        const releaseUrl = `https://api.github.com/repos/KaenTV/BackHub/releases/tags/${tagName}`
+        
+        sendLogToRenderer('log', '🔍 [IPC] Récupération des assets de la release:', releaseUrl)
+
+        const releaseData = await new Promise((resolve, reject) => {
+          https.get(releaseUrl, {
+            headers: {
+              'User-Agent': 'BackHub-Updater'
+            }
+          }, (res) => {
+            let data = ''
+            res.on('data', (chunk) => { data += chunk })
+            res.on('end', () => {
+              try {
+                resolve(JSON.parse(data))
+              } catch (e) {
+                reject(e)
+              }
+            })
+          }).on('error', reject)
+        })
+
+        const exeAsset = releaseData.assets.find(asset => asset.name.endsWith('.exe'))
+        if (!exeAsset) {
+          throw new Error('No .exe file found in release assets')
+        }
+
+        sendLogToRenderer('log', '✅ [IPC] Fichier .exe trouvé:', exeAsset.name)
+        sendLogToRenderer('log', '📥 [IPC] Téléchargement depuis:', exeAsset.browser_download_url)
+
+        const downloadPath = await downloadFile(exeAsset.browser_download_url)
+        
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+          try {
+            mainWindow.webContents.send('remove-notification', { id: 'update-download-progress' })
+          } catch (e) {
+          }
+        }
+
+        sendLogToRenderer('log', '🚀 [IPC] Lancement de l\'installation...')
+
+        app.isQuitting = true
+        updateDownloadInProgress = false
+        detectedUpdateInfo = null
+        
+        if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+          try {
+            mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+            mainWindow.webContents.send('remove-notification', { id: 'update-download-progress' })
+          } catch (e) {
+          }
+        }
+        
+        const { spawn } = require('child_process')
+        
+        if (process.platform === 'win32') {
+          spawn('cmd.exe', ['/c', 'start', '""', downloadPath], {
+            detached: true,
+            stdio: 'ignore',
+            shell: false
+          }).unref()
+        } else {
+          spawn('open', [downloadPath], {
+            detached: true,
+            stdio: 'ignore'
+          }).unref()
+        }
+
+        sendLogToRenderer('log', '✅ [IPC] Installation lancée, fermeture de l\'application...')
+        
+        const closeAllWindows = () => {
+          try {
+            const allWindowsToClose = BrowserWindow.getAllWindows()
+            allWindowsToClose.forEach(window => {
+              if (window && !window.isDestroyed()) {
+                try {
+                  window.removeAllListeners('close')
+                  window.removeAllListeners()
+                  window.close()
+                } catch (e) {
+                }
+              }
+            })
+            
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              try {
+                mainWindow.removeAllListeners('close')
+                mainWindow.removeAllListeners()
+                mainWindow.close()
+              } catch (e) {
+              }
+            }
+            
+            if (overlayWindow && !overlayWindow.isDestroyed()) {
+              try {
+                overlayWindow.removeAllListeners('close')
+                overlayWindow.removeAllListeners()
+                overlayWindow.close()
+              } catch (e) {
+              }
+            }
+          } catch (e) {
+          }
+        }
+        
+        closeAllWindows()
+        
+        setTimeout(() => {
+          try {
+            const allWindowsToDestroy = BrowserWindow.getAllWindows()
+            allWindowsToDestroy.forEach(window => {
+              if (window && !window.isDestroyed()) {
+                try {
+                  window.destroy()
+                } catch (e) {
+                }
+              }
+            })
+            
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              try {
+                mainWindow.destroy()
+                mainWindow = null
+              } catch (e) {
+              }
+            }
+            
+            if (overlayWindow && !overlayWindow.isDestroyed()) {
+              try {
+                overlayWindow.destroy()
+                overlayWindow = null
+              } catch (e) {
+              }
+            }
+          } catch (e) {
+          }
+          
+          setTimeout(() => {
+            try {
+              app.exit(0)
+            } catch (e) {
+              process.exit(0)
+            }
+          }, 100)
+        }, 500)
+        
+        return { success: true }
+      } else {
+        throw new Error('Please check update first')
+      }
     } catch (error) {
+      sendLogToRenderer('error', '❌ [IPC] Erreur lors du téléchargement:', error.message)
       return { success: false, error: error.message }
     }
   })
@@ -436,7 +982,7 @@ function createOverlayWindow() {
         preload: path.join(__dirname, 'preload.js'),
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: false,
+        devTools: true,
         backgroundThrottling: false,
         sandbox: true,
         partition: 'persist:overlay',
@@ -454,46 +1000,6 @@ function createOverlayWindow() {
     event.preventDefault()
   })
 
-    overlayWindow.webContents.on('before-input-event', (event, input) => {
-      if (input.key === 'F12') {
-        event.preventDefault()
-        return
-      }
-
-      if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-        event.preventDefault()
-        return
-      }
-
-      if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-        event.preventDefault()
-        return
-      }
-
-      if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-        event.preventDefault()
-        return
-      }
-
-      if (input.control && input.key.toLowerCase() === 'u') {
-        event.preventDefault()
-        return
-      }
-
-      if (input.control && input.key.toLowerCase() === 'r') {
-        event.preventDefault()
-        return
-      }
-
-      if (input.control && input.shift && input.key.toLowerCase() === 'r') {
-        event.preventDefault()
-        return
-      }
-    })
-
-    overlayWindow.webContents.on('devtools-opened', () => {
-      overlayWindow.webContents.closeDevTools()
-    })
 
 
   if (process.platform === 'win32') {
@@ -644,7 +1150,7 @@ function getFetchHtmlView() {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: false,
+        devTools: true,
         backgroundThrottling: true,
         sandbox: true,
         partition: 'persist:fetch',
@@ -664,21 +1170,6 @@ function getFetchHtmlView() {
       event.preventDefault()
     })
 
-    fetchHtmlView.webContents.on('before-input-event', (event, input) => {
-      if (input.key === 'F12' ||
-          (input.control && input.shift && input.key.toLowerCase() === 'i') ||
-          (input.control && input.shift && input.key.toLowerCase() === 'j') ||
-          (input.control && input.shift && input.key.toLowerCase() === 'c') ||
-          (input.control && input.key.toLowerCase() === 'u') ||
-          (input.control && input.key.toLowerCase() === 'r') ||
-          (input.control && input.shift && input.key.toLowerCase() === 'r')) {
-        event.preventDefault()
-      }
-    })
-
-    fetchHtmlView.webContents.on('devtools-opened', () => {
-      fetchHtmlView.webContents.closeDevTools()
-    })
   }
 
   return fetchHtmlView
@@ -766,6 +1257,14 @@ function processFetchHtmlQueue() {
       setTimeout(() => {
         if (resolved) return
 
+        if (!hiddenView || !hiddenView.webContents || hiddenView.webContents.isDestroyed()) {
+          if (!resolved) {
+            resolved = true
+            cleanup()
+            reject(new Error('BrowserView has been destroyed'))
+          }
+          return
+        }
 
         hiddenView.webContents.executeJavaScript(`
           (function() {
@@ -1421,31 +1920,41 @@ app.on('ready', () => {
 
 
   mainWindow.webContents.once('did-finish-load', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.openDevTools()
+    }
+    
     setTimeout(() => {
-      if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow && !mainWindow.isDestroyed() && !detectedUpdateInfo) {
         mainWindow.webContents.send('app-notification', { 
           message: 'Recherche de nouvelles versions disponibles...', 
           type: 'info', 
           duration: 0,
           id: 'update-checking'
         })
-        checkForUpdatesWithCurrentVersion().catch(err => {
-          if (mainWindow && !mainWindow.isDestroyed()) {
-            mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
-            mainWindow.webContents.send('app-notification', { 
-              message: `Erreur lors de la vérification: ${err.message || 'Erreur inconnue'}`, 
-              type: 'error', 
-              duration: 5000 
-            })
-          }
-        })
+        if (!app.isQuitting && !updateDownloadInProgress && !detectedUpdateInfo) {
+          checkForUpdatesWithCurrentVersion().catch(err => {
+            if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+              try {
+                mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
+                mainWindow.webContents.send('app-notification', { 
+                  message: `Erreur lors de la vérification: ${err.message || 'Erreur inconnue'}`, 
+                  type: 'error', 
+                  duration: 8000,
+                  id: 'update-error-startup'
+                })
+              } catch (e) {
+              }
+            }
+          })
+        }
       }
     }, 5000)
   })
 
 
   setInterval(() => {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && !app.isQuitting) {
       autoUpdater.checkForUpdates().catch(err => {
       })
     }
@@ -1461,16 +1970,20 @@ app.on('ready', () => {
 })
 
 app.on('window-all-closed', () => {
-
     if (overlayWindow && !overlayWindow.isDestroyed()) {
-      overlayWindow.destroy()
+      try {
+        overlayWindow.destroy()
+      } catch (e) {
+      }
     }
 
-    if (mainWindow && fetchHtmlView && !fetchHtmlView.webContents.isDestroyed()) {
-      mainWindow.removeBrowserView(fetchHtmlView)
-      fetchHtmlView.webContents.destroy()
+    if (mainWindow && !mainWindow.isDestroyed() && fetchHtmlView && !fetchHtmlView.webContents.isDestroyed()) {
+      try {
+        mainWindow.removeBrowserView(fetchHtmlView)
+        fetchHtmlView.webContents.destroy()
+      } catch (e) {
+      }
     }
-
 
     setTimeout(() => {
       if (process.platform !== 'darwin') {

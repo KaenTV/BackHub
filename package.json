@@ -16,6 +16,7 @@
     "build": "electron-builder",
     "build:win": "cross-env NODE_ENV=production CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --publish never",
     "build:win:publish": "dotenv -e .env -- cross-env NODE_ENV=production electron-builder --win --publish always",
+    "publish:github": "dotenv -e .env -- cross-env NODE_ENV=production electron-builder --win --publish always",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -67,13 +68,7 @@
       "include": "build/installer.nsh",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
-      "artifactName": "${productName}-Setup.${ext}",
-      "publish": {
-        "provider": "github",
-        "owner": "KaenTV",
-        "repo": "BackHub",
-        "releaseType": "release"
-      }
+      "artifactName": "${productName}-Setup.${ext}"
     },
     "extraFiles": [
       {
@@ -90,7 +85,8 @@
       "owner": "KaenTV",
       "repo": "BackHub",
       "releaseType": "release",
-      "channel": "latest"
+      "channel": "latest",
+      "publishAutoUpdate": true
     },
     "electronUpdaterCompatibility": ">=2.16.0",
     "compression": "maximum",

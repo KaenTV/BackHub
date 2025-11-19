@@ -52,6 +52,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('remove-notification', (event, data) => callback(data))
   },
 
+  onMainLog: (callback) => {
+    ipcRenderer.on('main-log', (event, data) => callback(data))
+  },
+
   removeAllListeners: (channel) => {
     ipcRenderer.removeAllListeners(channel)
   }

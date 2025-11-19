@@ -22,7 +22,6 @@ class NotificationService {
   }
 
   show(message, type = 'info', duration = 3000, customId = null) {
-    
     if (!this.container) {
       this.init()
     }
@@ -34,7 +33,8 @@ class NotificationService {
     if (customId) {
       const existing = this.notifications.find(n => n.customId === customId)
       if (existing) {
-        this.remove(existing.id)
+        this.updateMessage(existing.id, message)
+        return existing.id
       }
     }
 
@@ -63,6 +63,30 @@ class NotificationService {
 
     logger.info(`Notification: ${message}`, { type, customId })
     return notification.id
+  }
+
+  updateMessage(id, newMessage) {
+    const notification = this.notifications.find(n => n.id === id)
+    if (notification) {
+      notification.message = newMessage
+      const element = this.container.querySelector(`[data-id="${id}"]`)
+      if (element) {
+        const messageElement = element.querySelector('.notification-message')
+        if (messageElement) {
+          messageElement.textContent = newMessage
+        }
+      }
+      return true
+    }
+    return false
+  }
+
+  updateMessageByCustomId(customId, newMessage) {
+    const notification = this.notifications.find(n => n.customId === customId)
+    if (notification) {
+      return this.updateMessage(notification.id, newMessage)
+    }
+    return false
   }
 
   removeById(customId) {
@@ -142,7 +166,7 @@ class NotificationService {
     this.notifications.forEach(n => this.remove(n.id))
   }
 
-  showWithActions(message, type = 'info', actions = [], duration = 0) {
+  showWithActions(message, type = 'info', actions = [], duration = 0, customId = null) {
     if (!this.container) {
       this.init()
     }
@@ -151,8 +175,16 @@ class NotificationService {
       return null
     }
 
+    if (customId) {
+      const existing = this.notifications.find(n => n.customId === customId)
+      if (existing) {
+        return existing.id
+      }
+    }
+
     const notification = {
       id: Date.now() + Math.random(),
+      customId: customId,
       message,
       type,
       duration: 0,
@@ -168,7 +200,7 @@ class NotificationService {
       this.remove(oldest.id)
     }
 
-    logger.info(`Notification avec actions: ${message}`, { type, actions: actions.length })
+    logger.info(`Notification avec actions: ${message}`, { type, actions: actions.length, customId })
     return notification.id
   }
 
@@ -201,8 +233,8 @@ class NotificationService {
       const button = element.querySelector(`[data-action-id="${index}"]`)
       if (button && action.callback) {
         button.addEventListener('click', () => {
-          action.callback()
           this.remove(notification.id)
+          action.callback()
         })
       }
     })

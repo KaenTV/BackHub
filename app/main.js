@@ -220,51 +220,52 @@ function createWindow () {
     event.preventDefault()
   })
 
-  mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'F12') {
-      event.preventDefault()
-      return
-    }
+  // Raccourcis DevTools temporairement désactivés pour le débogage
+  // mainWindow.webContents.on('before-input-event', (event, input) => {
+  //   if (input.key === 'F12') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.key.toLowerCase() === 'u') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.key.toLowerCase() === 'u') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'k') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'k') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.key.toLowerCase() === 'r') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.key.toLowerCase() === 'r') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.key.toLowerCase() === 'shift+r') {
-      event.preventDefault()
-      return
-    }
-  })
+  //   if (input.control && input.key.toLowerCase() === 'shift+r') {
+  //     event.preventDefault()
+  //     return
+  //   }
+  // })
 
-  mainWindow.webContents.on('devtools-opened', () => {
-    mainWindow.webContents.closeDevTools()
-  })
+  // mainWindow.webContents.on('devtools-opened', () => {
+  //   mainWindow.webContents.closeDevTools()
+  // })
 
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
@@ -422,46 +423,47 @@ function createOverlayWindow() {
     event.preventDefault()
   })
 
-  overlayWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.key === 'F12') {
-      event.preventDefault()
-      return
-    }
+  // Raccourcis DevTools temporairement désactivés pour le débogage
+  // overlayWindow.webContents.on('before-input-event', (event, input) => {
+  //   if (input.key === 'F12') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.key.toLowerCase() === 'u') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.key.toLowerCase() === 'u') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.key.toLowerCase() === 'r') {
-      event.preventDefault()
-      return
-    }
+  //   if (input.control && input.key.toLowerCase() === 'r') {
+  //     event.preventDefault()
+  //     return
+  //   }
 
-    if (input.control && input.shift && input.key.toLowerCase() === 'r') {
-      event.preventDefault()
-      return
-    }
-  })
+  //   if (input.control && input.shift && input.key.toLowerCase() === 'r') {
+  //     event.preventDefault()
+  //     return
+  //   }
+  // })
 
-  overlayWindow.webContents.on('devtools-opened', () => {
-    overlayWindow.webContents.closeDevTools()
-  })
+  // overlayWindow.webContents.on('devtools-opened', () => {
+  //   overlayWindow.webContents.closeDevTools()
+  // })
 
 
   if (process.platform === 'win32') {
@@ -632,21 +634,22 @@ function getFetchHtmlView() {
       event.preventDefault()
     })
 
-    fetchHtmlView.webContents.on('before-input-event', (event, input) => {
-      if (input.key === 'F12' ||
-          (input.control && input.shift && input.key.toLowerCase() === 'i') ||
-          (input.control && input.shift && input.key.toLowerCase() === 'j') ||
-          (input.control && input.shift && input.key.toLowerCase() === 'c') ||
-          (input.control && input.key.toLowerCase() === 'u') ||
-          (input.control && input.key.toLowerCase() === 'r') ||
-          (input.control && input.shift && input.key.toLowerCase() === 'r')) {
-        event.preventDefault()
-      }
-    })
+    // Raccourcis DevTools temporairement désactivés pour le débogage
+    // fetchHtmlView.webContents.on('before-input-event', (event, input) => {
+    //   if (input.key === 'F12' ||
+    //       (input.control && input.shift && input.key.toLowerCase() === 'i') ||
+    //       (input.control && input.shift && input.key.toLowerCase() === 'j') ||
+    //       (input.control && input.shift && input.key.toLowerCase() === 'c') ||
+    //       (input.control && input.key.toLowerCase() === 'u') ||
+    //       (input.control && input.key.toLowerCase() === 'r') ||
+    //       (input.control && input.shift && input.key.toLowerCase() === 'r')) {
+    //     event.preventDefault()
+    //   }
+    // })
 
-    fetchHtmlView.webContents.on('devtools-opened', () => {
-      fetchHtmlView.webContents.closeDevTools()
-    })
+    // fetchHtmlView.webContents.on('devtools-opened', () => {
+    //   fetchHtmlView.webContents.closeDevTools()
+    // })
   }
 
   return fetchHtmlView

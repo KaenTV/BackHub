@@ -54,14 +54,7 @@
       ],
       "requestedExecutionLevel": "asInvoker",
       "forceCodeSigning": false,
-      "icon": "build/icon.ico",
-      "publisherName": "KaenTV",
-      "publish": {
-        "provider": "github",
-        "owner": "KaenTV",
-        "repo": "BackHub",
-        "releaseType": "release"
-      }
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,

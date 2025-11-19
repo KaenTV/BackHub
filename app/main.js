@@ -17,6 +17,15 @@ autoUpdater.autoInstallOnAppQuit = true
 
 autoUpdater.allowPrerelease = true
 
+autoUpdater.setFeedURL({
+  provider: 'github',
+  owner: 'KaenTV',
+  repo: 'BackHub',
+  private: false
+})
+
+autoUpdater.channel = 'latest'
+
 autoUpdater.on('checking-for-update', () => {
   console.log('Vérification des mises à jour...')
   if (mainWindow && !mainWindow.isDestroyed()) {

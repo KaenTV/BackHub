@@ -199,7 +199,7 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: false,
+      devTools: true,
       sandbox: true,
       partition: 'persist:main',
       backgroundThrottling: true,
@@ -211,6 +211,9 @@ function createWindow () {
   })
 
   mainWindow.loadFile(path.join(__dirname, '..', 'interface', 'home.html'))
+  
+  // Ouvrir les DevTools automatiquement pour le débogage
+  mainWindow.webContents.openDevTools()
 
 
   mainWindow.webContents.on('context-menu', (event) => {
@@ -609,7 +612,7 @@ function getFetchHtmlView() {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: false,
+        devTools: true,
         backgroundThrottling: true,
         sandbox: true,
         partition: 'persist:fetch',

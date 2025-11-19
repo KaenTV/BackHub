@@ -15,19 +15,16 @@ let fetchHtmlQueue = []
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
 
+// Permet les prereleases (BETA, etc.)
 autoUpdater.allowPrerelease = true
 
-autoUpdater.setFeedURL({
-  provider: 'github',
-  owner: 'KaenTV',
-  repo: 'BackHub',
-  private: false
-})
-
-autoUpdater.channel = 'latest'
+// Pour un repository public, electron-updater détecte automatiquement depuis package.json
+// Il utilisera automatiquement l'API GitHub pour trouver les releases
+// Pas besoin de setFeedURL() - cela peut causer "No published versions"
 
 autoUpdater.on('checking-for-update', () => {
-  console.log('Vérification des mises à jour...')
+  console.log('🔍 Vérification des mises à jour...')
+  console.log('📦 Repository détecté depuis package.json:', require('../package.json').repository)
   if (mainWindow && !mainWindow.isDestroyed()) {
     console.log('Envoi de la notification de vérification...')
     mainWindow.webContents.send('update-status', { status: 'checking', message: 'Vérification des mises à jour...' })
@@ -71,6 +68,13 @@ autoUpdater.on('update-not-available', (info) => {
 })
 
 autoUpdater.on('error', (err) => {
+  console.error('❌ Erreur electron-updater:', err)
+  console.error('📋 Détails de l\'erreur:', {
+    message: err.message,
+    stack: err.stack,
+    code: err.code,
+    statusCode: err.statusCode
+  })
   console.error('Erreur lors de la vérification des mises à jour:', err)
   console.error('Détails de l\'erreur:', {
     message: err.message,

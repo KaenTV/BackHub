@@ -11,7 +11,6 @@ class NotificationService {
 
   init() {
     if (!document.body) {
-      console.warn('document.body non disponible, attente du DOM...')
       setTimeout(() => this.init(), 100)
       return
     }
@@ -20,19 +19,15 @@ class NotificationService {
     this.container.id = 'notification-container'
     this.container.className = 'notification-container'
     document.body.appendChild(this.container)
-    console.log('NotificationService initialisé, container créé:', this.container)
   }
 
   show(message, type = 'info', duration = 3000, customId = null) {
-    console.log('NotificationService.show appelé:', { message, type, duration, customId })
     
     if (!this.container) {
-      console.warn('Container non initialisé, réinitialisation...')
       this.init()
     }
 
     if (!this.container) {
-      console.error('Impossible de créer le container de notifications')
       return
     }
 
@@ -80,10 +75,8 @@ class NotificationService {
   }
 
   render(notification) {
-    console.log('Rendu de la notification:', notification)
     
     if (!this.container) {
-      console.error('Container non disponible pour le rendu')
       return
     }
 
@@ -101,11 +94,9 @@ class NotificationService {
     `
 
     this.container.appendChild(element)
-    console.log('Élément de notification ajouté au DOM:', element)
 
     requestAnimationFrame(() => {
       element.classList.add('show')
-      console.log('Classe "show" ajoutée à la notification')
     })
   }
 
@@ -157,7 +148,6 @@ class NotificationService {
     }
 
     if (!this.container) {
-      console.error('Impossible de créer le container de notifications')
       return null
     }
 
@@ -184,7 +174,6 @@ class NotificationService {
 
   renderWithActions(notification) {
     if (!this.container) {
-      console.error('Container non disponible pour le rendu')
       return null
     }
 

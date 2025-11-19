@@ -2,7 +2,9 @@ const { app, BrowserWindow, BrowserView, ipcMain, Tray, Menu, nativeImage, Notif
 const { autoUpdater } = require('electron-updater')
 const path = require('node:path')
 const https = require('node:https')
+const http = require('node:http')
 const { URL } = require('node:url')
+const { compare } = require('semver')
 
 let mainWindow
 let overlayWindow = null
@@ -15,18 +17,70 @@ let fetchHtmlQueue = []
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
 
-// Permet les prereleases (BETA, etc.)
 autoUpdater.allowPrerelease = true
 
-// Pour un repository public, electron-updater détecte automatiquement depuis package.json
-// Il utilisera automatiquement l'API GitHub pour trouver les releases
-// Pas besoin de setFeedURL() - cela peut causer "No published versions"
+autoUpdater.setFeedURL({
+  provider: 'github',
+  owner: 'KaenTV',
+  repo: 'BackHub'
+})
+
+async function checkForUpdatesWithCurrentVersion() {
+  const currentVersion = app.getVersion()
+  const versionTag = `v${currentVersion}`
+  const latestYmlUrl = `https://github.com/KaenTV/BackHub/releases/download/${versionTag}/latest.yml`
+  
+  autoUpdater.emit('checking-for-update')
+  
+  try {
+    const ymlContent = await new Promise((resolve, reject) => {
+      const makeRequest = (url) => {
+        const urlObj = new URL(url)
+        const client = urlObj.protocol === 'https:' ? https : http
+        
+        client.get(url, (res) => {
+          if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+            const redirectUrl = res.headers.location.startsWith('http') 
+              ? res.headers.location 
+              : `${urlObj.protocol}//${urlObj.host}${res.headers.location}`
+            makeRequest(redirectUrl)
+            return
+          }
+          
+          if (res.statusCode !== 200) {
+            reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`))
+            return
+          }
+          
+          let data = ''
+          res.on('data', (chunk) => { data += chunk })
+          res.on('end', () => resolve(data))
+        }).on('error', reject)
+      }
+      
+      makeRequest(latestYmlUrl)
+    })
+    
+    const versionMatch = ymlContent.match(/^version:\s*(.+)$/m)
+    if (versionMatch) {
+      const latestVersion = versionMatch[1].trim()
+      
+      if (latestVersion !== currentVersion) {
+        autoUpdater.emit('update-available', {
+          version: latestVersion,
+          releaseDate: new Date().toISOString()
+        })
+      } else {
+        autoUpdater.emit('update-not-available')
+      }
+    }
+  } catch (error) {
+    autoUpdater.emit('error', error)
+  }
+}
 
 autoUpdater.on('checking-for-update', () => {
-  console.log('🔍 Vérification des mises à jour...')
-  console.log('📦 Repository détecté depuis package.json:', require('../package.json').repository)
   if (mainWindow && !mainWindow.isDestroyed()) {
-    console.log('Envoi de la notification de vérification...')
     mainWindow.webContents.send('update-status', { status: 'checking', message: 'Vérification des mises à jour...' })
     mainWindow.webContents.send('app-notification', { 
       message: 'Recherche de nouvelles versions disponibles...', 
@@ -34,14 +88,10 @@ autoUpdater.on('checking-for-update', () => {
       duration: 0,
       id: 'update-checking'
     })
-    console.log('Notification envoyée au renderer')
-  } else {
-    console.warn('MainWindow non disponible pour envoyer la notification')
   }
 })
 
 autoUpdater.on('update-available', (info) => {
-  console.log('Mise à jour disponible:', info.version)
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-status', { status: 'available', message: 'Mise à jour disponible' })
     mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
@@ -59,7 +109,6 @@ autoUpdater.on('update-available', (info) => {
 })
 
 autoUpdater.on('update-not-available', (info) => {
-  console.log('Aucune mise à jour disponible')
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-status', { status: 'up-to-date', message: 'Vous utilisez la dernière version' })
     mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
@@ -68,19 +117,6 @@ autoUpdater.on('update-not-available', (info) => {
 })
 
 autoUpdater.on('error', (err) => {
-  console.error('❌ Erreur electron-updater:', err)
-  console.error('📋 Détails de l\'erreur:', {
-    message: err.message,
-    stack: err.stack,
-    code: err.code,
-    statusCode: err.statusCode
-  })
-  console.error('Erreur lors de la vérification des mises à jour:', err)
-  console.error('Détails de l\'erreur:', {
-    message: err.message,
-    stack: err.stack,
-    code: err.code
-  })
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-status', { status: 'error', message: 'Erreur lors de la vérification des mises à jour' })
     mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
@@ -94,8 +130,6 @@ autoUpdater.on('error', (err) => {
 })
 
 autoUpdater.on('download-progress', (progressObj) => {
-  const message = `Téléchargement: ${Math.round(progressObj.percent)}%`
-  console.log(message)
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-download-progress', {
       percent: progressObj.percent,
@@ -111,7 +145,6 @@ autoUpdater.on('download-progress', (progressObj) => {
 })
 
 autoUpdater.on('update-downloaded', (info) => {
-  console.log('Mise à jour téléchargée:', info.version)
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('update-downloaded', {
       version: info.version,
@@ -203,7 +236,7 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: true,
+      devTools: false,
       sandbox: true,
       partition: 'persist:main',
       backgroundThrottling: true,
@@ -215,61 +248,57 @@ function createWindow () {
   })
 
   mainWindow.loadFile(path.join(__dirname, '..', 'interface', 'home.html'))
-  
-  // Ouvrir les DevTools automatiquement pour le débogage
-  mainWindow.webContents.openDevTools()
 
 
   mainWindow.webContents.on('context-menu', (event) => {
     event.preventDefault()
   })
 
-  // Raccourcis DevTools temporairement désactivés pour le débogage
-  // mainWindow.webContents.on('before-input-event', (event, input) => {
-  //   if (input.key === 'F12') {
-  //     event.preventDefault()
-  //     return
-  //   }
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.key.toLowerCase() === 'u') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.key.toLowerCase() === 'u') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'k') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.shift && input.key.toLowerCase() === 'k') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.key.toLowerCase() === 'r') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    if (input.control && input.key.toLowerCase() === 'r') {
+      event.preventDefault()
+      return
+    }
 
-  //   if (input.control && input.key.toLowerCase() === 'shift+r') {
-  //     event.preventDefault()
-  //     return
-  //   }
-  // })
+    if (input.control && input.key.toLowerCase() === 'shift+r') {
+      event.preventDefault()
+      return
+    }
+  })
 
-  // mainWindow.webContents.on('devtools-opened', () => {
-  //   mainWindow.webContents.closeDevTools()
-  // })
+  mainWindow.webContents.on('devtools-opened', () => {
+    mainWindow.webContents.closeDevTools()
+  })
 
   mainWindow.on('close', (event) => {
     if (!app.isQuitting) {
@@ -361,7 +390,6 @@ function createWindow () {
       await autoUpdater.checkForUpdates()
       return { success: true }
     } catch (error) {
-      console.error('Erreur lors de la vérification des mises à jour:', error)
       return { success: false, error: error.message }
     }
   })
@@ -371,7 +399,6 @@ function createWindow () {
       await autoUpdater.downloadUpdate()
       return { success: true }
     } catch (error) {
-      console.error('Erreur lors du téléchargement de la mise à jour:', error)
       return { success: false, error: error.message }
     }
   })
@@ -409,7 +436,7 @@ function createOverlayWindow() {
         preload: path.join(__dirname, 'preload.js'),
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: true,
+        devTools: false,
         backgroundThrottling: false,
         sandbox: true,
         partition: 'persist:overlay',
@@ -427,47 +454,46 @@ function createOverlayWindow() {
     event.preventDefault()
   })
 
-  // Raccourcis DevTools temporairement désactivés pour le débogage
-  // overlayWindow.webContents.on('before-input-event', (event, input) => {
-  //   if (input.key === 'F12') {
-  //     event.preventDefault()
-  //     return
-  //   }
+    overlayWindow.webContents.on('before-input-event', (event, input) => {
+      if (input.key === 'F12') {
+        event.preventDefault()
+        return
+      }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-  //     event.preventDefault()
-  //     return
-  //   }
+      if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+        event.preventDefault()
+        return
+      }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'j') {
-  //     event.preventDefault()
-  //     return
-  //   }
+      if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+        event.preventDefault()
+        return
+      }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'c') {
-  //     event.preventDefault()
-  //     return
-  //   }
+      if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+        event.preventDefault()
+        return
+      }
 
-  //   if (input.control && input.key.toLowerCase() === 'u') {
-  //     event.preventDefault()
-  //     return
-  //   }
+      if (input.control && input.key.toLowerCase() === 'u') {
+        event.preventDefault()
+        return
+      }
 
-  //   if (input.control && input.key.toLowerCase() === 'r') {
-  //     event.preventDefault()
-  //     return
-  //   }
+      if (input.control && input.key.toLowerCase() === 'r') {
+        event.preventDefault()
+        return
+      }
 
-  //   if (input.control && input.shift && input.key.toLowerCase() === 'r') {
-  //     event.preventDefault()
-  //     return
-  //   }
-  // })
+      if (input.control && input.shift && input.key.toLowerCase() === 'r') {
+        event.preventDefault()
+        return
+      }
+    })
 
-  // overlayWindow.webContents.on('devtools-opened', () => {
-  //   overlayWindow.webContents.closeDevTools()
-  // })
+    overlayWindow.webContents.on('devtools-opened', () => {
+      overlayWindow.webContents.closeDevTools()
+    })
 
 
   if (process.platform === 'win32') {
@@ -618,7 +644,7 @@ function getFetchHtmlView() {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: true,
+        devTools: false,
         backgroundThrottling: true,
         sandbox: true,
         partition: 'persist:fetch',
@@ -638,22 +664,21 @@ function getFetchHtmlView() {
       event.preventDefault()
     })
 
-    // Raccourcis DevTools temporairement désactivés pour le débogage
-    // fetchHtmlView.webContents.on('before-input-event', (event, input) => {
-    //   if (input.key === 'F12' ||
-    //       (input.control && input.shift && input.key.toLowerCase() === 'i') ||
-    //       (input.control && input.shift && input.key.toLowerCase() === 'j') ||
-    //       (input.control && input.shift && input.key.toLowerCase() === 'c') ||
-    //       (input.control && input.key.toLowerCase() === 'u') ||
-    //       (input.control && input.key.toLowerCase() === 'r') ||
-    //       (input.control && input.shift && input.key.toLowerCase() === 'r')) {
-    //     event.preventDefault()
-    //   }
-    // })
+    fetchHtmlView.webContents.on('before-input-event', (event, input) => {
+      if (input.key === 'F12' ||
+          (input.control && input.shift && input.key.toLowerCase() === 'i') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'j') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'c') ||
+          (input.control && input.key.toLowerCase() === 'u') ||
+          (input.control && input.key.toLowerCase() === 'r') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'r')) {
+        event.preventDefault()
+      }
+    })
 
-    // fetchHtmlView.webContents.on('devtools-opened', () => {
-    //   fetchHtmlView.webContents.closeDevTools()
-    // })
+    fetchHtmlView.webContents.on('devtools-opened', () => {
+      fetchHtmlView.webContents.closeDevTools()
+    })
   }
 
   return fetchHtmlView
@@ -1397,18 +1422,14 @@ app.on('ready', () => {
 
   mainWindow.webContents.once('did-finish-load', () => {
     setTimeout(() => {
-      console.log('Vérification des mises à jour au démarrage...')
       if (mainWindow && !mainWindow.isDestroyed()) {
-        console.log('Envoi de la notification de vérification...')
         mainWindow.webContents.send('app-notification', { 
           message: 'Recherche de nouvelles versions disponibles...', 
           type: 'info', 
           duration: 0,
           id: 'update-checking'
         })
-        console.log('Notification envoyée, démarrage de la vérification GitHub...')
-        autoUpdater.checkForUpdates().catch(err => {
-          console.error('Erreur lors de la vérification initiale des mises à jour:', err)
+        checkForUpdatesWithCurrentVersion().catch(err => {
           if (mainWindow && !mainWindow.isDestroyed()) {
             mainWindow.webContents.send('remove-notification', { id: 'update-checking' })
             mainWindow.webContents.send('app-notification', { 
@@ -1426,7 +1447,6 @@ app.on('ready', () => {
   setInterval(() => {
     if (process.env.NODE_ENV === 'production') {
       autoUpdater.checkForUpdates().catch(err => {
-        console.error('Erreur lors de la vérification périodique des mises à jour:', err)
       })
     }
   }, 4 * 60 * 60 * 1000)

@@ -120,31 +120,18 @@ class BackHubApp {
 
   initUpdateNotifications() {
     const setupListener = () => {
-      console.log('Tentative de configuration du listener de notifications...', {
-        electronAPI: !!window.electronAPI,
-        onAppNotification: !!(window.electronAPI && window.electronAPI.onAppNotification)
-      })
-      
       if (window.electronAPI && window.electronAPI.onAppNotification) {
         window.electronAPI.onAppNotification((data) => {
-          console.log('📨 Notification reçue depuis le main process:', data)
           if (data && data.message) {
             const type = data.type || 'info'
             const duration = data.duration !== undefined ? data.duration : (type === 'error' ? 5000 : type === 'warning' ? 4000 : 3000)
             const customId = data.id || null
-            console.log('✅ Affichage de la notification:', { message: data.message, type, duration, customId })
-            const notificationId = notificationService.show(data.message, type, duration, customId)
-            console.log('📌 ID de la notification créée:', notificationId)
-            console.log('📦 Container de notifications:', notificationService.container)
-            console.log('📋 Notifications actives:', notificationService.notifications.length)
-          } else {
-            console.warn('⚠️ Données de notification invalides:', data)
+            notificationService.show(data.message, type, duration, customId)
           }
         })
 
         if (window.electronAPI.onUpdateAvailableNotification) {
           window.electronAPI.onUpdateAvailableNotification((data) => {
-            console.log('Mise à jour disponible reçue:', data)
             this.showUpdateAvailableNotification(data)
           })
         }
@@ -152,7 +139,6 @@ class BackHubApp {
         if (window.electronAPI.onRemoveNotification) {
           window.electronAPI.onRemoveNotification((data) => {
             if (data && data.id) {
-              console.log('Suppression de la notification:', data.id)
               notificationService.removeById(data.id)
             }
           })
@@ -161,7 +147,6 @@ class BackHubApp {
         if (window.electronAPI.onUpdateDownloadProgress) {
           window.electronAPI.onUpdateDownloadProgress((progress) => {
             const percent = Math.round(progress.percent || 0)
-            console.log(`Progression du téléchargement: ${percent}%`)
             if (this.updateProgressNotificationId) {
               notificationService.remove(this.updateProgressNotificationId)
             }
@@ -179,10 +164,7 @@ class BackHubApp {
             localStorage.removeItem('pending-update-version')
           })
         }
-
-        console.log('✅ Listener de notifications de mise à jour configuré avec succès')
       } else {
-        console.warn('electronAPI ou onAppNotification non disponible, nouvelle tentative dans 100ms...')
         setTimeout(setupListener, 100)
       }
     }
@@ -199,12 +181,9 @@ class BackHubApp {
   checkPendingUpdate() {
     const pendingUpdateVersion = localStorage.getItem('pending-update-version')
     if (pendingUpdateVersion) {
-      console.log('Mise à jour en attente détectée:', pendingUpdateVersion)
       if (window.electronAPI && window.electronAPI.checkForUpdates) {
         window.electronAPI.checkForUpdates().then(() => {
-          console.log('Vérification des mises à jour en attente effectuée')
         }).catch(err => {
-          console.error('Erreur lors de la vérification des mises à jour en attente:', err)
         })
       }
     }
@@ -219,14 +198,12 @@ class BackHubApp {
         label: 'Télécharger',
         type: 'primary',
         callback: async () => {
-          console.log('Téléchargement de la mise à jour demandé')
           this.updateProgressNotificationId = notificationService.show('Téléchargement de la mise à jour en cours...', 'info', 0)
           
           try {
             if (window.electronAPI && window.electronAPI.downloadUpdate) {
               const result = await window.electronAPI.downloadUpdate()
               if (result && result.success) {
-                console.log('Téléchargement démarré avec succès')
               } else {
                 if (this.updateProgressNotificationId) {
                   notificationService.remove(this.updateProgressNotificationId)
@@ -236,7 +213,6 @@ class BackHubApp {
               }
             }
           } catch (error) {
-            console.error('Erreur lors du téléchargement de la mise à jour:', error)
             if (this.updateProgressNotificationId) {
               notificationService.remove(this.updateProgressNotificationId)
               this.updateProgressNotificationId = null
@@ -249,7 +225,6 @@ class BackHubApp {
         label: 'Plus tard',
         type: 'secondary',
         callback: () => {
-          console.log('Mise à jour reportée')
           localStorage.setItem('pending-update-version', version)
           notificationService.info('La mise à jour sera proposée au prochain redémarrage.', 3000)
         }
@@ -4576,7 +4551,6 @@ class BackHubApp {
   async renderUsers() {
     const tbody = document.getElementById('users-tbody')
     if (!tbody) {
-      console.warn('users-tbody not found')
       return
     }
 
@@ -8234,7 +8208,6 @@ class BackHubApp {
         const version = await window.electronAPI.getAppVersion()
         appVersionElement.textContent = version 
       } catch (error) {
-        console.error('Erreur lors de la récupération de la version:', error)
         appVersionElement.textContent = version
       }
     }
@@ -10092,7 +10065,6 @@ class BackHubApp {
       }
     } catch (error) {
 
-      console.error('Erreur lors de la vérification des feedbacks:', error)
     }
   }
 }

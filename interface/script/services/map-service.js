@@ -10,13 +10,11 @@ class MapService {
   initMap() {
     const mapElement = document.getElementById('chernarus-map')
     if (!mapElement) {
-      console.error('Élément de carte non trouvé')
       return
     }
 
 
     if (typeof L === 'undefined') {
-      console.error('Leaflet n\'est pas chargé')
       return
     }
 

@@ -250,7 +250,6 @@ class InteractiveGuide {
       await storageService.save('backhub-guide-shown', true)
       notificationService.success('Guide terminé ! Vous pouvez le relancer depuis les paramètres.')
     } catch (error) {
-      console.error('Failed to save guide completion', error)
     }
   }
 }

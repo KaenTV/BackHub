@@ -1,0 +1,177 @@
+
+const ITEMS_DATA = {
+
+  drugBriques: [
+    { name: 'Cocaine', buyPrice: 0, sellPrice: 55000 },
+    { name: 'Black Frost', buyPrice: 0, sellPrice: 50000 },
+    { name: 'Nomad', buyPrice: 0, sellPrice: 48000 },
+    { name: 'Stardawg', buyPrice: 0, sellPrice: 47000 },
+    { name: 'PurpleKush', buyPrice: 0, sellPrice: 46000 },
+    { name: 'Future', buyPrice: 0, sellPrice: 45000 },
+    { name: 'Chanvre S1', buyPrice: 0, sellPrice: 44000 },
+    { name: 'Blue God', buyPrice: 0, sellPrice: 40000 },
+    { name: 'Shunk', buyPrice: 0, sellPrice: 34000 }
+  ],
+  drugSachetGraine: [
+    { name: 'Cocaine', buyPrice: 0, sellPrice: 21214 },
+    { name: 'Black Frost', buyPrice: 0, sellPrice: 26438 },
+    { name: 'Nomad', buyPrice: 0, sellPrice: 25000 },
+    { name: 'Stardawg', buyPrice: 0, sellPrice: 24200 },
+    { name: 'PurpleKush', buyPrice: 0, sellPrice: 23500 },
+    { name: 'Future', buyPrice: 0, sellPrice: 22800 },
+    { name: 'Chanvre S1', buyPrice: 0, sellPrice: 22000 },
+    { name: 'Blue God', buyPrice: 0, sellPrice: 20500 },
+    { name: 'Shunk', buyPrice: 0, sellPrice: 19125 }
+  ],
+  drugGraine: [
+    { name: 'Cocaine', buyPrice: 0, sellPrice: 2357 },
+    { name: 'Black Frost', buyPrice: 0, sellPrice: 2938 },
+    { name: 'Nomad', buyPrice: 0, sellPrice: 2778 },
+    { name: 'Stardawg', buyPrice: 0, sellPrice: 2689 },
+    { name: 'PurpleKush', buyPrice: 0, sellPrice: 2611 },
+    { name: 'Future', buyPrice: 0, sellPrice: 2533 },
+    { name: 'Chanvre S1', buyPrice: 0, sellPrice: 2444 },
+    { name: 'Blue God', buyPrice: 0, sellPrice: 2278 },
+    { name: 'Shunk', buyPrice: 0, sellPrice: 2125 }
+  ],
+  drugBourgeons: [
+    { name: 'Cocaine', buyPrice: 0, sellPrice: 786 },
+    { name: 'Black Frost', buyPrice: 0, sellPrice: 1469 },
+    { name: 'Nomad', buyPrice: 0, sellPrice: 1389 },
+    { name: 'Stardawg', buyPrice: 0, sellPrice: 1344 },
+    { name: 'PurpleKush', buyPrice: 0, sellPrice: 1306 },
+    { name: 'Future', buyPrice: 0, sellPrice: 1267 },
+    { name: 'Chanvre S1', buyPrice: 0, sellPrice: 1222 },
+    { name: 'Blue God', buyPrice: 0, sellPrice: 1139 },
+    { name: 'Shunk', buyPrice: 0, sellPrice: 1063 }
+  ],
+  drugPochon: [
+    { name: 'Cocaine', buyPrice: 0, sellPrice: 1571 },
+    { name: 'Black Frost', buyPrice: 0, sellPrice: 2938 },
+    { name: 'Nomad', buyPrice: 0, sellPrice: 2778 },
+    { name: 'Stardawg', buyPrice: 0, sellPrice: 2689 },
+    { name: 'PurpleKush', buyPrice: 0, sellPrice: 2611 },
+    { name: 'Future', buyPrice: 0, sellPrice: 2533 },
+    { name: 'Chanvre S1', buyPrice: 0, sellPrice: 2444 },
+    { name: 'Blue God', buyPrice: 0, sellPrice: 2278 },
+    { name: 'Shunk', buyPrice: 0, sellPrice: 2125 }
+  ],
+
+  drugs: [
+    { name: 'Black Frost', buyPrice: 0, sellPrice: 47000 },
+    { name: 'Blue God', buyPrice: 0, sellPrice: 38000 },
+    { name: 'Future', buyPrice: 0, sellPrice: 40000 },
+    { name: 'Nomad', buyPrice: 0, sellPrice: 45000 },
+    { name: 'Purple Kush', buyPrice: 0, sellPrice: 44000 },
+    { name: 'Chanvre S1', buyPrice: 0, sellPrice: 39000 },
+    { name: 'Skunk', buyPrice: 0, sellPrice: 34000 },
+    { name: 'Stardawg', buyPrice: 0, sellPrice: 45000 },
+    { name: 'Brick of Cocaine', buyPrice: 0, sellPrice: 55000 }
+  ],
+  accessories: [
+    { name: 'Pochette pour cannabis', buyPrice: 0, sellPrice: 0 },
+    { name: 'Bac à compost', buyPrice: 0, sellPrice: 0 },
+    { name: 'Sac vide de 30g', buyPrice: 0, sellPrice: 0 },
+    { name: 'Feuilles à rouler Fizla', buyPrice: 0, sellPrice: 0 },
+    { name: 'Film étirable', buyPrice: 0, sellPrice: 0 },
+    { name: 'Machine à emballer sous film rétractable', buyPrice: 0, sellPrice: 0 },
+    { name: 'Machine à emballer sous vide', buyPrice: 0, sellPrice: 0 }
+  ],
+  weaponSkins: [
+    { name: 'Chargeur', buyPrice: 0, sellPrice: 2000 },
+    { name: 'Katana', buyPrice: 0, sellPrice: 5000 },
+    { name: 'QQ9 Sigrun', buyPrice: 0, sellPrice: 58000 },
+    { name: 'ASVAL Mythique', buyPrice: 0, sellPrice: 60000 },
+    { name: 'Calamité', buyPrice: 0, sellPrice: 70000 },
+    { name: 'Félinéfine', buyPrice: 0, sellPrice: 70000 },
+    { name: 'Shorty Légendaire', buyPrice: 0, sellPrice: 80000 },
+    { name: 'Aile de Braise PPSh', buyPrice: 0, sellPrice: 80000 },
+    { name: 'AK117 Rythme', buyPrice: 0, sellPrice: 90000 },
+    { name: 'Défonsuese AGR556', buyPrice: 0, sellPrice: 90000 },
+    { name: 'Gardien de la Paix', buyPrice: 0, sellPrice: 90000 },
+    { name: 'HVK Sécurité Maximale', buyPrice: 0, sellPrice: 90000 },
+    { name: 'Kilo141 Chant Démonique', buyPrice: 0, sellPrice: 90000 },
+    { name: 'Licorne GKS', buyPrice: 0, sellPrice: 90000 },
+    { name: 'LK24', buyPrice: 0, sellPrice: 90000 },
+    { name: 'M13', buyPrice: 0, sellPrice: 90000 },
+    { name: 'M4A1', buyPrice: 0, sellPrice: 90000 },
+    { name: 'MX9 Sans Coeur', buyPrice: 0, sellPrice: 90000 },
+    { name: 'AGR556 La roche sur Yon', buyPrice: 0, sellPrice: 90000 },
+    { name: 'AGR556 Parakko', buyPrice: 0, sellPrice: 90000 },
+    { name: 'AK117 Aesir Magnétique', buyPrice: 0, sellPrice: 90000 },
+    { name: 'AK117 NéonLotus', buyPrice: 0, sellPrice: 90000 },
+    { name: 'AK177 Vacances', buyPrice: 0, sellPrice: 100000 },
+    { name: 'AK47 Brûlerruby', buyPrice: 0, sellPrice: 100000 },
+    { name: 'AK47 Halloween', buyPrice: 0, sellPrice: 100000 },
+    { name: 'AK47 Kuromaku', buyPrice: 0, sellPrice: 100000 },
+    { name: 'AK47 à vendre', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Arbaléte Electrique', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Artic50 Bête du Zodiaque', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Artic50 Feu du Renard', buyPrice: 0, sellPrice: 100000 },
+    { name: 'ASVAL Fusion de l\'acier', buyPrice: 0, sellPrice: 100000 },
+    { name: 'ASVAL Opéra de Pékin', buyPrice: 0, sellPrice: 100000 },
+    { name: 'BK57 Course à l\'espace', buyPrice: 0, sellPrice: 100000 },
+    { name: 'BK57 Gel instantané', buyPrice: 0, sellPrice: 100000 },
+    { name: 'CBR Treillis', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Chopper Régles du jeu', buyPrice: 0, sellPrice: 100000 },
+    { name: 'CR56 Défense de Frelon', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Effrondrement AK117', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Faux de Mort de Guerre', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Maximun CR56', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Or de Colère AK47', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Spécification de couleur', buyPrice: 0, sellPrice: 100000 },
+    { name: 'Griffe Méchante DHR', buyPrice: 0, sellPrice: 110000 },
+    { name: 'Cordite Zéro G', buyPrice: 0, sellPrice: 116000 },
+    { name: 'Espace CMSM', buyPrice: 0, sellPrice: 116000 },
+    { name: 'Fenouil mthique', buyPrice: 0, sellPrice: 116000 },
+    { name: 'Point de Fusion QQ9', buyPrice: 0, sellPrice: 116000 },
+    { name: 'Jours Fériés DLQ', buyPrice: 0, sellPrice: 120000 },
+    { name: 'Lieu', buyPrice: 0, sellPrice: 120000 },
+    { name: 'D13 Secteur haut sur Pattes', buyPrice: 0, sellPrice: 150000 },
+    { name: 'Partie de Thumper', buyPrice: 0, sellPrice: 150000 },
+    { name: 'Purificateur', buyPrice: 0, sellPrice: 150000 }
+  ],
+  sniper: [
+    { name: 'AR 50A1', buyPrice: 0, sellPrice: 68000 },
+    { name: 'AS50', buyPrice: 0, sellPrice: 68000 },
+    { name: 'AX50', buyPrice: 0, sellPrice: 68000 },
+    { name: 'AX MKIII', buyPrice: 0, sellPrice: 68000 },
+    { name: 'Cheytac M200', buyPrice: 0, sellPrice: 68000 },
+    { name: 'Composite Prétorien M300', buyPrice: 0, sellPrice: 68000 },
+    { name: 'Delta PRO 5', buyPrice: 0, sellPrice: 68000 },
+    { name: 'DT SRS A2', buyPrice: 0, sellPrice: 68000 },
+    { name: 'GM6 Lynx', buyPrice: 0, sellPrice: 68000 },
+    { name: 'M24', buyPrice: 0, sellPrice: 68000 },
+    { name: 'M24A3', buyPrice: 0, sellPrice: 68000 },
+    { name: 'M82A1', buyPrice: 0, sellPrice: 68000 },
+    { name: 'OP SKS', buyPrice: 0, sellPrice: 68000 },
+    { name: 'Orsis T-5000', buyPrice: 0, sellPrice: 68000 },
+    { name: 'R700', buyPrice: 0, sellPrice: 68000 },
+    { name: 'RSASS', buyPrice: 0, sellPrice: 68000 },
+    { name: 'SV 98', buyPrice: 0, sellPrice: 68000 },
+    { name: 'SVD Mod', buyPrice: 0, sellPrice: 68000 },
+    { name: 'Snipex Alligator', buyPrice: 0, sellPrice: 76000 }
+  ],
+  rifle: [
+    { name: 'LK24', buyPrice: 0, sellPrice: 90000 }
+  ],
+  armement: [
+    { name: 'M79', buyPrice: 0, sellPrice: 12000 },
+    { name: 'ASH-12', buyPrice: 0, sellPrice: 37000 },
+    { name: 'FN FAL', buyPrice: 0, sellPrice: 42000 },
+    { name: 'FN Evolys', buyPrice: 0, sellPrice: 53000 }
+  ],
+  accessoire: [
+    { name: 'Crosse', buyPrice: 0, sellPrice: 1500 },
+    { name: 'Garde Main', buyPrice: 0, sellPrice: 1500 },
+    { name: 'Poignée', buyPrice: 0, sellPrice: 1500 },
+    { name: 'Silencieux', buyPrice: 0, sellPrice: 1500 },
+    { name: 'Chargeur', buyPrice: 0, sellPrice: 2250 }
+  ],
+  vanillaSkin: [
+    { name: 'Arme Principal', buyPrice: 0, sellPrice: 16000 },
+    { name: 'Deagle', buyPrice: 0, sellPrice: 10000 }
+  ]
+}
+
+export { ITEMS_DATA }

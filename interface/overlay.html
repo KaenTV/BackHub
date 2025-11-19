@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BackHub - Notification Overlay</title>
+  <link rel="stylesheet" href="styles/overlay.css">
+</head>
+<body>
+  <div class="overlay-notification" id="overlay-notification">
+    <!-- Notification Vote (par défaut) -->
+    <div class="overlay-notification-content" id="overlay-vote-content">
+      <div class="overlay-notification-icon-wrapper">
+        <div class="overlay-notification-icon">🗳️</div>
+        <div class="overlay-notification-icon-glow"></div>
+      </div>
+      <div class="overlay-notification-text">
+        <div class="overlay-notification-title">Vote disponible !</div>
+        <div class="overlay-notification-message">Vous pouvez maintenant voter pour le serveur RevolutionDayZ</div>
+      </div>
+      <button class="overlay-notification-close" id="overlay-close-btn" aria-label="Fermer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Notification Feedback -->
+    <div class="overlay-notification-content overlay-feedback-content" id="overlay-feedback-content" style="display: none;">
+      <div class="overlay-feedback-header">
+        <div class="overlay-feedback-icon-wrapper">
+          <div class="overlay-feedback-icon" id="overlay-feedback-icon">💬</div>
+        </div>
+        <div class="overlay-feedback-info">
+          <div class="overlay-feedback-title-main">Nouveau Feedback</div>
+          <div class="overlay-feedback-badge" id="overlay-feedback-badge">
+            <span id="overlay-feedback-badge-icon">📝</span>
+            <span id="overlay-feedback-badge-text">Autre</span>
+          </div>
+        </div>
+        <button class="overlay-notification-close" id="overlay-feedback-close-btn" aria-label="Fermer">×</button>
+      </div>
+      <div class="overlay-feedback-body">
+        <div class="overlay-feedback-author" id="overlay-feedback-author">De: Utilisateur</div>
+        <div class="overlay-feedback-title" id="overlay-feedback-title">Titre du feedback</div>
+        <div class="overlay-feedback-description" id="overlay-feedback-description">Description du feedback...</div>
+      </div>
+      <div class="overlay-feedback-actions">
+        <button class="overlay-feedback-action-btn" id="overlay-feedback-view-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Voir les feedbacks
+        </button>
+      </div>
+    </div>
+  </div>
+  <script src="script/overlay.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,445 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container principal */
+.overlay-notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 420px;
+  min-width: 380px;
+  max-width: 420px;
+  background: rgba(18, 18, 18, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 1px 0 rgba(255, 255, 255, 0.1) inset;
+  padding: 0;
+  transform: translateX(500px) scale(0.95);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 999999;
+  pointer-events: auto;
+  -webkit-app-region: no-drag;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+
+.overlay-notification::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #f97316 0%, #fb923c 50%, #f97316 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+  z-index: 1;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.overlay-notification.show {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+.overlay-notification.hiding {
+  animation: slideOutRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(500px) scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* Contenu de la notification vote */
+.overlay-notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  position: relative;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Wrapper de l'icône avec effet */
+.overlay-notification-icon-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-notification-icon {
+  font-size: 32px;
+  line-height: 1;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 2px 8px rgba(249, 115, 22, 0.4));
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.05);
+  }
+}
+
+.overlay-notification-icon-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: glowPulse 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* Zone de texte */
+.overlay-notification-text {
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.overlay-notification-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.overlay-notification-message {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+}
+
+/* Bouton de fermeture */
+.overlay-notification-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-app-region: no-drag;
+  flex-shrink: 0;
+  z-index: 10;
+  padding: 0;
+}
+
+.overlay-notification-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+}
+
+.overlay-notification-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.05) rotate(90deg);
+}
+
+.overlay-notification-close:active {
+  transform: scale(0.95) rotate(90deg);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Styles pour la notification feedback */
+.overlay-feedback-content {
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.overlay-feedback-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 24px 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  position: relative;
+  padding-right: 60px;
+}
+
+.overlay-feedback-icon-wrapper {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.overlay-feedback-icon-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.overlay-feedback-icon-wrapper:hover::before {
+  opacity: 1;
+}
+
+.overlay-feedback-icon {
+  font-size: 24px;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+.overlay-feedback-info {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 64px);
+  box-sizing: border-box;
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.overlay-feedback-title-main {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+  letter-spacing: -0.2px;
+}
+
+.overlay-feedback-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid;
+  color: #ffffff;
+  flex-shrink: 0;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.overlay-feedback-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 24px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.overlay-feedback-author {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.overlay-feedback-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  box-sizing: border-box;
+  letter-spacing: -0.1px;
+}
+
+.overlay-feedback-description {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.overlay-feedback-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px 24px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.overlay-feedback-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.1));
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-app-region: no-drag;
+  letter-spacing: 0.2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.overlay-feedback-action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.overlay-feedback-action-btn:hover::before {
+  left: 100%;
+}
+
+.overlay-feedback-action-btn:hover {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(249, 115, 22, 0.2));
+  border-color: rgba(249, 115, 22, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.25);
+}
+
+.overlay-feedback-action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+}
+
+.overlay-feedback-action-btn svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}

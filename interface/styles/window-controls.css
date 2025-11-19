@@ -1,0 +1,127 @@
+.title-bar {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 28px;
+  padding: 0 12px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #2d2d2d;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  position: relative;
+  z-index: 1000;
+  -webkit-app-region: no-drag;
+}
+
+.window-controls * {
+  -webkit-app-region: no-drag;
+}
+
+.control-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-app-region: no-drag !important;
+  z-index: 1001;
+}
+
+.control-button:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.control-button:active {
+  transform: scale(0.95);
+}
+
+.close-button {
+  background: #ff5f57;
+}
+
+.close-button:hover {
+  background: #ff3b30;
+}
+
+.minimize-button {
+  background: #ffbd2e;
+}
+
+.minimize-button:hover {
+  background: #ff9500;
+}
+
+.maximize-button {
+  background: #28c940;
+}
+
+.maximize-button:hover {
+  background: #28c940;
+}
+
+.control-button::before {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.close-button:hover::before {
+  color: #000;
+  font-size: 10px;
+  font-weight: bold;
+  opacity: 1;
+  width: auto;
+  height: auto;
+}
+
+.minimize-button:hover::before {
+  color: #000;
+  font-size: 12px;
+  font-weight: bold;
+  opacity: 1;
+  width: auto;
+  height: auto;
+}
+
+.maximize-button:hover::before {
+  color: #000;
+  font-size: 10px;
+  font-weight: bold;
+  opacity: 1;
+  width: auto;
+  height: auto;
+}
+
+.app-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #cccccc;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.content {
+  height: calc(100vh - 28px);
+  overflow: auto;
+  background: #1e1e1e;
+}
+

@@ -20,6 +20,7 @@ class ApiService {
 
   async request(endpoint, options = {}) {
     const isAutoLogin = options._isAutoLogin || false
+    const skipAuth = options.skipAuth || false
     const url = `${this.baseUrl}${endpoint}`
     const headers = {
       'Content-Type': 'application/json',
@@ -27,7 +28,7 @@ class ApiService {
     }
 
 
-    if (!this.authToken) {
+    if (!skipAuth && !this.authToken) {
       const savedToken = this.getSavedToken()
       if (savedToken) {
         this.authToken = savedToken
@@ -39,14 +40,14 @@ class ApiService {
 
 
     const method = options.method || 'GET'
-    if (this.authToken && this.authToken.trim() !== '') {
+    if (!skipAuth && this.authToken && this.authToken.trim() !== '') {
       headers['Authorization'] = `Bearer ${this.authToken}`
       if (this.debug) {
         logger.info(`API Request with token: ${method} ${url}`, { hasToken: true, tokenLength: this.authToken.length })
       }
     } else {
       if (this.debug) {
-        logger.warn(`API Request without token: ${method} ${url}`, { authToken: this.authToken })
+        logger.warn(`API Request without token: ${method} ${url}`, { authToken: this.authToken, skipAuth })
       }
     }
 
@@ -202,7 +203,8 @@ class ApiService {
     try {
       const result = await this.request('/auth.php?action=login', {
         method: 'POST',
-        body: { username, password }
+        body: { username, password },
+        skipAuth: true
       })
 
       if (result.success) {
@@ -366,7 +368,8 @@ class ApiService {
       const result = await this.request('/auth.php?action=login', {
         method: 'POST',
         body: { username: credentials.username, password: credentials.password },
-        _isAutoLogin: true
+        _isAutoLogin: true,
+        skipAuth: true
       })
 
       if (result.success) {
@@ -398,7 +401,8 @@ class ApiService {
     try {
       const result = await this.request('/auth.php?action=register', {
         method: 'POST',
-        body: { username, password, role }
+        body: { username, password, role },
+        skipAuth: true
       })
 
       if (result.success) {

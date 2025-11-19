@@ -15,14 +15,7 @@ let fetchHtmlQueue = []
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
 
-autoUpdater.setFeedURL({
-  provider: 'github',
-  owner: 'KaenTV',
-  repo: 'BackHub',
-  private: false
-})
-
-autoUpdater.channel = 'latest'
+autoUpdater.allowPrerelease = true
 
 autoUpdater.on('checking-for-update', () => {
   console.log('Vérification des mises à jour...')

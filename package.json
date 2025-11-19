@@ -40,7 +40,8 @@
       "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
       "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
-      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
+      "!**/*.blockmap"
     ],
     "win": {
       "target": [
@@ -53,7 +54,14 @@
       ],
       "requestedExecutionLevel": "asInvoker",
       "forceCodeSigning": false,
-      "icon": "build/icon.ico"
+      "icon": "build/icon.ico",
+      "publisherName": "KaenTV",
+      "publish": {
+        "provider": "github",
+        "owner": "KaenTV",
+        "repo": "BackHub",
+        "releaseType": "release"
+      }
     },
     "nsis": {
       "oneClick": false,
@@ -66,7 +74,13 @@
       "include": "build/installer.nsh",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
-      "artifactName": "${productName}-Setup.${ext}"
+      "artifactName": "${productName}-Setup.${ext}",
+      "publish": {
+        "provider": "github",
+        "owner": "KaenTV",
+        "repo": "BackHub",
+        "releaseType": "release"
+      }
     },
     "extraFiles": [
       {
@@ -85,6 +99,7 @@
       "releaseType": "release",
       "channel": "latest"
     },
+    "electronUpdaterCompatibility": ">=2.16.0",
     "compression": "maximum",
     "asar": true
   },

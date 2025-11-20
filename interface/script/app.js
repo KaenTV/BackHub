@@ -3316,8 +3316,11 @@ class BackHubApp {
       const fragment = document.createDocumentFragment()
       const rows = sortedHistory.map(entry => {
         const date = new Date(entry.date)
-        const marginClass = entry.margin >= 0 ? 'profit-positive' : 'profit-negative'
-        const isProfit = entry.margin >= 0
+        const calculatedMargin = entry.margin !== undefined && entry.margin !== null 
+          ? entry.margin 
+          : ((entry.totalSell || entry.total_sell || 0) - (entry.totalBuy || entry.total_buy || 0))
+        const marginClass = calculatedMargin >= 0 ? 'profit-positive' : 'profit-negative'
+        const isProfit = calculatedMargin >= 0
 
         let itemsList = []
         if (entry.items && entry.items.length > 0) {
@@ -3376,14 +3379,6 @@ class BackHubApp {
             <div class="transaction-items-section">
               <div class="transaction-items-header">
                 <span class="items-count-badge">${itemsCount} item${itemsCount > 1 ? 's' : ''} • ${totalItems} unité${totalItems > 1 ? 's' : ''}</span>
-                <div class="transaction-seller-info" style="display: flex; align-items: center; gap: 6px; margin-left: auto; padding: 6px 12px; background: ${entry.seller ? 'rgba(59, 130, 246, 0.15)' : 'rgba(156, 163, 175, 0.15)'}; border-radius: 8px; color: ${entry.seller ? '#3b82f6' : '#9ca3af'}; font-size: 13px; font-weight: 500;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="8.5" cy="7" r="4"></circle>
-                    <path d="M20 8v6M23 11h-6"></path>
-                  </svg>
-                  <span>Acheté à: <strong>${this.escapeHtml(entry.seller || 'Inconnu')}</strong></span>
-                </div>
               </div>
               <div class="transaction-items-grid">
                 ${itemsList.slice(0, 6).map(item => {
@@ -3412,18 +3407,9 @@ class BackHubApp {
                 <div class="financial-item profit-item ${marginClass}">
                   <span class="financial-label">Bénéfice Net</span>
                   <span class="financial-value profit-amount">
-                    ${(entry.margin >= 0 ? '+' : '') + this.formatPrice(entry.margin)}
+                    ${(calculatedMargin >= 0 ? '+' : '') + this.formatPrice(calculatedMargin)}
                   </span>
                 </div>
-              </div>
-              <div class="transaction-seller-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 8px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: ${entry.seller ? '#60a5fa' : '#9ca3af'};">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="8.5" cy="7" r="4"></circle>
-                  <path d="M20 8v6M23 11h-6"></path>
-                </svg>
-                <span style="color: #9ca3af; font-size: 13px;">Acheté à:</span>
-                <span style="color: ${entry.seller ? '#60a5fa' : '#9ca3af'}; font-size: 14px; font-weight: 600;">${this.escapeHtml(entry.seller || 'Inconnu')}</span>
               </div>
             </div>
           </div>
@@ -3552,8 +3538,10 @@ class BackHubApp {
 
     userHistory.forEach(entry => {
       if (entry) {
-        totalBuy += entry.totalBuy || 0
-        totalSell += entry.totalSell || 0
+        const buy = parseFloat(entry.totalBuy !== undefined ? entry.totalBuy : (entry.total_buy || 0)) || 0
+        const sell = parseFloat(entry.totalSell !== undefined ? entry.totalSell : (entry.total_sell || 0)) || 0
+        totalBuy += buy
+        totalSell += sell
       }
     })
 
@@ -4704,25 +4692,49 @@ class BackHubApp {
     }
 
 
-    const totalProfit = this.history.reduce((sum, t) => sum + (t.margin || 0), 0)
+    let totalProfit = 0
+    let totalBuy = 0
+    let totalSell = 0
+    
+    this.history.forEach(t => {
+      const buy = parseFloat(t.totalBuy !== undefined ? t.totalBuy : (t.total_buy || 0)) || 0
+      const sell = parseFloat(t.totalSell !== undefined ? t.totalSell : (t.total_sell || 0)) || 0
+      
+      const margin = t.margin !== undefined && t.margin !== null 
+        ? parseFloat(t.margin) || 0
+        : (sell - buy)
+      
+      totalBuy += buy
+      totalSell += sell
+      totalProfit += margin
+    })
+    
     const totalTransactions = this.history.length
     const avgMargin = totalTransactions > 0 ? totalProfit / totalTransactions : 0
-    const totalBuy = this.history.reduce((sum, t) => sum + (t.totalBuy || 0), 0)
-    const totalSell = this.history.reduce((sum, t) => sum + (t.totalSell || 0), 0)
 
-
-    const avgMarginPercent = totalBuy > 0 ? ((totalProfit / totalBuy) * 100) : 0
-
+    const avgMarginPercent = totalBuy > 0 && totalTransactions > 0 ? ((totalProfit / totalBuy) * 100) : null
 
     const totalItems = this.history.reduce((sum, t) => {
       return sum + (t.items ? t.items.reduce((itemSum, item) => itemSum + (item.quantity || 0), 0) : 0)
     }, 0)
 
-
-    const bestTransaction = this.history.length > 0
-      ? this.history.reduce((best, t) => (t.margin || 0) > (best.margin || 0) ? t : best, this.history[0])
-      : null
-    const bestMargin = bestTransaction ? (bestTransaction.margin || 0) : 0
+    let bestTransaction = null
+    let bestMargin = 0
+    
+    if (this.history.length > 0) {
+      this.history.forEach(t => {
+        const buy = parseFloat(t.totalBuy !== undefined ? t.totalBuy : (t.total_buy || 0)) || 0
+        const sell = parseFloat(t.totalSell !== undefined ? t.totalSell : (t.total_sell || 0)) || 0
+        const margin = t.margin !== undefined && t.margin !== null 
+          ? parseFloat(t.margin) || 0
+          : (sell - buy)
+        
+        if (margin > bestMargin) {
+          bestMargin = margin
+          bestTransaction = t
+        }
+      })
+    }
 
 
     document.getElementById('dashboard-total-profit').textContent = formatPrice(totalProfit)
@@ -4730,12 +4742,20 @@ class BackHubApp {
     document.getElementById('dashboard-avg-margin').textContent = formatPrice(avgMargin)
     document.getElementById('dashboard-total-buy').textContent = formatPrice(totalBuy)
 
-
     const totalSellEl = document.getElementById('dashboard-total-sell')
     if (totalSellEl) totalSellEl.textContent = formatPrice(totalSell)
     const totalSellAdvancedEl = document.getElementById('dashboard-total-sell-advanced')
     if (totalSellAdvancedEl) totalSellAdvancedEl.textContent = formatPrice(totalSell)
-    document.getElementById('dashboard-avg-margin-percent').textContent = `${avgMarginPercent.toFixed(1)}%`
+    
+    const avgMarginPercentEl = document.getElementById('dashboard-avg-margin-percent')
+    if (avgMarginPercentEl) {
+      if (avgMarginPercent !== null && totalTransactions > 0) {
+        avgMarginPercentEl.textContent = `${avgMarginPercent.toFixed(1)}%`
+      } else {
+        avgMarginPercentEl.textContent = '-'
+      }
+    }
+    
     document.getElementById('dashboard-best-margin').textContent = formatPrice(bestMargin)
     document.getElementById('dashboard-total-items').textContent = totalItems.toString()
 
@@ -4770,8 +4790,22 @@ class BackHubApp {
                 <div class="transaction-items">${this.escapeHtml(itemsText)}</div>
                 <div class="transaction-date">${dateStr}</div>
               </div>
-              <div class="transaction-margin ${transaction.margin >= 0 ? 'positive' : 'negative'}">
-                ${transaction.margin >= 0 ? '+' : ''}${formatPrice(transaction.margin)}
+              <div class="transaction-margin ${(() => {
+                const buy = parseFloat(transaction.totalBuy !== undefined ? transaction.totalBuy : (transaction.total_buy || 0)) || 0
+                const sell = parseFloat(transaction.totalSell !== undefined ? transaction.totalSell : (transaction.total_sell || 0)) || 0
+                const margin = transaction.margin !== undefined && transaction.margin !== null 
+                  ? parseFloat(transaction.margin) || 0
+                  : (sell - buy)
+                return margin >= 0 ? 'positive' : 'negative'
+              })()}">
+                ${(() => {
+                  const buy = parseFloat(transaction.totalBuy !== undefined ? transaction.totalBuy : (transaction.total_buy || 0)) || 0
+                  const sell = parseFloat(transaction.totalSell !== undefined ? transaction.totalSell : (transaction.total_sell || 0)) || 0
+                  const margin = transaction.margin !== undefined && transaction.margin !== null 
+                    ? parseFloat(transaction.margin) || 0
+                    : (sell - buy)
+                  return (margin >= 0 ? '+' : '') + formatPrice(margin)
+                })()}
               </div>
             </div>
           `
@@ -4783,7 +4817,15 @@ class BackHubApp {
     const topContainer = document.getElementById('dashboard-top-transactions')
     if (topContainer) {
       const topTransactions = [...this.history]
-        .sort((a, b) => (b.margin || 0) - (a.margin || 0))
+        .map(t => {
+          const buy = parseFloat(t.totalBuy !== undefined ? t.totalBuy : (t.total_buy || 0)) || 0
+          const sell = parseFloat(t.totalSell !== undefined ? t.totalSell : (t.total_sell || 0)) || 0
+          const margin = t.margin !== undefined && t.margin !== null 
+            ? parseFloat(t.margin) || 0
+            : (sell - buy)
+          return { ...t, calculatedMargin: margin }
+        })
+        .sort((a, b) => b.calculatedMargin - a.calculatedMargin)
         .slice(0, 5)
 
       if (topTransactions.length === 0) {
@@ -4814,8 +4856,8 @@ class BackHubApp {
                 <div class="transaction-items">${this.escapeHtml(itemsText)}</div>
                 <div class="transaction-date">${dateStr}</div>
               </div>
-              <div class="transaction-margin positive">
-                ${formatPrice(transaction.margin || 0)}
+              <div class="transaction-margin ${transaction.calculatedMargin >= 0 ? 'positive' : 'negative'}">
+                ${transaction.calculatedMargin >= 0 ? '+' : ''}${formatPrice(transaction.calculatedMargin)}
               </div>
             </div>
           `
@@ -5510,9 +5552,23 @@ class BackHubApp {
   getMarketStats() {
     const totalTransactions = this.history.length
     const activeUsers = new Set(this.history.map(t => t.user)).size
-    const totalBuy = this.history.reduce((sum, t) => sum + (t.totalBuy || 0), 0)
-    const totalSell = this.history.reduce((sum, t) => sum + (t.totalSell || 0), 0)
-    const totalMargin = totalSell - totalBuy
+    
+    let totalBuy = 0
+    let totalSell = 0
+    let totalMargin = 0
+    
+    this.history.forEach(t => {
+      const buy = parseFloat(t.totalBuy !== undefined ? t.totalBuy : (t.total_buy || 0)) || 0
+      const sell = parseFloat(t.totalSell !== undefined ? t.totalSell : (t.total_sell || 0)) || 0
+      const margin = t.margin !== undefined && t.margin !== null 
+        ? parseFloat(t.margin) || 0
+        : (sell - buy)
+      
+      totalBuy += buy
+      totalSell += sell
+      totalMargin += margin
+    })
+    
     const avgMargin = totalTransactions > 0 ? totalMargin / totalTransactions : 0
 
     return {
@@ -6343,11 +6399,12 @@ class BackHubApp {
         for (const entry of this.history) {
           try {
             await window.electronAPI.dbExec(
-              'INSERT OR REPLACE INTO history (id, date, user, items, totalBuy, totalSell, margin) VALUES (?, ?, ?, ?, ?, ?, ?)',
+              'INSERT OR REPLACE INTO history (id, date, user, seller, items, totalBuy, totalSell, margin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
               [
                 entry.id,
                 entry.date,
                 entry.user,
+                entry.seller || '',
                 JSON.stringify(entry.items),
                 entry.totalBuy,
                 entry.totalSell,
@@ -6381,6 +6438,7 @@ class BackHubApp {
             id: t.id || t.transaction_id || Date.now().toString(),
             date: t.date || t.created_at || new Date().toISOString(),
             user: t.user || t.username || this.currentUser.username,
+            seller: t.seller || '',
             items: Array.isArray(t.items) ? t.items :
                    (typeof t.items === 'string' ? JSON.parse(t.items) : []),
             totalBuy: t.total_buy || t.totalBuy || 0,
@@ -6404,10 +6462,13 @@ class BackHubApp {
               id: row.id,
               date: row.date,
               user: row.user,
+              seller: row.seller || '',
               items: typeof row.items === 'string' ? JSON.parse(row.items) : row.items,
               totalBuy: row.totalBuy,
               totalSell: row.totalSell,
-              margin: row.margin
+              margin: row.margin !== undefined && row.margin !== null 
+                ? row.margin 
+                : ((row.totalSell || 0) - (row.totalBuy || 0))
             }))
           }
         } catch (sqlError) {
@@ -6424,6 +6485,7 @@ class BackHubApp {
           id: t.id || Date.now().toString(),
           date: t.date || new Date().toISOString(),
           user: t.user || 'Utilisateur',
+          seller: t.seller || '',
           items: Array.isArray(t.items) ? t.items : [],
           totalBuy: t.totalBuy || t.total_buy || 0,
           totalSell: t.totalSell || t.total_sell || 0,
@@ -9301,23 +9363,17 @@ class BackHubApp {
     }).join('')
   }
 
-  /**
-   * Vérifier le statut de suppression du compte
-   */
   async checkDeletionStatus() {
     if (!this.useApi || !this.currentUser) return
 
     try {
       const result = await apiService.getDeletionStatus(this.currentUser.id)
-      // Si result est null, l'endpoint n'existe pas ou a retourné une erreur 500 (gérée silencieusement)
       if (result && result.deletion_requested_at) {
         this.displayDeletionStatus(result.deletion_requested_at, result.deletion_date)
       } else {
         this.hideDeletionStatus()
       }
     } catch (error) {
-      // Ne pas afficher d'erreur si l'endpoint n'existe pas ou si c'est une erreur non critique
-      // On log silencieusement pour le débogage (warn ne déclenche pas de notification)
       logger.warn('Failed to check deletion status (non-critical)', error)
       this.hideDeletionStatus()
     }
@@ -9327,7 +9383,6 @@ class BackHubApp {
    * Afficher le statut de suppression
    */
   displayDeletionStatus(requestedAt, deletionDate) {
-    // Créer ou mettre à jour l'affichage du statut
     let statusDiv = document.getElementById('delete-account-status')
     const settingsSection = document.querySelector('.settings-section')
 

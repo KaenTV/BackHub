@@ -29,8 +29,8 @@ class StorageService {
     try {
       if (this.useSQLite && window.electronAPI?.dbExec && key === 'backhub-history') {
         await window.electronAPI.dbExec(
-          'INSERT OR REPLACE INTO history (id, date, user, items, totalBuy, totalSell, margin) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [data.id || Date.now().toString(), data.date, data.user, jsonData, data.totalBuy, data.totalSell, data.margin]
+          'INSERT OR REPLACE INTO history (id, date, user, seller, items, totalBuy, totalSell, margin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [data.id || Date.now().toString(), data.date, data.user, data.seller || '', jsonData, data.totalBuy, data.totalSell, data.margin]
         )
         return
       }
@@ -50,6 +50,7 @@ class StorageService {
             id: row.id,
             date: row.date,
             user: row.user,
+            seller: row.seller || '',
             items: JSON.parse(row.items),
             totalBuy: row.totalBuy,
             totalSell: row.totalSell,

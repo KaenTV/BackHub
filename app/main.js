@@ -333,7 +333,7 @@ function createWindow () {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: true,
+      devTools: false,
       sandbox: true,
       partition: 'persist:main',
       backgroundThrottling: true,
@@ -982,7 +982,7 @@ function createOverlayWindow() {
         preload: path.join(__dirname, 'preload.js'),
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: true,
+        devTools: false,
         backgroundThrottling: false,
         sandbox: true,
         partition: 'persist:overlay',
@@ -1000,7 +1000,48 @@ function createOverlayWindow() {
     event.preventDefault()
   })
 
+  overlayWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12') {
+      event.preventDefault()
+      return
+    }
 
+    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.key.toLowerCase() === 'u') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.key.toLowerCase() === 'r') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.shift && input.key.toLowerCase() === 'r') {
+      event.preventDefault()
+      return
+    }
+  })
+
+  overlayWindow.webContents.on('devtools-opened', () => {
+    if (overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.webContents.closeDevTools()
+    }
+  })
 
   if (process.platform === 'win32') {
 
@@ -1150,7 +1191,7 @@ function getFetchHtmlView() {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        devTools: true,
+        devTools: false,
         backgroundThrottling: true,
         sandbox: true,
         partition: 'persist:fetch',
@@ -1170,6 +1211,23 @@ function getFetchHtmlView() {
       event.preventDefault()
     })
 
+    fetchHtmlView.webContents.on('before-input-event', (event, input) => {
+      if (input.key === 'F12' ||
+          (input.control && input.shift && input.key.toLowerCase() === 'i') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'j') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'c') ||
+          (input.control && input.key.toLowerCase() === 'u') ||
+          (input.control && input.key.toLowerCase() === 'r') ||
+          (input.control && input.shift && input.key.toLowerCase() === 'r')) {
+        event.preventDefault()
+      }
+    })
+
+    fetchHtmlView.webContents.on('devtools-opened', () => {
+      if (fetchHtmlView && !fetchHtmlView.webContents.isDestroyed()) {
+        fetchHtmlView.webContents.closeDevTools()
+      }
+    })
   }
 
   return fetchHtmlView
@@ -1919,11 +1977,55 @@ app.on('ready', () => {
   createOverlayWindow()
 
 
-  mainWindow.webContents.once('did-finish-load', () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.openDevTools()
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12') {
+      event.preventDefault()
+      return
     }
-    
+
+    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.shift && input.key.toLowerCase() === 'j') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.shift && input.key.toLowerCase() === 'c') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.key.toLowerCase() === 'u') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.shift && input.key.toLowerCase() === 'k') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.key.toLowerCase() === 'r') {
+      event.preventDefault()
+      return
+    }
+
+    if (input.control && input.key.toLowerCase() === 'shift+r') {
+      event.preventDefault()
+      return
+    }
+  })
+
+  mainWindow.webContents.on('devtools-opened', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.closeDevTools()
+    }
+  })
+
+  mainWindow.webContents.once('did-finish-load', () => {
     setTimeout(() => {
       if (mainWindow && !mainWindow.isDestroyed() && !detectedUpdateInfo) {
         mainWindow.webContents.send('app-notification', { 
